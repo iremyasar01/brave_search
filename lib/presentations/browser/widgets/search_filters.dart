@@ -15,7 +15,8 @@ class SearchFilters extends StatelessWidget {
         return Container(
           height: 50,
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
+          child: ListView(
+            scrollDirection: Axis.horizontal,
             children: [
               _FilterChip(
                 label: 'Tümü',
