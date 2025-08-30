@@ -1,13 +1,14 @@
+import 'package:brave_search/domain/entities/web_search_result.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../../domain/entities/search_result.dart';
+
 
 //part of 'browser_cubit.dart';
 
 class BrowserState extends Equatable {
   final List<String> tabs;
   final int activeTabIndex;
-  final Map<String, List<SearchResult>> tabResults;
+  final Map<String, List<WebSearchResult>> tabResults;
   final Map<String, String> tabQueries;
   final String searchFilter; // 'all', 'web', 'news', 'videos', etc.
   final bool isSecure;
@@ -24,7 +25,7 @@ class BrowserState extends Equatable {
   BrowserState copyWith({
     List<String>? tabs,
     int? activeTabIndex,
-    Map<String, List<SearchResult>>? tabResults,
+    Map<String, List<WebSearchResult>>? tabResults,
     Map<String, String>? tabQueries,
     String? searchFilter,
     bool? isSecure,

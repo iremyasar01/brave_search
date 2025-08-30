@@ -1,9 +1,10 @@
+import 'package:brave_search/domain/entities/web_search_result.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
 //import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../domain/entities/search_result.dart';
+
 
 //part 'browser_state.dart';
 
@@ -54,7 +55,7 @@ class BrowserCubit extends Cubit<BrowserState> {
     emit(state.copyWith(searchFilter: filter));
   }
 
-  void updateTabResults(String tabId, List<SearchResult> results) {
+  void updateTabResults(String tabId, List<WebSearchResult> results) {
     final tabResults = Map.of(state.tabResults);
     tabResults[tabId] = results;
     emit(state.copyWith(tabResults: tabResults));

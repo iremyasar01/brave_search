@@ -1,4 +1,4 @@
-
+/*
 import 'package:brave_search/domain/repositories/search_repository.dart';
 import 'package:injectable/injectable.dart';
 
@@ -28,3 +28,4 @@ class SearchUseCase {
     }
   }
 }
+*/

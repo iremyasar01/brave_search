@@ -1,73 +1,85 @@
+// presentation/web/cubit/web_search_cubit.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
-
-import '../../../domain/usecases/search_use_case.dart';
+import '../../../domain/usecases/web_search_use_case.dart';
 import 'web_search_state.dart';
 
 @injectable
 class WebSearchCubit extends Cubit<WebSearchState> {
-  final SearchUseCase searchUseCase;
+  final WebSearchUseCase webSearchUseCase;
 
-  WebSearchCubit(this.searchUseCase) : super(const WebSearchState());
+  WebSearchCubit(this.webSearchUseCase) : super(const WebSearchState());
 
-  Future<void> search(String query, {String searchType = 'web'}) async {
+  Future<void> searchWeb(
+    String query, {
+    String? country,
+    String safesearch = 'strict',
+  }) async {
     if (query.trim().isEmpty) {
-      emit(state.copyWith(status: SearchStatus.empty));
+      emit(state.copyWith(status: WebSearchStatus.empty));
       return;
     }
 
     emit(state.copyWith(
-      status: SearchStatus.loading,
+      status: WebSearchStatus.loading,
       query: query,
       currentPage: 1,
       hasReachedMax: false,
     ));
 
     try {
-      final results = await searchUseCase.execute(query, searchType: searchType);
+      final results = await webSearchUseCase.execute(
+        query,
+        country: country,
+        safesearch: safesearch,
+      );
       
       if (results.isEmpty) {
         emit(state.copyWith(
-          status: SearchStatus.empty,
+          status: WebSearchStatus.empty,
           results: [],
         ));
       } else {
         emit(state.copyWith(
-          status: SearchStatus.success,
+          status: WebSearchStatus.success,
           results: results,
           hasReachedMax: results.length < 20,
         ));
       }
     } catch (e) {
       emit(state.copyWith(
-        status: SearchStatus.failure,
+        status: WebSearchStatus.failure,
         errorMessage: e.toString(),
       ));
     }
   }
 
-  Future<void> loadMore({String searchType = 'web'}) async {
-    if (state.hasReachedMax || state.status == SearchStatus.loading) return;
+  Future<void> loadMore({
+    String? country,
+    String safesearch = 'strict',
+  }) async {
+    if (state.hasReachedMax || state.status == WebSearchStatus.loading) return;
 
     try {
-      final results = await searchUseCase.execute(
+      final results = await webSearchUseCase.execute(
         state.query,
-        searchType: searchType,
         page: state.currentPage + 1,
+        country: country,
+        safesearch: safesearch,
       );
 
       final hasReachedMax = results.length < 20;
       
       emit(state.copyWith(
-        status: SearchStatus.success,
+        status: WebSearchStatus.success,
         results: List.of(state.results)..addAll(results),
         currentPage: state.currentPage + 1,
         hasReachedMax: hasReachedMax,
       ));
     } catch (e) {
       emit(state.copyWith(
-        status: SearchStatus.failure,
+        status: WebSearchStatus.failure,
         errorMessage: e.toString(),
       ));
     }

@@ -1,3 +1,4 @@
+/*
 import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/search_result.dart';
@@ -30,3 +31,4 @@ class SearchRepositoryImpl implements SearchRepository {
     return remoteDataSource.searchVideos(query, page: page);
   }
 }
+*/

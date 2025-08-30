@@ -1,3 +1,4 @@
+/*
 import 'package:equatable/equatable.dart';
 
 class SearchResult extends Equatable {
@@ -27,3 +28,4 @@ class SearchResult extends Equatable {
         thumbnail,
       ];
 }
+*/

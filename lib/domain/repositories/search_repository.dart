@@ -1,3 +1,4 @@
+/*
 import '../entities/search_result.dart';
 
 abstract class SearchRepository {
@@ -6,3 +7,4 @@ abstract class SearchRepository {
   Future<List<SearchResult>> searchNews(String query, {int page = 1});
   Future<List<SearchResult>> searchVideos(String query, {int page = 1});
 }
+*/

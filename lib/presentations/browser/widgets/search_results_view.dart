@@ -1,6 +1,6 @@
-import 'package:brave_search/presentations/browser/widgets/search_result_item.dart';
 import 'package:brave_search/presentations/web/cubit/web_search_cubit.dart';
 import 'package:brave_search/presentations/web/cubit/web_search_state.dart';
+import 'package:brave_search/presentations/web/views/web_search_result_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -14,25 +14,25 @@ class SearchResultsView extends StatelessWidget {
     return BlocBuilder<WebSearchCubit, WebSearchState>(
       builder: (context, state) {
         switch (state.status) {
-          case SearchStatus.initial:
+          case WebSearchStatus.initial:
             return const Center(
               child: Text(
                 'Arama yapmak için üstteki çubuğu kullanın',
                 style: TextStyle(color: Colors.white70),
               ),
             );
-          case SearchStatus.loading:
+          case WebSearchStatus.loading:
             return const Center(
               child: CircularProgressIndicator(color: Colors.blue),
             );
-          case SearchStatus.empty:
+          case WebSearchStatus.empty:
             return const Center(
               child: Text(
                 'Sonuç bulunamadı',
                 style: TextStyle(color: Colors.white70),
               ),
             );
-          case SearchStatus.failure:
+          case WebSearchStatus.failure:
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -52,7 +52,7 @@ class SearchResultsView extends StatelessWidget {
                 ],
               ),
             );
-          case SearchStatus.success:
+          case WebSearchStatus.success:
             return ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: state.results.length + (state.hasReachedMax ? 0 : 1),
@@ -63,7 +63,7 @@ class SearchResultsView extends StatelessWidget {
                   );
                 }
                 
-                return SearchResultItem(result: state.results[index]);
+                return WebSearchResultItem(result: state.results[index]);
               },
             );
         }

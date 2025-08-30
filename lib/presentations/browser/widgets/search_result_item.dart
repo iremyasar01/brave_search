@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../domain/entities/search_result.dart';
@@ -87,3 +87,4 @@ class SearchResultItem extends StatelessWidget {
     }
   }
 }
+*/

@@ -61,7 +61,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
                               onTap: () => context.read<BrowserCubit>().switchTab(index),
                               onClose: () => context.read<BrowserCubit>().closeTab(index),
                             );
-                          }).toList(),
+                          }),
                         ],
                       ),
                     ),
@@ -127,7 +127,8 @@ class _BrowserHeaderState extends State<BrowserHeader> {
     }
     
     // Perform search based on current filter
-    searchCubit.search(query, searchType: _getSearchTypeFromFilter(browserState.searchFilter));
+   // searchCubit.search(query, searchType: _getSearchTypeFromFilter(browserState.searchFilter));
+     searchCubit.searchWeb(query);
     
     // Update search controller
     _searchController.text = query;

@@ -12,11 +12,13 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
-import '../../data/datasources/remote/brave_search_remote_data_source.dart'
-    as _i912;
-import '../../data/repositories/search_repository_impl.dart' as _i278;
-import '../../domain/repositories/search_repository.dart' as _i475;
-import '../../domain/usecases/search_use_case.dart' as _i130;
+import '../../data/datasources/remote/web_search_remote_data_source.dart'
+    as _i930;
+import '../../data/repositories/web_search_remote_data_source_impl.dart'
+    as _i971;
+import '../../data/repositories/web_search_repository_impl.dart' as _i860;
+import '../../domain/repositories/web_search_repository.dart' as _i79;
+import '../../domain/usecases/web_search_use_case.dart' as _i109;
 import '../../presentations/browser/cubit/browser_cubit.dart' as _i594;
 import '../../presentations/web/cubit/web_search_cubit.dart' as _i372;
 import 'register_module.dart' as _i291;
@@ -35,14 +37,14 @@ _i174.GetIt $initGetIt(
   final registerModule = _$RegisterModule();
   gh.factory<_i594.BrowserCubit>(() => _i594.BrowserCubit());
   gh.singleton<_i361.Dio>(() => registerModule.dio);
-  gh.lazySingleton<_i912.BraveSearchRemoteDataSource>(
-      () => _i912.BraveSearchRemoteDataSourceImpl(gh<_i361.Dio>()));
-  gh.lazySingleton<_i475.SearchRepository>(() =>
-      _i278.SearchRepositoryImpl(gh<_i912.BraveSearchRemoteDataSource>()));
-  gh.factory<_i130.SearchUseCase>(
-      () => _i130.SearchUseCase(gh<_i475.SearchRepository>()));
+  gh.lazySingleton<_i930.WebSearchRemoteDataSource>(
+      () => _i971.WebSearchRemoteDataSourceImpl(gh<_i361.Dio>()));
+  gh.lazySingleton<_i79.WebSearchRepository>(() =>
+      _i860.WebSearchRepositoryImpl(gh<_i930.WebSearchRemoteDataSource>()));
+  gh.factory<_i109.WebSearchUseCase>(
+      () => _i109.WebSearchUseCase(gh<_i79.WebSearchRepository>()));
   gh.factory<_i372.WebSearchCubit>(
-      () => _i372.WebSearchCubit(gh<_i130.SearchUseCase>()));
+      () => _i372.WebSearchCubit(gh<_i109.WebSearchUseCase>()));
   return getIt;
 }
 

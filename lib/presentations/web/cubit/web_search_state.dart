@@ -1,8 +1,9 @@
+// presentation/web/cubit/web_search_state.dart
 import 'package:equatable/equatable.dart';
 
-import '../../../domain/entities/search_result.dart';
+import '../../../domain/entities/web_search_result.dart';
 
-enum SearchStatus { 
+enum WebSearchStatus { 
   initial, 
   loading, 
   success, 
@@ -11,16 +12,16 @@ enum SearchStatus {
 }
 
 class WebSearchState extends Equatable {
-  final SearchStatus status;
-  final List<SearchResult> results;
+  final WebSearchStatus status;
+  final List<WebSearchResult> results;
   final String query;
   final String? errorMessage;
   final bool hasReachedMax;
   final int currentPage;
 
   const WebSearchState({
-    this.status = SearchStatus.initial,
-    this.results = const <SearchResult>[],
+    this.status = WebSearchStatus.initial,
+    this.results = const <WebSearchResult>[],
     this.query = '',
     this.errorMessage,
     this.hasReachedMax = false,
@@ -28,8 +29,8 @@ class WebSearchState extends Equatable {
   });
 
   WebSearchState copyWith({
-    SearchStatus? status,
-    List<SearchResult>? results,
+    WebSearchStatus? status,
+    List<WebSearchResult>? results,
     String? query,
     String? errorMessage,
     bool? hasReachedMax,
