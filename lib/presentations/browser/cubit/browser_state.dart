@@ -1,16 +1,13 @@
-import 'package:brave_search/domain/entities/web_search_result.dart';
 import 'package:equatable/equatable.dart';
 
-
-
-//part of 'browser_cubit.dart';
+import '../../../domain/entities/web_search_result.dart';
 
 class BrowserState extends Equatable {
   final List<String> tabs;
   final int activeTabIndex;
   final Map<String, List<WebSearchResult>> tabResults;
   final Map<String, String> tabQueries;
-  final String searchFilter; // 'all', 'web', 'news', 'videos', etc.
+  final String searchFilter;
   final bool isSecure;
 
   const BrowserState({

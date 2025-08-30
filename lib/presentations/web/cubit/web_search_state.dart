@@ -1,4 +1,3 @@
-// presentation/web/cubit/web_search_state.dart
 import 'package:equatable/equatable.dart';
 
 import '../../../domain/entities/web_search_result.dart';

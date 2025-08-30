@@ -1,10 +1,9 @@
-import 'package:brave_search/presentations/browser/cubit/browser_cubit.dart';
-import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
-import 'package:brave_search/presentations/web/cubit/web_search_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
+import '../cubit/browser_cubit.dart';
+import '../cubit/browser_state.dart';
+import '../../web/cubit/web_search_cubit.dart';
 import 'tab_widget.dart';
 
 class BrowserHeader extends StatefulWidget {
@@ -61,7 +60,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
                               onTap: () => context.read<BrowserCubit>().switchTab(index),
                               onClose: () => context.read<BrowserCubit>().closeTab(index),
                             );
-                          }),
+                          })
                         ],
                       ),
                     ),
@@ -117,7 +116,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
     if (query.trim().isEmpty) return;
 
     final browserCubit = context.read<BrowserCubit>();
-    final searchCubit = context.read<WebSearchCubit>();
+    final webSearchCubit = context.read<WebSearchCubit>();
     final browserState = browserCubit.state;
     
     // Update current tab query
@@ -126,20 +125,10 @@ class _BrowserHeaderState extends State<BrowserHeader> {
       browserCubit.updateTabQuery(currentTabId, query);
     }
     
-    // Perform search based on current filter
-   // searchCubit.search(query, searchType: _getSearchTypeFromFilter(browserState.searchFilter));
-     searchCubit.searchWeb(query);
+    // Perform web search
+    webSearchCubit.searchWeb(query);
     
     // Update search controller
     _searchController.text = query;
-  }
-
-  String _getSearchTypeFromFilter(String filter) {
-    switch (filter) {
-      case 'images': return 'images';
-      case 'videos': return 'videos';
-      case 'news': return 'news';
-      default: return 'web';
-    }
   }
 }

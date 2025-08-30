@@ -1,9 +1,9 @@
-import 'package:brave_search/presentations/web/cubit/web_search_cubit.dart';
-import 'package:brave_search/presentations/web/cubit/web_search_state.dart';
 import 'package:brave_search/presentations/web/views/web_search_result_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../web/cubit/web_search_cubit.dart';
+import '../../web/cubit/web_search_state.dart';
 
 
 class SearchResultsView extends StatelessWidget {

@@ -1,4 +1,3 @@
-// presentation/web/cubit/web_search_cubit.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 

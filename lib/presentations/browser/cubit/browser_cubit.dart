@@ -1,12 +1,9 @@
 import 'package:brave_search/domain/entities/web_search_result.dart';
-import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
-//import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 
-
-//part 'browser_state.dart';
+import 'browser_state.dart';
 
 @injectable
 class BrowserCubit extends Cubit<BrowserState> {
