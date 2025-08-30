@@ -2,7 +2,7 @@ import 'package:brave_search/data/datasources/remote/web_search_remote_data_sour
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../domain/entities/web_search_result.dart';
+import '../../../../domain/entities/web_search_result.dart';
 @LazySingleton(as: WebSearchRemoteDataSource)
 class WebSearchRemoteDataSourceImpl implements WebSearchRemoteDataSource {
   final Dio dio;

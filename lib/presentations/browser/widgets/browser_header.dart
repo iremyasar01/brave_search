@@ -1,3 +1,4 @@
+import 'package:brave_search/presentations/images/cubit/image_search_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -116,7 +117,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
     if (query.trim().isEmpty) return;
 
     final browserCubit = context.read<BrowserCubit>();
-    final webSearchCubit = context.read<WebSearchCubit>();
+    //final webSearchCubit = context.read<WebSearchCubit>();
     final browserState = browserCubit.state;
     
     // Update current tab query
@@ -125,9 +126,12 @@ class _BrowserHeaderState extends State<BrowserHeader> {
       browserCubit.updateTabQuery(currentTabId, query);
     }
     
-    // Perform web search
-    webSearchCubit.searchWeb(query);
-    
+    // Mevcut filtreye göre arama yap
+  if (browserState.searchFilter == 'images') {
+    context.read<ImageSearchCubit>().searchImages(query);
+  } else {
+    context.read<WebSearchCubit>().searchWeb(query);
+  }
     // Update search controller
     _searchController.text = query;
   }
