@@ -20,47 +20,49 @@ class SearchBrowserScreen extends StatefulWidget {
 }
 
 class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
-  int _selectedIndex = 0;
+  late BrowserCubit _browserCubit;
+  late WebSearchCubit _webSearchCubit;
+  late ImageSearchCubit _imageSearchCubit;
 
-  void _onTabTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  @override
+  void initState() {
+    super.initState();
     
-    final browserCubit = context.read<BrowserCubit>();
-    if (index < browserCubit.state.tabs.length) {
-      browserCubit.switchTab(index);
+    // GetIt'ten instance'ları al
+    _browserCubit = GetIt.instance<BrowserCubit>();
+    _webSearchCubit = GetIt.instance<WebSearchCubit>();
+    _imageSearchCubit = GetIt.instance<ImageSearchCubit>();
+    
+    // İlk sekmeyi oluştur
+    if (_browserCubit.state.tabs.isEmpty) {
+      _browserCubit.addTab();
     }
   }
 
+  void _onTabTapped(int index) {
+    debugPrint('🔵 Tab tapped: $index');
+    _browserCubit.switchTab(index);
+  }
+
   void _addNewTab() {
-    final browserCubit = context.read<BrowserCubit>();
-    browserCubit.addTab();
-    setState(() {
-      _selectedIndex = browserCubit.state.tabs.length - 1;
-    });
+    debugPrint('🔵 Add new tab button pressed');
+    _browserCubit.addTab();
   }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (context) => GetIt.instance<BrowserCubit>(),
-        ),
-        BlocProvider(
-          create: (context) => GetIt.instance<WebSearchCubit>(),
-        ),
-        BlocProvider(
-          create: (context) => GetIt.instance<ImageSearchCubit>(),
-        ),
+        BlocProvider.value(value: _browserCubit),
+        BlocProvider.value(value: _webSearchCubit),
+        BlocProvider.value(value: _imageSearchCubit),
       ],
       child: Scaffold(
         backgroundColor: Colors.grey[900],
         body: SafeArea(
           child: Column(
             children: [
-              // Browser Header with tabs and address bar
+              // Browser Header with search bar
               const BrowserHeader(),
               // Search filters (Tümü, Görseller, Videolar, etc.)
               const SearchFilters(),
@@ -68,6 +70,8 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
               Expanded(
                 child: BlocBuilder<BrowserCubit, BrowserState>(
                   builder: (context, browserState) {
+                    //debugPrint('🟡 Browser state updated - Tabs: ${browserState.tabs.length}, Active: ${browserState.activeTabIndex}');
+                    
                     if (browserState.tabs.isEmpty) {
                       return const EmptyBrowserState();
                     }
@@ -78,12 +82,22 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
             ],
           ),
         ),
-        bottomNavigationBar: TabNavigationBar(
-          selectedIndex: _selectedIndex,
-          onTabTapped: _onTabTapped,
-          onAddTab: _addNewTab,
+        bottomNavigationBar: BlocBuilder<BrowserCubit, BrowserState>(
+          builder: (context, browserState) {
+            return TabNavigationBar(
+              selectedIndex: browserState.activeTabIndex,
+              onTabTapped: _onTabTapped,
+              onAddTab: _addNewTab,
+            );
+          },
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // GetIt instance'ları dispose etme - singleton'lar
+    super.dispose();
   }
 }

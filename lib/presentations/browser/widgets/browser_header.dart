@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/browser_cubit.dart';
 import '../cubit/browser_state.dart';
 import '../../web/cubit/web_search_cubit.dart';
-import 'tab_widget.dart';
 
 class BrowserHeader extends StatefulWidget {
   const BrowserHeader({super.key});
@@ -35,48 +34,24 @@ class _BrowserHeaderState extends State<BrowserHeader> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(16.0),
       color: Colors.grey[800],
-      child: Column(
-        children: [
-          // Tab bar
-          BlocBuilder<BrowserCubit, BrowserState>(
-            builder: (context, state) {
-              return Row(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          ...state.tabs.asMap().entries.map((entry) {
-                            final index = entry.key;
-                            final tabId = entry.value;
-                            final isActive = index == state.activeTabIndex;
-                            final query = state.tabQueries[tabId] ?? 'Yeni Sekme';
-                            
-                            return TabWidget(
-                              title: query.isEmpty ? 'Yeni Sekme' : query,
-                              isActive: isActive,
-                              onTap: () => context.read<BrowserCubit>().switchTab(index),
-                              onClose: () => context.read<BrowserCubit>().closeTab(index),
-                            );
-                          })
-                        ],
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add, color: Colors.white),
-                    onPressed: () => context.read<BrowserCubit>().addTab(),
-                  ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 8),
-          // Address/Search bar
-          Container(
+      child: BlocBuilder<BrowserCubit, BrowserState>(
+        builder: (context, browserState) {
+          // Aktif sekmenin sorgusunu göster
+          String currentQuery = '';
+          if (browserState.tabs.isNotEmpty && 
+              browserState.activeTabIndex < browserState.tabs.length) {
+            final currentTabId = browserState.tabs[browserState.activeTabIndex];
+            currentQuery = browserState.tabQueries[currentTabId] ?? '';
+          }
+
+          // Controller'ı güncelle (sadece farklıysa)
+          if (_searchController.text != currentQuery) {
+            _searchController.text = currentQuery;
+          }
+
+          return Container(
             height: 40,
             decoration: BoxDecoration(
               color: Colors.grey[700],
@@ -99,6 +74,13 @@ class _BrowserHeaderState extends State<BrowserHeader> {
                       border: InputBorder.none,
                     ),
                     onSubmitted: (query) => _performSearch(context, query),
+                    onChanged: (query) {
+                      // Real-time update için
+                      if (browserState.tabs.isNotEmpty) {
+                        final currentTabId = browserState.tabs[browserState.activeTabIndex];
+                        context.read<BrowserCubit>().updateTabQuery(currentTabId, query);
+                      }
+                    },
                   ),
                 ),
                 IconButton(
@@ -107,8 +89,8 @@ class _BrowserHeaderState extends State<BrowserHeader> {
                 ),
               ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -117,22 +99,23 @@ class _BrowserHeaderState extends State<BrowserHeader> {
     if (query.trim().isEmpty) return;
 
     final browserCubit = context.read<BrowserCubit>();
-    //final webSearchCubit = context.read<WebSearchCubit>();
     final browserState = browserCubit.state;
     
-    // Update current tab query
-    if (browserState.tabs.isNotEmpty) {
+    // Aktif sekmenin sorgusunu güncelle
+    if (browserState.tabs.isNotEmpty && 
+        browserState.activeTabIndex < browserState.tabs.length) {
       final currentTabId = browserState.tabs[browserState.activeTabIndex];
       browserCubit.updateTabQuery(currentTabId, query);
     }
     
-    // Mevcut filtreye göre arama yap
-  if (browserState.searchFilter == 'images') {
-    context.read<ImageSearchCubit>().searchImages(query);
-  } else {
-    context.read<WebSearchCubit>().searchWeb(query);
-  }
-    // Update search controller
-    _searchController.text = query;
+    // Seçili filtreye göre arama yap
+    if (browserState.searchFilter == 'images') {
+      context.read<ImageSearchCubit>().searchImages(query);
+    } else {
+      context.read<WebSearchCubit>().searchWeb(query);
+    }
+
+    // Focus'u kaldır
+    _searchFocus.unfocus();
   }
 }

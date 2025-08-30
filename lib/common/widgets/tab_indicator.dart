@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-
 class TabIndicator extends StatelessWidget {
   final int index;
   final bool isActive;
@@ -22,10 +20,7 @@ class TabIndicator extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 6,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isActive ? Colors.blue : Colors.grey[700],
           borderRadius: BorderRadius.circular(12),
