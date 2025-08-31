@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../cubit/image_search_cubit.dart';
 import '../cubit/image_search_state.dart';
@@ -52,19 +53,19 @@ class ImagesResultsView extends StatelessWidget {
               ),
             );
           case ImageSearchStatus.success:
-            return GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.7,
-              ),
+            return MasonryGridView.count(
+              padding: const EdgeInsets.all(8),
+              crossAxisCount: 2, // 2 sütun
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
               itemCount: state.results.length + (state.hasReachedMax ? 0 : 1),
               itemBuilder: (context, index) {
                 if (index >= state.results.length) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: Colors.blue),
+                  return const SizedBox(
+                    height: 100,
+                    child: Center(
+                      child: CircularProgressIndicator(color: Colors.blue),
+                    ),
                   );
                 }
                 
