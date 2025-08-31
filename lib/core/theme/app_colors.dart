@@ -17,6 +17,9 @@ abstract class AppColors {
   static const Color lightSearchBar = Color(0xFFF1F5F9);
   static const Color lightTabBackground = Color(0xFFF8FAFC);
   static const Color lightTabActive = Color(0xFFFFFFFF);
+  // ✅ Bottom navigation için theme'le uyumlu renkler
+  static const Color lightBottomNavBackground = Color(0xFFF8FAFC); // lightSurface ile aynı
+  static const Color lightBottomNavBorder = Color(0xFFE2E8F0); // lightBorder ile aynı
   
   // Dark Theme Colors
   static const Color darkPrimary = Color(0xFF3B82F6);
@@ -34,6 +37,9 @@ abstract class AppColors {
   static const Color darkSearchBar = Color(0xFF525252);
   static const Color darkTabBackground = Color(0xFF525252);
   static const Color darkTabActive = Color(0xFF404040);
+  // ✅ Bottom navigation için theme'le uyumlu renkler
+  static const Color darkBottomNavBackground = Color(0xFF2D2D2D); // darkSurface ile aynı
+  static const Color darkBottomNavBorder = Color(0xFF525252); // darkBorder ile aynı
   
   // Status Colors
   static const Color error = Color(0xFFDC2626);

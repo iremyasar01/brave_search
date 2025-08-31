@@ -33,7 +33,7 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
     _browserCubit = GetIt.instance<BrowserCubit>();
     _webSearchCubit = GetIt.instance<WebSearchCubit>();
     _imageSearchCubit = GetIt.instance<ImageSearchCubit>();
-     _videoSearchCubit = GetIt.instance<VideoSearchCubit>();
+    _videoSearchCubit = GetIt.instance<VideoSearchCubit>();
     
     // İlk sekmeyi oluştur
     if (_browserCubit.state.tabs.isEmpty) {
@@ -61,7 +61,8 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
         BlocProvider.value(value: _videoSearchCubit),
       ],
       child: Scaffold(
-        backgroundColor: Colors.grey[900],
+        // ❌ Sabit renk yerine theme'den al
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: Column(
             children: [

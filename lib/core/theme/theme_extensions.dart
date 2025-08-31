@@ -8,6 +8,8 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
   final Color iconSecondary;
   final Color textHint;
   final Color accent;
+  final Color bottomNavBackground;
+  final Color bottomNavBorder;
 
   const AppColorsExtension({
     required this.searchBarBackground,
@@ -16,6 +18,8 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     required this.iconSecondary,
     required this.textHint,
     required this.accent,
+    required this.bottomNavBackground,
+    required this.bottomNavBorder,
   });
 
   static const AppColorsExtension light = AppColorsExtension(
@@ -25,6 +29,8 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     iconSecondary: AppColors.lightIconSecondary,
     textHint: AppColors.lightTextHint,
     accent: AppColors.lightAccent,
+    bottomNavBackground: AppColors.lightBottomNavBackground,
+    bottomNavBorder: AppColors.lightBottomNavBorder,
   );
 
   static const AppColorsExtension dark = AppColorsExtension(
@@ -34,6 +40,8 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     iconSecondary: AppColors.darkIconSecondary,
     textHint: AppColors.darkTextHint,
     accent: AppColors.darkAccent,
+    bottomNavBackground: AppColors.darkBottomNavBackground,
+    bottomNavBorder: AppColors.darkBottomNavBorder,
   );
 
   @override
@@ -44,6 +52,8 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     Color? iconSecondary,
     Color? textHint,
     Color? accent,
+    Color? bottomNavBackground,
+    Color? bottomNavBorder,
   }) {
     return AppColorsExtension(
       searchBarBackground: searchBarBackground ?? this.searchBarBackground,
@@ -52,6 +62,8 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
       iconSecondary: iconSecondary ?? this.iconSecondary,
       textHint: textHint ?? this.textHint,
       accent: accent ?? this.accent,
+      bottomNavBackground: bottomNavBackground ?? this.bottomNavBackground,
+      bottomNavBorder: bottomNavBorder ?? this.bottomNavBorder,
     );
   }
 
@@ -66,6 +78,8 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
       iconSecondary: Color.lerp(iconSecondary, other.iconSecondary, t)!,
       textHint: Color.lerp(textHint, other.textHint, t)!,
       accent: Color.lerp(accent, other.accent, t)!,
+      bottomNavBackground: Color.lerp(bottomNavBackground, other.bottomNavBackground, t)!,
+      bottomNavBorder: Color.lerp(bottomNavBorder, other.bottomNavBorder, t)!,
     );
   }
 }

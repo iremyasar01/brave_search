@@ -1,5 +1,6 @@
 import 'package:brave_search/presentations/browser/cubit/browser_cubit.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
+import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,10 +18,15 @@ class TabNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Theme'den renkleri al
+    final theme = Theme.of(context);
+    final colors = theme.extension<AppColorsExtension>()!;
+    
     return BlocBuilder<BrowserCubit, BrowserState>(
       builder: (context, browserState) {
         return Container(
-          color: Colors.grey[850],
+          // ✅ Theme extension'dan al
+          color: colors.bottomNavBackground,
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(
             children: [
@@ -29,7 +35,9 @@ class TabNavigationBar extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(horizontal: 12),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white54),
+                  border: Border.all(
+                    color: colors.bottomNavBorder,
+                  ),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Row(
@@ -37,16 +45,16 @@ class TabNavigationBar extends StatelessWidget {
                   children: [
                     Text(
                       '${browserState.tabs.length}',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: theme.textTheme.bodyLarge?.color,
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(
+                    Icon(
                       Icons.keyboard_arrow_up,
-                      color: Colors.white54,
+                      color: colors.iconSecondary,
                       size: 16,
                     ),
                   ],
@@ -60,9 +68,9 @@ class TabNavigationBar extends StatelessWidget {
                 onPressed: () {
                   // Ana sayfaya gitme işlevi
                 },
-                icon: const Icon(
+                icon: Icon(
                   Icons.home_outlined,
-                  color: Colors.white70,
+                  color: colors.iconSecondary,
                   size: 24,
                 ),
               ),
@@ -70,9 +78,9 @@ class TabNavigationBar extends StatelessWidget {
               // Yeni sekme ekleme butonu
               IconButton(
                 onPressed: onAddTab,
-                icon: const Icon(
+                icon: Icon(
                   Icons.add,
-                  color: Colors.white70,
+                  color: colors.iconSecondary,
                   size: 24,
                 ),
               ),
@@ -82,9 +90,9 @@ class TabNavigationBar extends StatelessWidget {
                 onPressed: () {
                   _showTabsOverview(context, browserState);
                 },
-                icon: const Icon(
+                icon: Icon(
                   Icons.more_vert,
-                  color: Colors.white70,
+                  color: colors.iconSecondary,
                   size: 24,
                 ),
               ),
@@ -98,10 +106,13 @@ class TabNavigationBar extends StatelessWidget {
   void _showTabsOverview(BuildContext context, BrowserState initialBrowserState) {
     // Ana context'i sakla
     final parentContext = context;
+    final theme = Theme.of(context);
+    final colors = theme.extension<AppColorsExtension>()!;
     
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.grey[900],
+      // ✅ Theme extension'dan renk al
+      backgroundColor: theme.colorScheme.surface,
       isScrollControlled: true,
       builder: (modalContext) => BlocBuilder<BrowserCubit, BrowserState>(
         bloc: parentContext.read<BrowserCubit>(),
@@ -117,15 +128,18 @@ class TabNavigationBar extends StatelessWidget {
                   children: [
                     Text(
                       '${currentBrowserState.tabs.length} Gizli Sekme',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: theme.textTheme.bodyLarge?.color,
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(modalContext),
-                      icon: const Icon(Icons.close, color: Colors.white),
+                      icon: Icon(
+                        Icons.close, 
+                        color: theme.iconTheme.color,
+                      ),
                     ),
                   ],
                 ),
@@ -133,11 +147,11 @@ class TabNavigationBar extends StatelessWidget {
                 
                 // Tabs grid - Empty state kontrolü
                 currentBrowserState.tabs.isEmpty 
-                  ? const Expanded(
+                  ? Expanded(
                       child: Center(
                         child: Text(
                           'Hiç sekme yok',
-                          style: TextStyle(color: Colors.white54),
+                          style: TextStyle(color: colors.textHint),
                         ),
                       ),
                     )
@@ -167,10 +181,11 @@ class TabNavigationBar extends StatelessWidget {
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.grey[800],
+                                // ✅ Theme extension'dan renk al
+                                color: colors.tabBackground,
                                 borderRadius: BorderRadius.circular(12),
                                 border: isActive 
-                                  ? Border.all(color: Colors.blue, width: 2)
+                                  ? Border.all(color: theme.primaryColor, width: 2)
                                   : null,
                               ),
                               child: Column(
@@ -180,17 +195,17 @@ class TabNavigationBar extends StatelessWidget {
                                     padding: const EdgeInsets.all(8),
                                     child: Row(
                                       children: [
-                                        const Icon(
+                                        Icon(
                                           Icons.public,
-                                          color: Colors.orange,
+                                          color: colors.accent, // ✅ Theme'den accent rengi
                                           size: 16,
                                         ),
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
                                             query.isEmpty ? 'Ana Sayfa' : query,
-                                            style: const TextStyle(
-                                              color: Colors.white,
+                                            style: TextStyle(
+                                              color: theme.textTheme.bodyLarge?.color,
                                               fontSize: 12,
                                             ),
                                             overflow: TextOverflow.ellipsis,
@@ -210,9 +225,9 @@ class TabNavigationBar extends StatelessWidget {
                                             },
                                             child: Container(
                                               padding: const EdgeInsets.all(4),
-                                              child: const Icon(
+                                              child: Icon(
                                                 Icons.close,
-                                                color: Colors.white54,
+                                                color: colors.iconSecondary,
                                                 size: 16,
                                               ),
                                             ),
@@ -226,13 +241,14 @@ class TabNavigationBar extends StatelessWidget {
                                     child: Container(
                                       margin: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: Colors.grey[700],
+                                        // ✅ Theme extension'dan renk al
+                                        color: colors.tabActiveBackground,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
-                                      child: const Center(
+                                      child: Center(
                                         child: Icon(
                                           Icons.public,
-                                          color: Colors.orange,
+                                          color: colors.accent,
                                           size: 48,
                                         ),
                                       ),
@@ -256,7 +272,7 @@ class TabNavigationBar extends StatelessWidget {
                   icon: const Icon(Icons.add),
                   label: const Text('Yeni Sekme'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: theme.primaryColor, // ✅ Theme'den primary renk
                     foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 48),
                     shape: RoundedRectangleBorder(

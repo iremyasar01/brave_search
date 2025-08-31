@@ -1,12 +1,12 @@
 import 'package:brave_search/presentations/images/cubit/image_search_cubit.dart';
+import 'package:brave_search/presentations/videos/cubit/video_search_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import '../../../core/theme/theme_extensions.dart';
+import '../../../core/theme/theme_cubit.dart';
 import '../cubit/browser_cubit.dart';
 import '../cubit/browser_state.dart';
 import '../../web/cubit/web_search_cubit.dart';
-// import '../../videos/cubit/video_search_cubit.dart';  // Video arama cubit'i
-// import '../../news/cubit/news_search_cubit.dart';     // Haber arama cubit'i
 
 class BrowserHeader extends StatefulWidget {
   const BrowserHeader({super.key});
@@ -35,64 +35,97 @@ class _BrowserHeaderState extends State<BrowserHeader> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.extension<AppColorsExtension>()!;
+    
     return Container(
       padding: const EdgeInsets.all(16.0),
-      color: Colors.grey[800],
-      child: BlocBuilder<BrowserCubit, BrowserState>(
-        builder: (context, browserState) {
-          // Aktif sekmenin sorgusunu göster
-          String currentQuery = '';
-          if (browserState.tabs.isNotEmpty && 
-              browserState.activeTabIndex < browserState.tabs.length) {
-            final currentTabId = browserState.tabs[browserState.activeTabIndex];
-            currentQuery = browserState.tabQueries[currentTabId] ?? '';
-          }
-
-          // Controller'ı güncelle (sadece farklıysa)
-          if (_searchController.text != currentQuery) {
-            _searchController.text = currentQuery;
-          }
-
-          return Container(
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.grey[700],
-              borderRadius: BorderRadius.circular(8),
+      color: theme.appBarTheme.backgroundColor,
+      child: Row(
+        children: [
+          // Theme toggle button
+          IconButton(
+            icon: Icon(
+              theme.brightness == Brightness.dark 
+                ? Icons.light_mode 
+                : Icons.dark_mode,
+              color: theme.iconTheme.color,
             ),
-            child: Row(
-              children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: Icon(Icons.search, color: Colors.white54, size: 20),
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    focusNode: _searchFocus,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
-                      hintText: 'Ara veya adres gir...',
-                      hintStyle: TextStyle(color: Colors.white54),
-                      border: InputBorder.none,
-                    ),
-                    onSubmitted: (query) => _performSearch(context, query, browserState.searchFilter),
-                    onChanged: (query) {
-                      // Real-time update için
-                      if (browserState.tabs.isNotEmpty) {
-                        final currentTabId = browserState.tabs[browserState.activeTabIndex];
-                        context.read<BrowserCubit>().updateTabQuery(currentTabId, query);
-                      }
-                    },
+            onPressed: () {
+              context.read<ThemeCubit>().toggleTheme();
+            },
+            tooltip: theme.brightness == Brightness.dark 
+              ? 'Açık Tema' 
+              : 'Koyu Tema',
+          ),
+          
+          const SizedBox(width: 8),
+          
+          // Search bar
+          Expanded(
+            child: BlocBuilder<BrowserCubit, BrowserState>(
+              builder: (context, browserState) {
+                String currentQuery = '';
+                if (browserState.tabs.isNotEmpty && 
+                    browserState.activeTabIndex < browserState.tabs.length) {
+                  final currentTabId = browserState.tabs[browserState.activeTabIndex];
+                  currentQuery = browserState.tabQueries[currentTabId] ?? '';
+                }
+
+                if (_searchController.text != currentQuery) {
+                  _searchController.text = currentQuery;
+                }
+
+                return Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: colors.searchBarBackground,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.refresh, color: Colors.white54, size: 20),
-                  onPressed: () => _performSearch(context, _searchController.text, browserState.searchFilter),
-                ),
-              ],
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Icon(
+                          Icons.search, 
+                          color: colors.iconSecondary, 
+                          size: 20,
+                        ),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          focusNode: _searchFocus,
+                          style: theme.textTheme.bodyLarge,
+                          decoration: InputDecoration(
+                            hintText: 'Ara veya adres gir...',
+                            hintStyle: TextStyle(color: colors.textHint),
+                            border: InputBorder.none,
+                          ),
+                          onSubmitted: (query) => _performSearch(context, query, browserState.searchFilter),
+                          onChanged: (query) {
+                            if (browserState.tabs.isNotEmpty) {
+                              final currentTabId = browserState.tabs[browserState.activeTabIndex];
+                              context.read<BrowserCubit>().updateTabQuery(currentTabId, query);
+                            }
+                          },
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.refresh, 
+                          color: colors.iconSecondary, 
+                          size: 20,
+                        ),
+                        onPressed: () => _performSearch(context, _searchController.text, browserState.searchFilter),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
@@ -103,16 +136,13 @@ class _BrowserHeaderState extends State<BrowserHeader> {
     final browserCubit = context.read<BrowserCubit>();
     final browserState = browserCubit.state;
     
-    // Aktif sekmenin sorgusunu güncelle
     if (browserState.tabs.isNotEmpty && 
         browserState.activeTabIndex < browserState.tabs.length) {
       final currentTabId = browserState.tabs[browserState.activeTabIndex];
       browserCubit.updateTabQuery(currentTabId, query);
-      // Arama yapıldığını işaretle
       browserCubit.markTabAsSearched(currentTabId);
     }
     
-    // Seçili filtreye göre ilgili API'yi çağır
     switch (currentFilter) {
       case 'all':
       case 'web':
@@ -122,20 +152,15 @@ class _BrowserHeaderState extends State<BrowserHeader> {
         context.read<ImageSearchCubit>().searchImages(query);
         break;
       case 'videos':
-        // context.read<VideoSearchCubit>().searchVideos(query);
-        // Şimdilik web arama kullan
-        context.read<WebSearchCubit>().searchWeb(query);
+        context.read<VideoSearchCubit>().searchVideos(query);
         break;
       case 'news':
-        // context.read<NewsSearchCubit>().searchNews(query);
-        // Şimdilik web arama kullan
         context.read<WebSearchCubit>().searchWeb(query);
         break;
       default:
         context.read<WebSearchCubit>().searchWeb(query);
     }
 
-    // Focus'u kaldır
     _searchFocus.unfocus();
   }
 }
