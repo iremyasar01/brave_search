@@ -65,7 +65,7 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
               // Browser Header with search bar
               const BrowserHeader(),
               // Search filters (Tümü, Görseller, Videolar, etc.)
-              const SearchFilters(),
+             // const SearchFilters(),
               // Main content area
               Expanded(
                 child: BlocBuilder<BrowserCubit, BrowserState>(

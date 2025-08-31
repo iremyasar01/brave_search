@@ -3,7 +3,8 @@ import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
+import '../../web/cubit/web_search_cubit.dart';
+import 'package:brave_search/presentations/images/cubit/image_search_cubit.dart';
 
 class SearchFilters extends StatelessWidget {
   const SearchFilters({super.key});
@@ -21,28 +22,60 @@ class SearchFilters extends StatelessWidget {
               _FilterChip(
                 label: 'Tümü',
                 isSelected: state.searchFilter == 'all',
-                onTap: () => context.read<BrowserCubit>().setSearchFilter('all'),
+                onTap: () => _onFilterChanged(context, 'all', state),
               ),
               _FilterChip(
                 label: 'Görseller',
                 isSelected: state.searchFilter == 'images',
-                onTap: () => context.read<BrowserCubit>().setSearchFilter('images'),
+                onTap: () => _onFilterChanged(context, 'images', state),
               ),
               _FilterChip(
                 label: 'Videolar',
                 isSelected: state.searchFilter == 'videos',
-                onTap: () => context.read<BrowserCubit>().setSearchFilter('videos'),
+                onTap: () => _onFilterChanged(context, 'videos', state),
               ),
               _FilterChip(
                 label: 'Haberler',
                 isSelected: state.searchFilter == 'news',
-                onTap: () => context.read<BrowserCubit>().setSearchFilter('news'),
+                onTap: () => _onFilterChanged(context, 'news', state),
               ),
             ],
           ),
         );
       },
     );
+  }
+
+  void _onFilterChanged(BuildContext context, String newFilter, BrowserState browserState) {
+    // Filtreyi değiştir
+    context.read<BrowserCubit>().setSearchFilter(newFilter);
+    
+    // Eğer aktif sekmede bir sorgu varsa, yeni filtreye göre arama yap
+    final browserCubit = context.read<BrowserCubit>();
+    final currentQuery = browserCubit.activeTabQuery;
+    
+    if (currentQuery.isNotEmpty) {
+      // Yeni filtreye göre ilgili API'yi çağır
+      switch (newFilter) {
+        case 'all':
+        case 'web':
+          context.read<WebSearchCubit>().searchWeb(currentQuery);
+          break;
+        case 'images':
+          context.read<ImageSearchCubit>().searchImages(currentQuery);
+          break;
+        case 'videos':
+          // Video API'si olduğunda buraya eklenecek
+          // context.read<VideoSearchCubit>().searchVideos(currentQuery);
+          context.read<WebSearchCubit>().searchWeb(currentQuery);
+          break;
+        case 'news':
+          // News API'si olduğunda buraya eklenecek
+          // context.read<NewsSearchCubit>().searchNews(currentQuery);
+          context.read<WebSearchCubit>().searchWeb(currentQuery);
+          break;
+      }
+    }
   }
 }
 

@@ -7,6 +7,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../web/cubit/web_search_cubit.dart';
 import '../../web/cubit/web_search_state.dart';
+import '../widgets/search_filters.dart';
+import '../widgets/empty_browser_state.dart';
+
 
 class SearchResultsView extends StatelessWidget {
   const SearchResultsView({super.key});
@@ -15,29 +18,58 @@ class SearchResultsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<BrowserCubit, BrowserState>(
       builder: (context, browserState) {
-        // Seçilen filtreye göre farklı görünümler göster
-        if (browserState.searchFilter == 'images') {
-          return const ImagesResultsView();
-        } else if (browserState.searchFilter == 'videos') {
-          return _buildVideosResults();
-        } else if (browserState.searchFilter == 'news') {
-          return _buildNewsResults();
-        } else {
-          return _buildWebResults();
+        final browserCubit = context.read<BrowserCubit>();
+        
+        // Eğer aktif sekmede arama yapılmamışsa ana sayfa göster
+        if (!browserCubit.activeTabHasSearched) {
+          return const EmptyBrowserState();
         }
+
+        // Arama yapıldıysa filtreleri ve sonuçları göster
+        return Column(
+          children: [
+            // Search filters - sadece arama yapıldıktan sonra görünür
+            const SearchFilters(),
+            
+            // Search results content
+            Expanded(
+              child: _buildResultsContent(context, browserState),
+            ),
+          ],
+        );
       },
     );
   }
 
-  Widget _buildWebResults() {
+  Widget _buildResultsContent(BuildContext context, BrowserState browserState) {
+    // Seçilen filtreye göre farklı görünümler göster
+    if (browserState.searchFilter == 'images') {
+      return const ImagesResultsView();
+    } else if (browserState.searchFilter == 'videos') {
+      return _buildVideosResults();
+    } else if (browserState.searchFilter == 'news') {
+      return _buildNewsResults(context, browserState);
+    } else {
+      return _buildWebResults(context, browserState);
+    }
+  }
+
+  Widget _buildWebResults(BuildContext context, BrowserState browserState) {
     return BlocBuilder<WebSearchCubit, WebSearchState>(
       builder: (context, state) {
         switch (state.status) {
           case WebSearchStatus.initial:
             return const Center(
-              child: Text(
-                'Arama yapmak için üstteki çubuğu kullanın',
-                style: TextStyle(color: Colors.white70),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.search, size: 64, color: Colors.white54),
+                  SizedBox(height: 16),
+                  Text(
+                    'Arama yapmak için üstteki çubuğu kullanın',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ],
               ),
             );
           case WebSearchStatus.loading:
@@ -86,7 +118,6 @@ class SearchResultsView extends StatelessWidget {
               itemCount: state.results.length + (state.hasReachedMax ? 0 : 1),
               itemBuilder: (context, index) {
                 if (index >= state.results.length) {
-                  // Loading indicator for pagination
                   return const Padding(
                     padding: EdgeInsets.all(16.0),
                     child: Center(
@@ -106,35 +137,53 @@ class SearchResultsView extends StatelessWidget {
     );
   }
 
-  Widget _buildVideosResults() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.video_library, color: Colors.white54, size: 48),
-          SizedBox(height: 16),
-          Text(
-            'Video arama özelliği yakında geliyor',
-            style: TextStyle(color: Colors.white70),
-          ),
-        ],
-      ),
+  Widget _buildNewsResults(BuildContext context, BrowserState browserState) {
+    return BlocBuilder<WebSearchCubit, WebSearchState>(
+      builder: (context, state) {
+        if (state.status == WebSearchStatus.initial) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.newspaper, color: Colors.white54, size: 48),
+                SizedBox(height: 16),
+                Text(
+                  'Haber aramak için bir sorgu girin',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        return _buildWebResults(context, browserState);
+      },
     );
   }
 
-  Widget _buildNewsResults() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.newspaper, color: Colors.white54, size: 48),
-          SizedBox(height: 16),
-          Text(
-            'Haber arama özelliği yakında geliyor',
-            style: TextStyle(color: Colors.white70),
-          ),
-        ],
-      ),
+  Widget _buildVideosResults() {
+    return BlocBuilder<WebSearchCubit, WebSearchState>(
+      builder: (context, state) {
+        if (state.status == WebSearchStatus.initial) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.video_library, color: Colors.white54, size: 48),
+                SizedBox(height: 16),
+                Text(
+                  'Video aramak için bir sorgu girin',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        return BlocBuilder<BrowserCubit, BrowserState>(
+          builder: (context, browserState) => _buildWebResults(context, browserState),
+        );
+      },
     );
   }
 }

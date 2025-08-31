@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/browser_cubit.dart';
 import '../cubit/browser_state.dart';
 import '../../web/cubit/web_search_cubit.dart';
+// import '../../videos/cubit/video_search_cubit.dart';  // Video arama cubit'i
+// import '../../news/cubit/news_search_cubit.dart';     // Haber arama cubit'i
 
 class BrowserHeader extends StatefulWidget {
   const BrowserHeader({super.key});
@@ -73,7 +75,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
                       hintStyle: TextStyle(color: Colors.white54),
                       border: InputBorder.none,
                     ),
-                    onSubmitted: (query) => _performSearch(context, query),
+                    onSubmitted: (query) => _performSearch(context, query, browserState.searchFilter),
                     onChanged: (query) {
                       // Real-time update için
                       if (browserState.tabs.isNotEmpty) {
@@ -85,7 +87,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.refresh, color: Colors.white54, size: 20),
-                  onPressed: () => _performSearch(context, _searchController.text),
+                  onPressed: () => _performSearch(context, _searchController.text, browserState.searchFilter),
                 ),
               ],
             ),
@@ -95,7 +97,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
     );
   }
 
-  void _performSearch(BuildContext context, String query) {
+  void _performSearch(BuildContext context, String query, String currentFilter) {
     if (query.trim().isEmpty) return;
 
     final browserCubit = context.read<BrowserCubit>();
@@ -106,13 +108,31 @@ class _BrowserHeaderState extends State<BrowserHeader> {
         browserState.activeTabIndex < browserState.tabs.length) {
       final currentTabId = browserState.tabs[browserState.activeTabIndex];
       browserCubit.updateTabQuery(currentTabId, query);
+      // Arama yapıldığını işaretle
+      browserCubit.markTabAsSearched(currentTabId);
     }
     
-    // Seçili filtreye göre arama yap
-    if (browserState.searchFilter == 'images') {
-      context.read<ImageSearchCubit>().searchImages(query);
-    } else {
-      context.read<WebSearchCubit>().searchWeb(query);
+    // Seçili filtreye göre ilgili API'yi çağır
+    switch (currentFilter) {
+      case 'all':
+      case 'web':
+        context.read<WebSearchCubit>().searchWeb(query);
+        break;
+      case 'images':
+        context.read<ImageSearchCubit>().searchImages(query);
+        break;
+      case 'videos':
+        // context.read<VideoSearchCubit>().searchVideos(query);
+        // Şimdilik web arama kullan
+        context.read<WebSearchCubit>().searchWeb(query);
+        break;
+      case 'news':
+        // context.read<NewsSearchCubit>().searchNews(query);
+        // Şimdilik web arama kullan
+        context.read<WebSearchCubit>().searchWeb(query);
+        break;
+      default:
+        context.read<WebSearchCubit>().searchWeb(query);
     }
 
     // Focus'u kaldır

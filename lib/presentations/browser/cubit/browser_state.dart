@@ -1,6 +1,5 @@
+import 'package:brave_search/domain/entities/web_search_result.dart';
 import 'package:equatable/equatable.dart';
-
-import '../../../domain/entities/web_search_result.dart';
 
 class BrowserState extends Equatable {
   final List<String> tabs;
@@ -9,6 +8,7 @@ class BrowserState extends Equatable {
   final Map<String, String> tabQueries;
   final String searchFilter;
   final bool isSecure;
+  final Map<String, bool> hasSearched; // Her tab için arama yapılıp yapılmadığını tutar
 
   const BrowserState({
     this.tabs = const [],
@@ -17,6 +17,7 @@ class BrowserState extends Equatable {
     this.tabQueries = const {},
     this.searchFilter = 'all',
     this.isSecure = true,
+    this.hasSearched = const {},
   });
 
   BrowserState copyWith({
@@ -26,6 +27,7 @@ class BrowserState extends Equatable {
     Map<String, String>? tabQueries,
     String? searchFilter,
     bool? isSecure,
+    Map<String, bool>? hasSearched,
   }) {
     return BrowserState(
       tabs: tabs ?? this.tabs,
@@ -34,6 +36,7 @@ class BrowserState extends Equatable {
       tabQueries: tabQueries ?? this.tabQueries,
       searchFilter: searchFilter ?? this.searchFilter,
       isSecure: isSecure ?? this.isSecure,
+      hasSearched: hasSearched ?? this.hasSearched,
     );
   }
 
@@ -45,5 +48,6 @@ class BrowserState extends Equatable {
         tabQueries,
         searchFilter,
         isSecure,
+        hasSearched,
       ];
 }
