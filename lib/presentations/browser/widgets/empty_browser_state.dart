@@ -1,3 +1,4 @@
+import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class EmptyBrowserState extends StatelessWidget {
@@ -5,47 +6,36 @@ class EmptyBrowserState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorsExtension>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // DuckDuckGo Logo
-          Container(
+          Image.asset(
+            isDark 
+              ? 'assets/brave_color_lightbackground.png' 
+              : 'assets/brave_color_darkbackground.png',
             width: 120,
             height: 120,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.orange,
-              border: Border.all(color: Colors.white, width: 4),
-            ),
-            child: const Center(
-              child: Text(
-                '🦆',
-                style: TextStyle(fontSize: 60),
-              ),
-            ),
+            fit: BoxFit.contain,
           ),
-          
           const SizedBox(height: 24),
-          
-          // DuckDuckGo Yazısı
-          const Text(
-            'DuckDuckGo',
+          Text(
+            'Brave Browser',
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.w400,
-              letterSpacing: -0.5,
+              color: appColors?.textHint ?? Theme.of(context).textTheme.bodyLarge?.color,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          
-          const SizedBox(height: 16),
-          
-          // Alt yazı
-          const Text(
+          const SizedBox(height: 12),
+          Text(
             'Gizliliğinizi koruyarak arama yapın',
             style: TextStyle(
-              color: Colors.white60,
+              color: appColors?.textHint,
               fontSize: 16,
             ),
           ),

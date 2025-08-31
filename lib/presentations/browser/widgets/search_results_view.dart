@@ -1,6 +1,7 @@
 import 'package:brave_search/presentations/browser/cubit/browser_cubit.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
 import 'package:brave_search/presentations/images/views/images_results_view.dart';
+import 'package:brave_search/presentations/videos/views/videos_results_view.dart';
 import 'package:brave_search/presentations/web/views/web_search_result_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -46,7 +47,7 @@ class SearchResultsView extends StatelessWidget {
     if (browserState.searchFilter == 'images') {
       return const ImagesResultsView();
     } else if (browserState.searchFilter == 'videos') {
-      return _buildVideosResults();
+      return const VideosResultsView();
     } else if (browserState.searchFilter == 'news') {
       return _buildNewsResults(context, browserState);
     } else {

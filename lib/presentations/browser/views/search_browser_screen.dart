@@ -1,4 +1,5 @@
 import 'package:brave_search/common/widgets/tab_navigation_bar.dart';
+import 'package:brave_search/presentations/videos/cubit/video_search_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -7,7 +8,6 @@ import '../cubit/browser_cubit.dart';
 import '../cubit/browser_state.dart';
 import '../widgets/browser_header.dart';
 import '../widgets/empty_browser_state.dart';
-import '../widgets/search_filters.dart';
 import '../widgets/search_results_view.dart';
 import '../../web/cubit/web_search_cubit.dart';
 import '../../images/cubit/image_search_cubit.dart';
@@ -23,6 +23,7 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
   late BrowserCubit _browserCubit;
   late WebSearchCubit _webSearchCubit;
   late ImageSearchCubit _imageSearchCubit;
+  late VideoSearchCubit _videoSearchCubit;
 
   @override
   void initState() {
@@ -32,6 +33,7 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
     _browserCubit = GetIt.instance<BrowserCubit>();
     _webSearchCubit = GetIt.instance<WebSearchCubit>();
     _imageSearchCubit = GetIt.instance<ImageSearchCubit>();
+     _videoSearchCubit = GetIt.instance<VideoSearchCubit>();
     
     // İlk sekmeyi oluştur
     if (_browserCubit.state.tabs.isEmpty) {
@@ -56,6 +58,7 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
         BlocProvider.value(value: _browserCubit),
         BlocProvider.value(value: _webSearchCubit),
         BlocProvider.value(value: _imageSearchCubit),
+        BlocProvider.value(value: _videoSearchCubit),
       ],
       child: Scaffold(
         backgroundColor: Colors.grey[900],
@@ -64,8 +67,6 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
             children: [
               // Browser Header with search bar
               const BrowserHeader(),
-              // Search filters (Tümü, Görseller, Videolar, etc.)
-             // const SearchFilters(),
               // Main content area
               Expanded(
                 child: BlocBuilder<BrowserCubit, BrowserState>(

@@ -1,12 +1,12 @@
-import 'package:brave_search/presentations/browser/cubit/browser_cubit.dart';
-import 'package:brave_search/presentations/browser/views/search_browser_screen.dart';
-import 'package:brave_search/presentations/web/cubit/web_search_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 import 'core/di/injection.dart';
-
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_cubit.dart';
+import 'presentations/browser/cubit/browser_cubit.dart';
+import 'presentations/browser/views/search_browser_screen.dart';
+import 'presentations/web/cubit/web_search_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,21 +20,41 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Brave Search Browser',
-      theme: ThemeData.dark(),
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (context) => getIt<BrowserCubit>(),
-          ),
-          BlocProvider(
-            create: (context) => getIt<WebSearchCubit>(),
-          ),
-        ],
-        child: const SearchBrowserScreen(),
+    return BlocProvider(
+      create: (context) => ThemeCubit(),
+      child: BlocBuilder<ThemeCubit, AppThemeMode>(
+        builder: (context, themeMode) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Brave Search Browser',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: _getThemeMode(themeMode),
+            home: MultiBlocProvider(
+              providers: [
+                BlocProvider(
+                  create: (context) => getIt<BrowserCubit>(),
+                ),
+                BlocProvider(
+                  create: (context) => getIt<WebSearchCubit>(),
+                ),
+              ],
+              child: const SearchBrowserScreen(),
+            ),
+          );
+        },
       ),
     );
+  }
+
+  ThemeMode _getThemeMode(AppThemeMode mode) {
+    switch (mode) {
+      case AppThemeMode.light:
+        return ThemeMode.light;
+      case AppThemeMode.dark:
+        return ThemeMode.dark;
+      case AppThemeMode.system:
+        return ThemeMode.system;
+    }
   }
 }

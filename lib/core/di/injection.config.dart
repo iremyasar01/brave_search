@@ -14,18 +14,24 @@ import 'package:injectable/injectable.dart' as _i526;
 
 import '../../data/datasources/remote/image_search_remote_data_source.dart'
     as _i709;
+import '../../data/datasources/remote/video_search_remote_data_source.dart'
+    as _i805;
 import '../../data/datasources/remote/web_search_remote_data_source.dart'
     as _i930;
 import '../../data/datasources/remote/web_search_remote_data_source_impl.dart'
     as _i557;
 import '../../data/repositories/image_search_repository_impl.dart' as _i803;
+import '../../data/repositories/video_search_repository_impl.dart' as _i208;
 import '../../data/repositories/web_search_repository_impl.dart' as _i860;
 import '../../domain/repositories/image_search_repository.dart' as _i71;
+import '../../domain/repositories/video_search_repository.dart' as _i949;
 import '../../domain/repositories/web_search_repository.dart' as _i79;
 import '../../domain/usecases/image_search_use_case.dart' as _i967;
+import '../../domain/usecases/video_search_use_case.dart' as _i733;
 import '../../domain/usecases/web_search_use_case.dart' as _i109;
 import '../../presentations/browser/cubit/browser_cubit.dart' as _i594;
 import '../../presentations/images/cubit/image_search_cubit.dart' as _i43;
+import '../../presentations/videos/cubit/video_search_cubit.dart' as _i605;
 import '../../presentations/web/cubit/web_search_cubit.dart' as _i372;
 import 'register_module.dart' as _i291;
 
@@ -45,10 +51,14 @@ _i174.GetIt $initGetIt(
   gh.singleton<_i361.Dio>(() => registerModule.dio);
   gh.lazySingleton<_i930.WebSearchRemoteDataSource>(
       () => _i557.WebSearchRemoteDataSourceImpl(gh<_i361.Dio>()));
+  gh.lazySingleton<_i805.VideoSearchRemoteDataSource>(
+      () => _i805.VideoSearchRemoteDataSourceImpl(gh<_i361.Dio>()));
   gh.lazySingleton<_i709.ImageSearchRemoteDataSource>(
       () => _i709.ImageSearchRemoteDataSourceImpl(gh<_i361.Dio>()));
   gh.lazySingleton<_i79.WebSearchRepository>(() =>
       _i860.WebSearchRepositoryImpl(gh<_i930.WebSearchRemoteDataSource>()));
+  gh.lazySingleton<_i949.VideoSearchRepository>(() =>
+      _i208.VideoSearchRepositoryImpl(gh<_i805.VideoSearchRemoteDataSource>()));
   gh.factory<_i109.WebSearchUseCase>(
       () => _i109.WebSearchUseCase(gh<_i79.WebSearchRepository>()));
   gh.lazySingleton<_i71.ImageSearchRepository>(() =>
@@ -59,6 +69,10 @@ _i174.GetIt $initGetIt(
       () => _i967.ImageSearchUseCase(gh<_i71.ImageSearchRepository>()));
   gh.factory<_i43.ImageSearchCubit>(
       () => _i43.ImageSearchCubit(gh<_i967.ImageSearchUseCase>()));
+  gh.factory<_i733.VideoSearchUseCase>(
+      () => _i733.VideoSearchUseCase(gh<_i949.VideoSearchRepository>()));
+  gh.factory<_i605.VideoSearchCubit>(
+      () => _i605.VideoSearchCubit(gh<_i733.VideoSearchUseCase>()));
   return getIt;
 }
 

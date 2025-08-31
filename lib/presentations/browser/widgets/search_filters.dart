@@ -1,5 +1,6 @@
 import 'package:brave_search/presentations/browser/cubit/browser_cubit.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
+import 'package:brave_search/presentations/videos/cubit/video_search_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -66,8 +67,8 @@ class SearchFilters extends StatelessWidget {
           break;
         case 'videos':
           // Video API'si olduğunda buraya eklenecek
-          // context.read<VideoSearchCubit>().searchVideos(currentQuery);
-          context.read<WebSearchCubit>().searchWeb(currentQuery);
+           context.read<VideoSearchCubit>().searchVideos(currentQuery);
+
           break;
         case 'news':
           // News API'si olduğunda buraya eklenecek
