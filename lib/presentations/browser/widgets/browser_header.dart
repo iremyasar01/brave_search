@@ -1,4 +1,5 @@
 import 'package:brave_search/presentations/images/cubit/image_search_cubit.dart';
+import 'package:brave_search/presentations/news/cubit/news_search_cubit.dart';
 import 'package:brave_search/presentations/videos/cubit/video_search_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -155,7 +156,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
         context.read<VideoSearchCubit>().searchVideos(query);
         break;
       case 'news':
-        context.read<WebSearchCubit>().searchWeb(query);
+        context.read<NewsSearchCubit>().searchNews(query);
         break;
       default:
         context.read<WebSearchCubit>().searchWeb(query);

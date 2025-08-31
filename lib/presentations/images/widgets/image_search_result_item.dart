@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import '../../../core/theme/theme_extensions.dart';
 import '../../../domain/entities/image_search_result.dart';
 
 class ImageSearchResultItem extends StatelessWidget {
@@ -10,6 +10,9 @@ class ImageSearchResultItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.extension<AppColorsExtension>()!;
+    
     // Görselin en-boy oranını hesapla
     final double aspectRatio = result.width > 0 && result.height > 0
         ? result.width / result.height
@@ -24,11 +27,12 @@ class ImageSearchResultItem extends StatelessWidget {
       onTap: () => _launchUrl(result.url),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.grey[900],
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.dividerColor),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: theme.shadowColor.withOpacity(0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -48,24 +52,24 @@ class ImageSearchResultItem extends StatelessWidget {
                   result.thumbnailUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
-                    color: Colors.grey[800],
-                    child: const Icon(
+                    color: theme.colorScheme.surface,
+                    child: Icon(
                       Icons.broken_image,
                       size: 32,
-                      color: Colors.white54,
+                      color: colors.iconSecondary,
                     ),
                   ),
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
                     return Container(
-                      color: Colors.grey[800],
+                      color: theme.colorScheme.surface,
                       child: Center(
                         child: CircularProgressIndicator(
                           value: loadingProgress.expectedTotalBytes != null
                               ? loadingProgress.cumulativeBytesLoaded /
                                   loadingProgress.expectedTotalBytes!
                               : null,
-                          color: Colors.blue,
+                          color: theme.primaryColor,
                           strokeWidth: 2,
                         ),
                       ),
@@ -85,8 +89,8 @@ class ImageSearchResultItem extends StatelessWidget {
                   if (result.title.isNotEmpty)
                     Text(
                       result.title,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: theme.textTheme.bodyLarge?.color,
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                       ),
@@ -102,8 +106,8 @@ class ImageSearchResultItem extends StatelessWidget {
                       Expanded(
                         child: Text(
                           result.source,
-                          style: const TextStyle(
-                            color: Colors.white60,
+                          style: TextStyle(
+                            color: theme.textTheme.bodyMedium?.color,
                             fontSize: 11,
                           ),
                           maxLines: 1,
@@ -113,8 +117,8 @@ class ImageSearchResultItem extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         '${result.width}×${result.height}',
-                        style: const TextStyle(
-                          color: Colors.white54,
+                        style: TextStyle(
+                          color: colors.textHint,
                           fontSize: 10,
                         ),
                       ),

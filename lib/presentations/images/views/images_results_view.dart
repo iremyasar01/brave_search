@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-
+import '../../../core/theme/theme_extensions.dart';
 import '../cubit/image_search_cubit.dart';
 import '../cubit/image_search_state.dart';
 import '../widgets/image_search_result_item.dart';
@@ -11,25 +11,28 @@ class ImagesResultsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.extension<AppColorsExtension>()!;
+    
     return BlocBuilder<ImageSearchCubit, ImageSearchState>(
       builder: (context, state) {
         switch (state.status) {
           case ImageSearchStatus.initial:
-            return const Center(
+            return Center(
               child: Text(
                 'Görsel aramak için üstteki çubuğu kullanın',
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: theme.textTheme.bodyMedium?.color),
               ),
             );
           case ImageSearchStatus.loading:
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.blue),
+            return Center(
+              child: CircularProgressIndicator(color: theme.primaryColor),
             );
           case ImageSearchStatus.empty:
-            return const Center(
+            return Center(
               child: Text(
                 'Görsel bulunamadı',
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: theme.textTheme.bodyMedium?.color),
               ),
             );
           case ImageSearchStatus.failure:
@@ -37,16 +40,26 @@ class ImagesResultsView extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error, color: Colors.red, size: 48),
+                  Icon(
+                    Icons.error, 
+                    color: theme.colorScheme.error, 
+                    size: 48,
+                  ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Bir hata oluştu',
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                    style: TextStyle(
+                      color: theme.textTheme.bodyMedium?.color, 
+                      fontSize: 16,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     state.errorMessage ?? '',
-                    style: const TextStyle(color: Colors.white54, fontSize: 12),
+                    style: TextStyle(
+                      color: colors.textHint, 
+                      fontSize: 12,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -61,10 +74,10 @@ class ImagesResultsView extends StatelessWidget {
               itemCount: state.results.length + (state.hasReachedMax ? 0 : 1),
               itemBuilder: (context, index) {
                 if (index >= state.results.length) {
-                  return const SizedBox(
+                  return SizedBox(
                     height: 100,
                     child: Center(
-                      child: CircularProgressIndicator(color: Colors.blue),
+                      child: CircularProgressIndicator(color: theme.primaryColor),
                     ),
                   );
                 }

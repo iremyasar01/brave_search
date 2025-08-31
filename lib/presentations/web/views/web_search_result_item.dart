@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import '../../../core/theme/theme_extensions.dart';
 import '../../../domain/entities/web_search_result.dart';
 
 class WebSearchResultItem extends StatelessWidget {
@@ -10,13 +10,16 @@ class WebSearchResultItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.extension<AppColorsExtension>()!;
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[800],
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[700]!),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,10 +32,10 @@ class WebSearchResultItem extends StatelessWidget {
                   result.profile!.img!,
                   width: 16,
                   height: 16,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (_, __, ___) => Icon(
                     Icons.public,
                     size: 16,
-                    color: Colors.white54,
+                    color: colors.iconSecondary,
                   ),
                 )
               else if (result.favicon != null)
@@ -40,17 +43,17 @@ class WebSearchResultItem extends StatelessWidget {
                   result.favicon!,
                   width: 16,
                   height: 16,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (_, __, ___) => Icon(
                     Icons.public,
                     size: 16,
-                    color: Colors.white54,
+                    color: colors.iconSecondary,
                   ),
                 )
               else
-                const Icon(
+                Icon(
                   Icons.public,
                   size: 16,
-                  color: Colors.white54,
+                  color: colors.iconSecondary,
                 ),
               const SizedBox(width: 8),
               Expanded(
@@ -60,8 +63,8 @@ class WebSearchResultItem extends StatelessWidget {
                     if (result.profile?.longName != null)
                       Text(
                         result.profile!.longName,
-                        style: const TextStyle(
-                          color: Colors.green,
+                        style: TextStyle(
+                          color: theme.primaryColor,
                           fontSize: 12,
                         ),
                         maxLines: 1,
@@ -69,8 +72,8 @@ class WebSearchResultItem extends StatelessWidget {
                       ),
                     Text(
                       result.url,
-                      style: const TextStyle(
-                        color: Colors.green,
+                      style: TextStyle(
+                        color: theme.primaryColor,
                         fontSize: 11,
                       ),
                       maxLines: 1,
@@ -82,8 +85,8 @@ class WebSearchResultItem extends StatelessWidget {
               if (result.pageAge != null)
                 Text(
                   result.pageAge!,
-                  style: const TextStyle(
-                    color: Colors.white54,
+                  style: TextStyle(
+                    color: colors.textHint,
                     fontSize: 11,
                   ),
                 ),
@@ -96,8 +99,8 @@ class WebSearchResultItem extends StatelessWidget {
             onTap: () => _launchUrl(result.url),
             child: Text(
               result.title,
-              style: const TextStyle(
-                color: Colors.blue,
+              style: TextStyle(
+                color: theme.primaryColor,
                 fontSize: 16,
                 decoration: TextDecoration.underline,
                 fontWeight: FontWeight.w500,
@@ -109,8 +112,8 @@ class WebSearchResultItem extends StatelessWidget {
           // Description
           Text(
             result.description,
-            style: const TextStyle(
-              color: Colors.white70,
+            style: TextStyle(
+              color: theme.textTheme.bodyMedium?.color,
               fontSize: 14,
             ),
             maxLines: 3,
@@ -130,13 +133,13 @@ class WebSearchResultItem extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.2),
+                        color: theme.primaryColor.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         result.language!.toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.blue,
+                        style: TextStyle(
+                          color: theme.primaryColor,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
@@ -150,13 +153,13 @@ class WebSearchResultItem extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.2),
+                        color: theme.colorScheme.error.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Text(
+                      child: Text(
                         'NOT SAFE',
                         style: TextStyle(
-                          color: Colors.red,
+                          color: theme.colorScheme.error,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
@@ -174,10 +177,10 @@ class WebSearchResultItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'İlgili bağlantılar:',
                     style: TextStyle(
-                      color: Colors.white70,
+                      color: theme.textTheme.bodyMedium?.color,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
@@ -190,16 +193,16 @@ class WebSearchResultItem extends StatelessWidget {
                         onTap: () => _launchUrl(cluster.url),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.chevron_right,
                               size: 12,
-                              color: Colors.white54,
+                              color: colors.iconSecondary,
                             ),
                             Expanded(
                               child: Text(
                                 cluster.title,
-                                style: const TextStyle(
-                                  color: Colors.blue,
+                                style: TextStyle(
+                                  color: theme.primaryColor,
                                   fontSize: 12,
                                   decoration: TextDecoration.underline,
                                 ),
