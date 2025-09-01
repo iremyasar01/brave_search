@@ -1,0 +1,28 @@
+import 'package:flutter/material.dart';
+class AddTabButtonLarge extends StatelessWidget {
+  final VoidCallback onAddTab;
+
+  const AddTabButtonLarge({super.key, required this.onAddTab});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ElevatedButton.icon(
+      onPressed: () {
+        onAddTab();
+        Navigator.pop(context);
+      },
+      icon: const Icon(Icons.add),
+      label: const Text('Yeni Sekme'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: theme.primaryColor,
+        foregroundColor: Colors.white,
+        minimumSize: const Size(double.infinity, 48),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+}
