@@ -17,7 +17,6 @@ abstract class AppColors {
   static const Color lightSearchBar = Color(0xFFF1F5F9);
   static const Color lightTabBackground = Color(0xFFF8FAFC);
   static const Color lightTabActive = Color(0xFFFFFFFF);
-  // ✅ Bottom navigation için theme'le uyumlu renkler
   static const Color lightBottomNavBackground = Color(0xFFF8FAFC); // lightSurface ile aynı
   static const Color lightBottomNavBorder = Color(0xFFE2E8F0); // lightBorder ile aynı
   

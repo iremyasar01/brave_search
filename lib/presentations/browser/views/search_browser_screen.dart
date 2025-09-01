@@ -67,6 +67,7 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
         body: SafeArea(
           child: Column(
             children: [
+           
               // Browser Header with search bar
               const BrowserHeader(),
               Expanded(

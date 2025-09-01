@@ -42,7 +42,7 @@ class SearchResultsView extends StatelessWidget {
     } else if (browserState.searchFilter == 'videos') {
       return const VideosResultsView();
     } else if (browserState.searchFilter == 'news') {
-      return const NewsResultsView(); // Yeni eklenen satır
+      return const NewsResultsView();
     } else {
       return _buildWebResults(context, browserState);
     }

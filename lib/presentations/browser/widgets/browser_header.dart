@@ -44,7 +44,6 @@ class _BrowserHeaderState extends State<BrowserHeader> {
       color: theme.appBarTheme.backgroundColor,
       child: Row(
         children: [
-          // Theme toggle button
           IconButton(
             icon: Icon(
               theme.brightness == Brightness.dark 
@@ -78,7 +77,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
                 }
 
                 return Container(
-                  height: 40,
+                  height: 50,
                   decoration: BoxDecoration(
                     color: colors.searchBarBackground,
                     borderRadius: BorderRadius.circular(8),
@@ -143,7 +142,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
       browserCubit.updateTabQuery(currentTabId, query);
       browserCubit.markTabAsSearched(currentTabId);
     }
-    
+
     switch (currentFilter) {
       case 'all':
       case 'web':
