@@ -45,12 +45,10 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
   }
 
   void _onTabTapped(int index) {
-    debugPrint('🔵 Tab tapped: $index');
     _browserCubit.switchTab(index);
   }
 
   void _addNewTab() {
-    debugPrint('🔵 Add new tab button pressed');
     _browserCubit.addTab();
   }
 
@@ -65,18 +63,15 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
         BlocProvider.value(value: _newsSearchCubit),
       ],
       child: Scaffold(
-        // ❌ Sabit renk yerine theme'den al
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: Column(
             children: [
               // Browser Header with search bar
               const BrowserHeader(),
-              // Main content area
               Expanded(
                 child: BlocBuilder<BrowserCubit, BrowserState>(
                   builder: (context, browserState) {
-                    //debugPrint('🟡 Browser state updated - Tabs: ${browserState.tabs.length}, Active: ${browserState.activeTabIndex}');
                     
                     if (browserState.tabs.isEmpty) {
                       return const EmptyBrowserState();

@@ -93,7 +93,8 @@ class _FilterChip extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+         alignment: Alignment.center,
+         padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: isSelected ? theme.primaryColor : Colors.transparent,
             borderRadius: BorderRadius.circular(20),

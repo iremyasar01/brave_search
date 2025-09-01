@@ -27,13 +27,11 @@ class NewsSearchResultItem extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Sol taraf - Haber içeriği (esnek alan)
-              Expanded(
+               Expanded(
                 flex: 3,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title - Ana başlık
                     Text(
                       result.title,
                       style: theme.textTheme.bodyLarge?.copyWith(
@@ -73,17 +71,8 @@ class NewsSearchResultItem extends StatelessWidget {
                               color: theme.colorScheme.error,
                               borderRadius: BorderRadius.circular(2),
                             ),
-                            child: const Center(
-                              child: Text(
-                                'P', // Posta Gazetesi için
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                            
                             ),
-                          ),
                           const SizedBox(width: 6),
                           Text(
                             result.metaUrl!.hostname,
@@ -119,7 +108,7 @@ class NewsSearchResultItem extends StatelessWidget {
               // Sağ taraf - Küçük resim (varsa)
               if (result.thumbnail.src.isNotEmpty) ...[
                 const SizedBox(width: 12),
-                Container(
+                SizedBox(
                   width: 80,
                   height: 80,
                   child: ClipRRect(
