@@ -18,16 +18,31 @@ class NetworkInfoImpl implements NetworkInfo {
 
   @override
   Future<bool> get isConnected async {
-    final results = await connectivity.checkConnectivity();
-    if (results.contains(ConnectivityResult.none)) {
+    try {
+      // Önce connectivity kontrolü
+      final results = await connectivity.checkConnectivity();
+      
+      // Hiç bağlantı yoksa false döndür
+      if (results.contains(ConnectivityResult.none) || results.isEmpty) {
+        return false;
+      }
+
+      // Bağlantı varsa gerçek internet erişimini kontrol et
+      final hasInternet = await internetChecker.hasInternetAccess;
+      return hasInternet;
+    } catch (e) {
+      // Hata durumunda false döndür
       return false;
     }
-    return await internetChecker.hasInternetAccess;
   }
 
   @override
   Future<List<ConnectivityResult>> get connectivityResult async {
-    return await connectivity.checkConnectivity();
+    try {
+      return await connectivity.checkConnectivity();
+    } catch (e) {
+      return [ConnectivityResult.none];
+    }
   }
 
   @override
