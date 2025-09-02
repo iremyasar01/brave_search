@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/di/injection.dart';
+import 'core/network/cubit/network_cubit.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_cubit.dart';
 import 'presentations/browser/cubit/browser_cubit.dart';
@@ -20,8 +21,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ThemeCubit(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => getIt<NetworkCubit>()),
+        BlocProvider(create: (context) => ThemeCubit()),
+        BlocProvider(create: (context) => getIt<BrowserCubit>()),
+        BlocProvider(create: (context) => getIt<WebSearchCubit>()),
+      ],
       child: BlocBuilder<ThemeCubit, AppThemeMode>(
         builder: (context, themeMode) {
           return MaterialApp(
@@ -30,17 +36,7 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: _getThemeMode(themeMode),
-            home: MultiBlocProvider(
-              providers: [
-                BlocProvider(
-                  create: (context) => getIt<BrowserCubit>(),
-                ),
-                BlocProvider(
-                  create: (context) => getIt<WebSearchCubit>(),
-                ),
-              ],
-              child: const SearchBrowserScreen(),
-            ),
+            home: const SearchBrowserScreen(),
           );
         },
       ),

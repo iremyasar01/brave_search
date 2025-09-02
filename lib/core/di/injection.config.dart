@@ -8,9 +8,12 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:connectivity_plus/connectivity_plus.dart' as _i895;
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart'
+    as _i161;
 
 import '../../data/datasources/remote/image_search_remote_data_source.dart'
     as _i709;
@@ -37,6 +40,9 @@ import '../../presentations/images/cubit/image_search_cubit.dart' as _i43;
 import '../../presentations/news/cubit/news_search_cubit.dart' as _i551;
 import '../../presentations/videos/cubit/video_search_cubit.dart' as _i605;
 import '../../presentations/web/cubit/web_search_cubit.dart' as _i372;
+import '../network/cubit/network_cubit.dart' as _i684;
+import '../network/network_info.dart' as _i932;
+import 'network_module.dart' as _i567;
 import 'register_module.dart' as _i291;
 
 // initializes the registration of main-scope dependencies inside of GetIt
@@ -51,8 +57,14 @@ _i174.GetIt $initGetIt(
     environmentFilter,
   );
   final registerModule = _$RegisterModule();
+  final networkModule = _$NetworkModule();
   gh.factory<_i594.BrowserCubit>(() => _i594.BrowserCubit());
   gh.singleton<_i361.Dio>(() => registerModule.dio);
+  gh.lazySingleton<_i895.Connectivity>(() => networkModule.connectivity);
+  gh.lazySingleton<_i161.InternetConnection>(
+      () => networkModule.internetChecker);
+  gh.lazySingleton<_i932.NetworkInfo>(() => networkModule.networkInfo);
+  gh.lazySingleton<_i684.NetworkCubit>(() => networkModule.networkCubit);
   gh.lazySingleton<_i930.WebSearchRemoteDataSource>(
       () => _i930.WebSearchRemoteDataSourceImpl(gh<_i361.Dio>()));
   gh.lazySingleton<_i805.VideoSearchRemoteDataSource>(
@@ -89,3 +101,5 @@ _i174.GetIt $initGetIt(
 }
 
 class _$RegisterModule extends _i291.RegisterModule {}
+
+class _$NetworkModule extends _i567.NetworkModule {}

@@ -12,6 +12,9 @@ import '../widgets/empty_browser_state.dart';
 import '../widgets/search_results_view.dart';
 import '../../web/cubit/web_search_cubit.dart';
 import '../../images/cubit/image_search_cubit.dart';
+import 'package:brave_search/core/network/cubit/network_cubit.dart';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class SearchBrowserScreen extends StatefulWidget {
   const SearchBrowserScreen({super.key});
@@ -30,14 +33,14 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     // GetIt'ten instance'ları al
     _browserCubit = GetIt.instance<BrowserCubit>();
     _webSearchCubit = GetIt.instance<WebSearchCubit>();
     _imageSearchCubit = GetIt.instance<ImageSearchCubit>();
     _videoSearchCubit = GetIt.instance<VideoSearchCubit>();
-     _newsSearchCubit = GetIt.instance<NewsSearchCubit>();
-    
+    _newsSearchCubit = GetIt.instance<NewsSearchCubit>();
+
     // İlk sekmeyi oluştur
     if (_browserCubit.state.tabs.isEmpty) {
       _browserCubit.addTab();
@@ -50,6 +53,32 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
 
   void _addNewTab() {
     _browserCubit.addTab();
+  }
+
+  // Bağlantı tipine göre ikon belirleme
+  IconData _getConnectionIcon(List<ConnectivityResult> connectivityTypes) {
+    if (connectivityTypes.contains(ConnectivityResult.wifi)) {
+      return Icons.wifi;
+    } else if (connectivityTypes.contains(ConnectivityResult.mobile)) {
+      return Icons.network_cell;
+    } else if (connectivityTypes.contains(ConnectivityResult.ethernet)) {
+      return Icons.settings_ethernet;
+    } else {
+      return Icons.signal_wifi_off;
+    }
+  }
+
+  // Bağlantı tipine göre metin belirleme
+  String _getConnectionText(List<ConnectivityResult> connectivityTypes) {
+    if (connectivityTypes.contains(ConnectivityResult.wifi)) {
+      return "Wi-Fi bağlantısı var";
+    } else if (connectivityTypes.contains(ConnectivityResult.mobile)) {
+      return "Mobil veri bağlantısı var";
+    } else if (connectivityTypes.contains(ConnectivityResult.ethernet)) {
+      return "Ethernet bağlantısı var";
+    } else {
+      return "İnternet bağlantısı yok";
+    }
   }
 
   @override
@@ -67,13 +96,65 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
         body: SafeArea(
           child: Column(
             children: [
-           
+              // İnternet bağlantı durumu banner'ı
+              BlocBuilder<NetworkCubit, NetworkState>(
+                builder: (context, networkState) {
+                  if (networkState is NetworkConnected) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      color: Colors.green.withOpacity(0.9),
+                      child: Row(
+                        children: [
+                          Icon(_getConnectionIcon(networkState.connectivityTypes), 
+                               color: Colors.white, size: 16),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _getConnectionText(networkState.connectivityTypes),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          const Icon(Icons.close, color: Colors.white, size: 16),
+                        ],
+                      ),
+                    );
+                  } else if (networkState is NetworkDisconnected) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      color: Colors.red.withOpacity(0.9),
+                      child:const Row(
+                        children: [
+                           Icon(Icons.signal_wifi_off, color: Colors.white, size: 16),
+                           SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              "İnternet bağlantısı yok. Lütfen bağlantınızı kontrol edin.",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          const Icon(Icons.close, color: Colors.white, size: 16),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
+              ),
+              
               // Browser Header with search bar
               const BrowserHeader(),
               Expanded(
                 child: BlocBuilder<BrowserCubit, BrowserState>(
                   builder: (context, browserState) {
-                    
                     if (browserState.tabs.isEmpty) {
                       return const EmptyBrowserState();
                     }

@@ -1,7 +1,7 @@
+import 'package:brave_search/core/constants/api_constants.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:injectable/injectable.dart';
-
 
 @module
 abstract class RegisterModule {
@@ -9,12 +9,12 @@ abstract class RegisterModule {
   Dio get dio {
     final apiKey = dotenv.env['BRAVE_API_KEY'];
     return Dio(BaseOptions(
-      baseUrl: 'https://api.search.brave.com/res/v1',
+      baseUrl: ApiConstants.braveApiBaseUrl,
       headers: {
         'Accept': 'application/json',
         'Accept-Encoding': 'gzip',
         'X-Subscription-Token': apiKey,
       },
     ));
-  }}
-
+  }
+}
