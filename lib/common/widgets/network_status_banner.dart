@@ -8,8 +8,8 @@ class NetworkStatusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColorsExtension>()!;
     final theme = Theme.of(context);
+    final colors = theme.extension<AppColorsExtension>()!;
     
     return BlocListener<NetworkCubit, NetworkState>(
       listener: (context, state) {
@@ -47,7 +47,7 @@ class NetworkStatusBanner extends StatelessWidget {
               duration: const Duration(milliseconds: 300),
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: Colors.red.shade600, // Veya colors.error rengini kullanabilirsiniz
+              color: Colors.red.shade600,
               child: Row(
                 children: [
                   Icon(Icons.wifi_off, color: theme.colorScheme.onError, size: 20),
