@@ -28,6 +28,7 @@ dependencies:
   flutter_staggered_grid_view: ^0.7.0
   internet_connection_checker_plus: ^2.7.2
   connectivity_plus: ^6.1.5
+  lottie: ^3.2.0
 
 dev_dependencies:
   flutter_test:
@@ -47,8 +48,9 @@ flutter:
  
   assets:
     - .env
-    - assets/brave_color_darkbackground.png
-    - assets/brave_color_lightbackground.png
+    - assets/images/brave_color_darkbackground.png
+    - assets/images/brave_color_lightbackground.png
+    - assets/animations/Web Search..json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

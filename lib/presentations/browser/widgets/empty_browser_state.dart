@@ -16,8 +16,8 @@ class EmptyBrowserState extends StatelessWidget {
         children: [
           Image.asset(
             isDark 
-              ? 'assets/brave_color_darkbackground.png' 
-              : 'assets/brave_color_lightbackground.png',
+              ? 'assets/images/brave_color_darkbackground.png' 
+              : 'assets/images/brave_color_lightbackground.png',
             width: 120,
             height: 120,
             fit: BoxFit.contain,
