@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/errors/api_error_handler.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../domain/entities/web_search_result.dart';
 
@@ -31,15 +32,15 @@ class WebSearchRemoteDataSourceImpl implements WebSearchRemoteDataSource {
     try {
       // Input validation
       if (query.trim().isEmpty) {
-        return  Result.failure('Arama sorgusu boş olamaz');
+        return Result.failure('Arama sorgusu boş olamaz');
       }
       
       if (count <= 0 || count > 20) {
-        return  Result.failure('Sayı değeri 1-20 arasında olmalıdır');
+        return Result.failure('Sayı değeri 1-20 arasında olmalıdır');
       }
 
       if (offset < 0 || offset > 9) {
-        return  Result.failure('Offset değeri 0-9 arasında olmalıdır');
+        return Result.failure('Offset değeri 0-9 arasında olmalıdır');
       }
 
       final queryParameters = <String, dynamic>{
@@ -62,13 +63,13 @@ class WebSearchRemoteDataSourceImpl implements WebSearchRemoteDataSource {
         final data = response.data;
         
         if (data == null) {
-          return  Result.failure('Sunucudan boş yanıt alındı');
+          return Result.failure('Sunucudan boş yanıt alındı');
         }
         
         final webResults = data['web']?['results'] as List<dynamic>? ?? [];
         
         if (webResults.isEmpty) {
-          return  Result.success([]);
+          return Result.success([]);
         }
         
         try {
@@ -82,12 +83,18 @@ class WebSearchRemoteDataSourceImpl implements WebSearchRemoteDataSource {
           return Result.failure('Veri ayrıştırma hatası: ${e.toString()}');
         }
       } else {
-        return Result.failure(_getErrorMessageByStatusCode(response.statusCode));
+        return Result.failure(
+          ApiErrorHandler.getErrorMessageByStatusCode(response.statusCode)
+        );
       }
     } on DioException catch (dioError) {
-      return Result.failure(_handleDioError(dioError));
+      return Result.failure(
+        ApiErrorHandler.handleDioError(dioError)
+      );
     } catch (e) {
-      return Result.failure('Beklenmeyen hata: ${e.toString()}');
+      return Result.failure(
+        ApiErrorHandler.getGenericErrorMessage()
+      );
     }
   }
 
@@ -149,48 +156,5 @@ class WebSearchRemoteDataSourceImpl implements WebSearchRemoteDataSource {
       description: json['description']?.toString() ?? '',
       familyFriendly: json['family_friendly'] ?? true,
     )).toList();
-  }
-
-  String _getErrorMessageByStatusCode(int? statusCode) {
-    switch (statusCode) {
-      case 400:
-        return 'Geçersiz istek parametreleri';
-      case 401:
-        return 'Yetkilendirme hatası';
-      case 403:
-        return 'Erişim reddedildi';
-      case 404:
-        return 'Servis bulunamadı';
-      case 429:
-        return 'Çok fazla istek gönderildi, lütfen bekleyin';
-      case 500:
-        return 'Sunucu hatası';
-      case 502:
-        return 'Ağ geçidi hatası';
-      case 503:
-        return 'Servis geçici olarak kullanılamıyor';
-      default:
-        return 'HTTP hatası: $statusCode';
-    }
-  }
-
-  String _handleDioError(DioException dioError) {
-    switch (dioError.type) {
-      case DioExceptionType.connectionTimeout:
-        return 'Bağlantı zaman aşımına uğradı';
-      case DioExceptionType.sendTimeout:
-        return 'Veri gönderimi zaman aşımına uğradı';
-      case DioExceptionType.receiveTimeout:
-        return 'Veri alımı zaman aşımına uğradı';
-      case DioExceptionType.badCertificate:
-        return 'Güvenlik sertifikası hatası';
-      case DioExceptionType.cancel:
-        return 'İstek iptal edildi';
-      case DioExceptionType.connectionError:
-        return 'İnternet bağlantısı bulunamadı';
-      case DioExceptionType.unknown:
-      default:
-        return 'Ağ hatası: ${dioError.message}';
-    }
   }
 }

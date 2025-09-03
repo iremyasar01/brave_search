@@ -1,3 +1,4 @@
+import 'package:brave_search/core/errors/api_error_handler.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/utils/result.dart';
@@ -32,7 +33,7 @@ class VideoSearchRemoteDataSourceImpl implements VideoSearchRemoteDataSource {
       if (query.trim().isEmpty) {
         return Result.failure('Arama sorgusu boş olamaz');
       }
-      
+
       // API sınırlamalarını kontrol et
       if (count <= 0 || count > 20) {
         count = 20; // Varsayılan değere dön
@@ -54,143 +55,76 @@ class VideoSearchRemoteDataSourceImpl implements VideoSearchRemoteDataSource {
       if (country != null && country.isNotEmpty) {
         queryParameters['country'] = country;
       }
-
       final response = await dio.get(
         '/videos/search',
         queryParameters: queryParameters,
-        options: Options(
-          validateStatus: (status) {
-            // 422 hatasını da normal bir yanıt olarak kabul et
-            return status! < 500;
-          },
-        ),
       );
 
-      // HTTP durum koduna göre işlem
       if (response.statusCode == 200) {
         return _handleSuccessResponse(response);
-      } else if (response.statusCode == 422) {
-        return _handle422Error(response);
       } else {
-        return Result.failure(_getErrorMessageByStatusCode(response.statusCode));
+        return Result.failure(
+            ApiErrorHandler.getErrorMessageByStatusCode(response.statusCode));
       }
     } on DioException catch (dioError) {
-      return Result.failure(_handleDioError(dioError));
+      return Result.failure(ApiErrorHandler.handleDioError(dioError));
     } catch (e) {
-      return Result.failure('Beklenmeyen hata: ${e.toString()}');
+      return Result.failure(ApiErrorHandler.getGenericErrorMessage());
     }
   }
-
-  Result<List<VideoSearchResult>> _handleSuccessResponse(Response response) {
-    final data = response.data;
-    
-    if (data == null) {
-      return Result.failure('Sunucudan boş yanıt alındı');
-    }
-    
-    final videoResults = data['results'] as List<dynamic>? ?? [];
-    
-    if (videoResults.isEmpty) {
-      return Result.success([]);
-    }
-    
-    try {
-      final parsedResults = videoResults
-          .map((json) => _parseVideoResult(json))
-          .whereType<VideoSearchResult>()
-          .toList();
-          
-      return Result.success(parsedResults);
-    } catch (e) {
-      return Result.failure('Veri ayrıştırma hatası: ${e.toString()}');
-    }
-  }
-
-  Result<List<VideoSearchResult>> _handle422Error(Response response) {
-    // 422 hatasının detaylarını analiz et
-    final errorData = response.data;
-    String errorMessage = 'İstek işlenemedi';
-    
-    if (errorData is Map<String, dynamic>) {
-      errorMessage = errorData['message']?.toString() ?? 
-                   errorData['error']?.toString() ?? 
-                   errorMessage;
-    }
-    
-    return Result.failure('API hatası: $errorMessage');
-  }
-
-  VideoSearchResult _parseVideoResult(Map<String, dynamic> json) {
-    final videoData = json['video'] as Map<String, dynamic>? ?? {};
-    final thumbnailData = json['thumbnail'] as Map<String, dynamic>? ?? {};
-    
-    return VideoSearchResult(
-      title: json['title']?.toString() ?? '',
-      url: json['url']?.toString() ?? '',
-      description: json['description']?.toString() ?? '',
-      age: json['age']?.toString() ?? '',
-      duration: videoData['duration']?.toString() ?? '',
-      creator: videoData['creator']?.toString() ?? '',
-      publisher: videoData['publisher']?.toString() ?? '',
-      thumbnailUrl: thumbnailData['src']?.toString() ?? '',
-      views: (videoData['views'] as int?) ?? 0,
-      metaUrl: _parseMetaUrl(json['meta_url']),
-    );
-  }
-
 }
- 
-  MetaUrl? _parseMetaUrl(Map<String, dynamic>? json) {
-    if (json == null) return null;
-    
-    return MetaUrl(
-      scheme: json['scheme']?.toString() ?? '',
-      netloc: json['netloc']?.toString() ?? '',
-      hostname: json['hostname']?.toString() ?? '',
-      favicon: json['favicon']?.toString() ?? '',
-      path: json['path']?.toString() ?? '',
-    );
+
+Result<List<VideoSearchResult>> _handleSuccessResponse(Response response) {
+  final data = response.data;
+
+  if (data == null) {
+    return Result.failure('Sunucudan boş yanıt alındı');
   }
 
-  String _getErrorMessageByStatusCode(int? statusCode) {
-    switch (statusCode) {
-      case 400:
-        return 'Geçersiz istek parametreleri';
-      case 401:
-        return 'Yetkilendirme hatası';
-      case 403:
-        return 'Erişim reddedildi';
-      case 404:
-        return 'Servis bulunamadı';
-      case 429:
-        return 'Çok fazla istek gönderildi, lütfen bekleyin';
-      case 500:
-        return 'Sunucu hatası';
-      case 502:
-        return 'Ağ geçidi hatası';
-      case 503:
-        return 'Servis geçici olarak kullanılamıyor';
-      default:
-        return 'HTTP hatası: $statusCode';
-    }
+  final videoResults = data['results'] as List<dynamic>? ?? [];
+
+  if (videoResults.isEmpty) {
+    return Result.success([]);
   }
 
-  String _handleDioError(DioException dioError) {
-    switch (dioError.type) {
-      case DioExceptionType.connectionTimeout:
-        return 'Bağlantı zaman aşımına uğradı';
-      case DioExceptionType.sendTimeout:
-        return 'Veri gönderimi zaman aşımına uğradı';
-      case DioExceptionType.receiveTimeout:
-        return 'Veri alımı zaman aşımına uğradı';
-      case DioExceptionType.badCertificate:
-        return 'Güvenlik sertifikası hatası';
-      case DioExceptionType.cancel:
-        return 'İstek iptal edildi';
-      case DioExceptionType.connectionError:
-        return 'İnternet bağlantısı bulunamadı';
-      case DioExceptionType.unknown:
-      default:
-        return 'Ağ hatası: ${dioError.message}';
-    }
+  try {
+    final parsedResults = videoResults
+        .map((json) => _parseVideoResult(json))
+        .whereType<VideoSearchResult>()
+        .toList();
+
+    return Result.success(parsedResults);
+  } catch (e) {
+    return Result.failure('Veri ayrıştırma hatası: ${e.toString()}');
   }
+}
+
+VideoSearchResult _parseVideoResult(Map<String, dynamic> json) {
+  final videoData = json['video'] as Map<String, dynamic>? ?? {};
+  final thumbnailData = json['thumbnail'] as Map<String, dynamic>? ?? {};
+
+  return VideoSearchResult(
+    title: json['title']?.toString() ?? '',
+    url: json['url']?.toString() ?? '',
+    description: json['description']?.toString() ?? '',
+    age: json['age']?.toString() ?? '',
+    duration: videoData['duration']?.toString() ?? '',
+    creator: videoData['creator']?.toString() ?? '',
+    publisher: videoData['publisher']?.toString() ?? '',
+    thumbnailUrl: thumbnailData['src']?.toString() ?? '',
+    views: (videoData['views'] as int?) ?? 0,
+    metaUrl: _parseMetaUrl(json['meta_url']),
+  );
+}
+
+MetaUrl? _parseMetaUrl(Map<String, dynamic>? json) {
+  if (json == null) return null;
+
+  return MetaUrl(
+    scheme: json['scheme']?.toString() ?? '',
+    netloc: json['netloc']?.toString() ?? '',
+    hostname: json['hostname']?.toString() ?? '',
+    favicon: json['favicon']?.toString() ?? '',
+    path: json['path']?.toString() ?? '',
+  );
+}

@@ -1,7 +1,7 @@
-// data/datasources/remote/news_search_remote_data_source.dart
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/errors/api_error_handler.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../domain/entities/news_search_result.dart';
 
@@ -30,17 +30,17 @@ class NewsSearchRemoteDataSourceImpl implements NewsSearchRemoteDataSource {
     String safesearch = 'strict',
   }) async {
     try {
-      // Input validation
+      // Input validation (data source'a özgü doğrulamalar)
       if (query.trim().isEmpty) {
-        return  Result.failure('Arama sorgusu boş olamaz');
+        return Result.failure('Arama sorgusu boş olamaz');
       }
       
       if (count <= 0 || count > 20) {
-        return  Result.failure('Sayı değeri 1-20 arasında olmalıdır');
+        return Result.failure('Sayı değeri 1-20 arasında olmalıdır');
       }
 
       if (offset < 0 || offset > 9) {
-        return  Result.failure('Offset değeri 0-9 arasında olmalıdır');
+        return Result.failure('Offset değeri 0-9 arasında olmalıdır');
       }
 
       final queryParameters = <String, dynamic>{
@@ -63,13 +63,13 @@ class NewsSearchRemoteDataSourceImpl implements NewsSearchRemoteDataSource {
         final data = response.data;
         
         if (data == null) {
-          return  Result.failure('Sunucudan boş yanıt alındı');
+          return Result.failure('Sunucudan boş yanıt alındı');
         }
         
         final newsResults = data['results'] as List<dynamic>? ?? [];
         
         if (newsResults.isEmpty) {
-          return  Result.success([]);
+          return Result.success([]);
         }
         
         try {
@@ -83,12 +83,21 @@ class NewsSearchRemoteDataSourceImpl implements NewsSearchRemoteDataSource {
           return Result.failure('Veri ayrıştırma hatası: ${e.toString()}');
         }
       } else {
-        return Result.failure(_getErrorMessageByStatusCode(response.statusCode));
+        // Merkezi hata yönetimi sınıfını kullan
+        return Result.failure(
+          ApiErrorHandler.getErrorMessageByStatusCode(response.statusCode)
+        );
       }
     } on DioException catch (dioError) {
-      return Result.failure(_handleDioError(dioError));
+      // Merkezi hata yönetimi sınıfını kullan
+      return Result.failure(
+        ApiErrorHandler.handleDioError(dioError)
+      );
     } catch (e) {
-      return Result.failure('Beklenmeyen hata: ${e.toString()}');
+      // Merkezi hata yönetimi sınıfını kullan
+      return Result.failure(
+        ApiErrorHandler.getGenericErrorMessage()
+      );
     }
   }
 
@@ -120,48 +129,5 @@ class NewsSearchRemoteDataSourceImpl implements NewsSearchRemoteDataSource {
     return NewsThumbnail(
       src: json['src']?.toString() ?? '',
     );
-  }
-
-  String _getErrorMessageByStatusCode(int? statusCode) {
-    switch (statusCode) {
-      case 400:
-        return 'Geçersiz istek parametreleri';
-      case 401:
-        return 'Yetkilendirme hatası';
-      case 403:
-        return 'Erişim reddedildi';
-      case 404:
-        return 'Servis bulunamadı';
-      case 429:
-        return 'Çok fazla istek gönderildi, lütfen bekleyin';
-      case 500:
-        return 'Sunucu hatası';
-      case 502:
-        return 'Ağ geçidi hatası';
-      case 503:
-        return 'Servis geçici olarak kullanılamıyor';
-      default:
-        return 'HTTP hatası: $statusCode';
-    }
-  }
-
-  String _handleDioError(DioException dioError) {
-    switch (dioError.type) {
-      case DioExceptionType.connectionTimeout:
-        return 'Bağlantı zaman aşımına uğradı';
-      case DioExceptionType.sendTimeout:
-        return 'Veri gönderimi zaman aşımına uğradı';
-      case DioExceptionType.receiveTimeout:
-        return 'Veri alımı zaman aşımına uğradı';
-      case DioExceptionType.badCertificate:
-        return 'Güvenlik sertifikası hatası';
-      case DioExceptionType.cancel:
-        return 'İstek iptal edildi';
-      case DioExceptionType.connectionError:
-        return 'İnternet bağlantısı bulunamadı';
-      case DioExceptionType.unknown:
-      default:
-        return 'Ağ hatası: ${dioError.message}';
-    }
   }
 }
