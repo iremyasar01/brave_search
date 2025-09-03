@@ -2,6 +2,7 @@ import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:brave_search/core/network/cubit/network_cubit.dart';
+import 'package:brave_search/core/extensions/widget_extensions.dart';
 
 class NetworkStatusBanner extends StatelessWidget {
   const NetworkStatusBanner({super.key});
@@ -46,7 +47,6 @@ class NetworkStatusBanner extends StatelessWidget {
             return AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               color: Colors.red.shade600,
               child: Row(
                 children: [
@@ -71,7 +71,7 @@ class NetworkStatusBanner extends StatelessWidget {
                     ),
                   ),
                 ],
-              ),
+              ).symmetricPadding(horizontal: 16, vertical: 12),
             );
           }
           

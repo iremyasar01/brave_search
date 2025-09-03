@@ -1,12 +1,15 @@
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:brave_search/core/extensions/widget_extensions.dart';
+
 class TabItemHeader extends StatelessWidget {
   final String query;
   final AppColorsExtension colors;
   final bool canClose;
   final VoidCallback onClose;
 
-  const TabItemHeader({super.key, 
+  const TabItemHeader({
+    super.key,
     required this.query,
     required this.colors,
     required this.canClose,
@@ -18,7 +21,6 @@ class TabItemHeader extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(8),
       child: Row(
         children: [
           Icon(Icons.public, color: colors.accent, size: 16),
@@ -42,7 +44,7 @@ class TabItemHeader extends StatelessWidget {
               ),
             ),
         ],
-      ),
+      ).allPadding(8),
     );
   }
 }

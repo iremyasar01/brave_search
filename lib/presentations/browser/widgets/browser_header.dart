@@ -3,8 +3,9 @@ import 'package:brave_search/presentations/news/cubit/news_search_cubit.dart';
 import 'package:brave_search/presentations/videos/cubit/video_search_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/theme/theme_extensions.dart';
-import '../../../core/theme/theme_cubit.dart';
+import 'package:brave_search/core/theme/theme_extensions.dart';
+import 'package:brave_search/core/theme/theme_cubit.dart';
+import 'package:brave_search/core/extensions/widget_extensions.dart';
 import '../cubit/browser_cubit.dart';
 import '../cubit/browser_state.dart';
 import '../../web/cubit/web_search_cubit.dart';
@@ -40,7 +41,6 @@ class _BrowserHeaderState extends State<BrowserHeader> {
     final colors = theme.extension<AppColorsExtension>()!;
     
     return Container(
-      padding: const EdgeInsets.all(16.0),
       color: theme.appBarTheme.backgroundColor,
       child: Row(
         children: [
@@ -126,7 +126,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
             ),
           ),
         ],
-      ),
+      ).allPadding(16),
     );
   }
 

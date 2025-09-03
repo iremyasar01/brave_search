@@ -1,5 +1,6 @@
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:brave_search/core/extensions/widget_extensions.dart';
 
 class GenericSearchErrorWidget extends StatelessWidget {
   final String? errorMessage;
@@ -20,43 +21,37 @@ class GenericSearchErrorWidget extends StatelessWidget {
     String userFriendlyMessage = _getUserFriendlyMessage(errorMessage);
 
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              color: theme.colorScheme.error,
-              size: 64,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            color: theme.colorScheme.error,
+            size: 64,
+          ).paddingBottom(16),
+          Text(
+            'Bir hata oluştu',
+            style: TextStyle(
+              color: theme.textTheme.bodyMedium?.color,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Bir hata oluştu',
-              style: TextStyle(
-                color: theme.textTheme.bodyMedium?.color,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+          ).paddingBottom(12),
+          Text(
+            userFriendlyMessage,
+            style: TextStyle(
+              color: colors.textHint,
+              fontSize: 14,
             ),
-            const SizedBox(height: 12),
-            Text(
-              userFriendlyMessage,
-              style: TextStyle(
-                color: colors.textHint,
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Tekrar Dene'),
-            ),
-          ],
-        ),
-      ),
+            textAlign: TextAlign.center,
+          ).paddingBottom(20),
+          ElevatedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Tekrar Dene'),
+          ),
+        ],
+      ).allPadding(16),
     );
   }
 

@@ -8,6 +8,7 @@ import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:brave_search/core/extensions/widget_extensions.dart';
 
 class TabNavigationBar extends StatelessWidget {
   final int selectedIndex;
@@ -30,7 +31,6 @@ class TabNavigationBar extends StatelessWidget {
       builder: (context, browserState) {
         return Container(
           color: colors.bottomNavBackground,
-          padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(
             children: [
               TabCounter(browserState: browserState),
@@ -42,7 +42,7 @@ class TabNavigationBar extends StatelessWidget {
                 onPressed: () => _showTabsOverview(context, browserState),
               ),
             ],
-          ),
+          ).symmetricPadding(vertical: 8),
         );
       },
     );

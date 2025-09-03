@@ -3,6 +3,7 @@ import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
 import 'package:brave_search/presentations/news/cubit/news_search_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:brave_search/core/extensions/widget_extensions.dart';
 import '../../web/cubit/web_search_cubit.dart';
 import '../../images/cubit/image_search_cubit.dart';
 import '../../videos/cubit/video_search_cubit.dart';
@@ -14,9 +15,8 @@ class SearchFilters extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<BrowserCubit, BrowserState>(
       builder: (context, state) {
-        return Container(
+        return SizedBox(
           height: 50,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
@@ -41,7 +41,7 @@ class SearchFilters extends StatelessWidget {
                 onTap: () => _onFilterChanged(context, 'news', state),
               ),
             ],
-          ),
+          ).symmetricPadding(horizontal: 16),
         );
       },
     );
@@ -88,29 +88,25 @@ class _FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return Padding(
-      padding: const EdgeInsets.only(right: 12),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-         alignment: Alignment.center,
-         padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: isSelected ? theme.primaryColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected ? theme.primaryColor : theme.dividerColor,
-            ),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? Colors.white : theme.textTheme.bodyMedium?.color,
-              fontSize: 14,
-            ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected ? theme.primaryColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? theme.primaryColor : theme.dividerColor,
           ),
         ),
-      ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : theme.textTheme.bodyMedium?.color,
+            fontSize: 14,
+          ),
+        ).symmetricPadding(horizontal: 16),
+      ).onlyPadding(right: 12),
     );
   }
 }

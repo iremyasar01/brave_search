@@ -1,6 +1,8 @@
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
 import 'package:flutter/material.dart';
+import 'package:brave_search/core/extensions/widget_extensions.dart';
+
 class TabCounter extends StatelessWidget {
   final BrowserState browserState;
 
@@ -12,8 +14,6 @@ class TabCounter extends StatelessWidget {
     final colors = theme.extension<AppColorsExtension>()!;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         border: Border.all(color: colors.bottomNavBorder),
         borderRadius: BorderRadius.circular(4),
@@ -36,7 +36,9 @@ class TabCounter extends StatelessWidget {
             size: 16,
           ),
         ],
-      ),
+      )
+          .symmetricPadding(horizontal: 12, vertical: 6)
+          .symmetricMargin(horizontal: 12),
     );
   }
 }

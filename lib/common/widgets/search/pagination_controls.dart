@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:brave_search/core/extensions/widget_extensions.dart';
 
 class GenericPaginationControls extends StatelessWidget {
   final int currentPage;
@@ -26,7 +27,6 @@ class GenericPaginationControls extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(8),
@@ -82,7 +82,6 @@ class GenericPaginationControls extends StatelessWidget {
                       onTap: isDisabled ? null : () => onPageChanged(pageNumber),
                       borderRadius: BorderRadius.circular(6),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: isCurrentPage
                               ? Theme.of(context).primaryColor
@@ -107,7 +106,7 @@ class GenericPaginationControls extends StatelessWidget {
                             fontWeight: isCurrentPage ? FontWeight.bold : FontWeight.normal,
                             fontSize: 12,
                           ),
-                        ),
+                        ).symmetricPadding(horizontal: 10, vertical: 6),
                       ),
                     ),
                   ),
@@ -142,7 +141,6 @@ class GenericPaginationControls extends StatelessWidget {
             const SizedBox(width: 12),
 
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: Theme.of(context).primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(4),
@@ -154,11 +152,11 @@ class GenericPaginationControls extends StatelessWidget {
                   color: Theme.of(context).primaryColor,
                   fontWeight: FontWeight.w500,
                 ),
-              ),
+              ).symmetricPadding(horizontal: 8, vertical: 4),
             ),
           ],
         ),
-      ),
+      ).symmetricPadding(horizontal: 16.0, vertical: 8.0),
     );
   }
 }

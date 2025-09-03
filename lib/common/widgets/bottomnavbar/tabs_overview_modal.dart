@@ -5,6 +5,8 @@ import 'package:brave_search/presentations/browser/cubit/browser_cubit.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:brave_search/core/extensions/widget_extensions.dart';
+
 class TabsOverviewModal extends StatelessWidget {
   final BuildContext parentContext;
   final Function(int) onTabTapped;
@@ -22,9 +24,8 @@ class TabsOverviewModal extends StatelessWidget {
     return BlocBuilder<BrowserCubit, BrowserState>(
       bloc: parentContext.read<BrowserCubit>(),
       builder: (context, currentBrowserState) {
-        return Container(
+        return SizedBox(
           height: MediaQuery.of(context).size.height * 0.8,
-          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               ModalHeader(
@@ -41,7 +42,7 @@ class TabsOverviewModal extends StatelessWidget {
                 onAddTab: onAddTab,
               ),
             ],
-          ),
+          ).allPadding(16),
         );
       },
     );

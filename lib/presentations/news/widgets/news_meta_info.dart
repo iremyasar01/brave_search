@@ -1,6 +1,7 @@
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:brave_search/core/extensions/widget_extensions.dart';
+
 class NewsMetaInfo extends StatelessWidget {
   final String? hostname;
   final String age;
@@ -16,47 +17,58 @@ class NewsMetaInfo extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.extension<AppColorsExtension>();
 
-    return Row(
-      children: [
-        // Kaynak ismi (kırmızı logo ile)
-        if (hostname != null) ...[
-          Container(
-            width: 16,
-            height: 16,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.error,
-              borderRadius: BorderRadius.circular(2),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Kaynak ismi (kırmızı logo ile)
+          if (hostname != null) ...[
+            Container(
+              width: 16,
+              height: 16,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.error,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
-          const SizedBox().spaceRight(6),
-          Text(
-            hostname!,
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w500,
+            const SizedBox(width: 6),
+            SizedBox(
+              width: 120, // Maksimum genişlik belirle
+              child: Text(
+                hostname!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
             ),
-          ),
-        ],
+          ],
 
-        // Ayırıcı
-        if (hostname != null && age.isNotEmpty) ...[
-          Text(
-            ' | ',
-            style: TextStyle(
-              color: colors?.textHint ?? theme.hintColor,
-              fontSize: 12,
-            ),
-          ).paddingHorizontal(4),
-        ],
+          // Ayırıcı
+          if (hostname != null && age.isNotEmpty) ...[
+            Text(
+              ' | ',
+              style: TextStyle(
+                color: colors?.textHint ?? theme.hintColor,
+                fontSize: 12,
+              ),
+            ).paddingHorizontal(4),
+          ],
 
-        // Tarih
-        if (age.isNotEmpty)
-          Text(
-            age,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colors?.textHint ?? theme.hintColor,
+          // Tarih
+          if (age.isNotEmpty)
+            Text(
+              age,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colors?.textHint ?? theme.hintColor,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }

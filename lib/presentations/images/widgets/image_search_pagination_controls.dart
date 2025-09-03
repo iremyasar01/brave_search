@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:brave_search/core/extensions/widget_extensions.dart';
 import '../cubit/image_search_cubit.dart';
 import '../cubit/image_search_state.dart';
 
@@ -28,7 +29,6 @@ class ImageSearchPaginationControls extends StatelessWidget {
     if (startPage < 1) startPage = 1;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(8),
@@ -83,7 +83,6 @@ class ImageSearchPaginationControls extends StatelessWidget {
                       onTap: () => context.read<ImageSearchCubit>().loadPage(pageNumber),
                       borderRadius: BorderRadius.circular(6),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: isCurrentPage
                               ? Theme.of(context).primaryColor
@@ -104,7 +103,7 @@ class ImageSearchPaginationControls extends StatelessWidget {
                             fontWeight: isCurrentPage ? FontWeight.bold : FontWeight.normal,
                             fontSize: 12,
                           ),
-                        ),
+                        ).symmetricPadding(horizontal: 10, vertical: 6),
                       ),
                     ),
                   ),
@@ -139,7 +138,6 @@ class ImageSearchPaginationControls extends StatelessWidget {
             const SizedBox(width: 12),
 
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: Theme.of(context).primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(4),
@@ -151,11 +149,11 @@ class ImageSearchPaginationControls extends StatelessWidget {
                   color: Theme.of(context).primaryColor,
                   fontWeight: FontWeight.w500,
                 ),
-              ),
+              ).symmetricPadding(horizontal: 8, vertical: 4),
             ),
           ],
         ),
-      ),
+      ).symmetricPadding(horizontal: 16.0, vertical: 8.0),
     );
   }
 }
