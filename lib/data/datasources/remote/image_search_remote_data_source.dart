@@ -1,13 +1,13 @@
+import 'package:brave_search/core/utils/result.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../domain/entities/image_search_result.dart';
 
 abstract class ImageSearchRemoteDataSource {
-  Future<List<ImageSearchResult>> searchImages(
+  Future<Result<List<ImageSearchResult>>> searchImages(
     String query, {
-    int count = 20,
-    int offset = 0,
+    int count = 50, // Sadece count parametresi
     String? country,
     String safesearch = 'strict',
   });
@@ -18,12 +18,10 @@ class ImageSearchRemoteDataSourceImpl implements ImageSearchRemoteDataSource {
   final Dio dio;
 
   ImageSearchRemoteDataSourceImpl(this.dio);
-
   @override
-  Future<List<ImageSearchResult>> searchImages(
+  Future<Result<List<ImageSearchResult>>> searchImages(
     String query, {
-    int count = 20,
-    int offset = 0,
+    int count = 50, // Sadece count parametresi
     String? country,
     String safesearch = 'strict',
   }) async {
@@ -31,7 +29,6 @@ class ImageSearchRemoteDataSourceImpl implements ImageSearchRemoteDataSource {
       final queryParameters = <String, dynamic>{
         'q': query,
         'count': count,
-        'offset': offset,
         'safesearch': safesearch,
       };
 
@@ -47,15 +44,21 @@ class ImageSearchRemoteDataSourceImpl implements ImageSearchRemoteDataSource {
       if (response.statusCode == 200) {
         final data = response.data;
         final imageResults = data['results'] as List<dynamic>? ?? [];
-        return imageResults.map((json) => _parseImageResult(json)).toList();
+        final results = imageResults
+            .map((json) => _parseImageResult(json))
+            .whereType<ImageSearchResult>()
+            .toList();
+        
+        return Success(results);
       } else {
-        throw Exception('Görsel arama başarısız: ${response.statusCode}');
+        return Failure('HTTP Hatası: ${response.statusCode}');
       }
+    } on DioException catch (e) {
+      return Failure('Ağ Hatası: ${e.message}');
     } catch (e) {
-      throw Exception('Görsel arama hatası: $e');
+      return Failure('Beklenmeyen Hata: $e');
     }
   }
-
   ImageSearchResult _parseImageResult(Map<String, dynamic> json) {
     return ImageSearchResult(
       title: json['title'] ?? '',

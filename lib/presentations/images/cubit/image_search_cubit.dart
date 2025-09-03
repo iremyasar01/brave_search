@@ -1,3 +1,4 @@
+import 'package:brave_search/domain/entities/image_search_result.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
@@ -7,6 +8,7 @@ import 'image_search_state.dart';
 @injectable
 class ImageSearchCubit extends Cubit<ImageSearchState> {
   final ImageSearchUseCase imageSearchUseCase;
+  List<ImageSearchResult> _allResults = []; // Tüm sonuçları saklayacağız
 
   ImageSearchCubit(this.imageSearchUseCase) : super(const ImageSearchState());
 
@@ -25,66 +27,83 @@ class ImageSearchCubit extends Cubit<ImageSearchState> {
       query: query,
       currentPage: 1,
       hasReachedMax: false,
+      results: [],
     ));
 
-    try {
-      final results = await imageSearchUseCase.execute(
-        query,
-        country: country,
-        safesearch: safesearch,
-      );
-      
-      if (results.isEmpty) {
+    final result = await imageSearchUseCase.execute(
+      query,
+      country: country,
+      safesearch: safesearch,
+    );
+
+    result.map(
+      success: (data) {
+        _allResults = data; // Tüm sonuçları sakla
+
+        if (data.isEmpty) {
+          emit(state.copyWith(
+            status: ImageSearchStatus.empty,
+            results: [],
+            totalPages: 1,
+          ));
+        } else {
+          const itemsPerPage = 10;
+          final totalPages = (data.length / itemsPerPage).ceil(); // Toplam sayfa sayısı
+
+          // İlk sayfayı göster (ilk 10 sonuç)
+          final firstPageResults = _getPageResults(1, itemsPerPage);
+          emit(state.copyWith(
+            status: ImageSearchStatus.success,
+            results: firstPageResults,
+            currentPage: 1,
+            hasReachedMax: firstPageResults.length < itemsPerPage,
+            totalPages: totalPages,
+          ));
+        }
+      },
+      failure: (error) {
         emit(state.copyWith(
-          status: ImageSearchStatus.empty,
-          results: [],
+          status: ImageSearchStatus.failure,
+          errorMessage: error,
         ));
-      } else {
-        emit(state.copyWith(
-          status: ImageSearchStatus.success,
-          results: results,
-          hasReachedMax: results.length < 20,
-        ));
-      }
-    } catch (e) {
-      emit(state.copyWith(
-        status: ImageSearchStatus.failure,
-        errorMessage: e.toString(),
-      ));
-    }
+      },
+    );
   }
 
-  Future<void> loadMore({
-    String? country,
-    String safesearch = 'strict',
-  }) async {
-    if (state.hasReachedMax || state.status == ImageSearchStatus.loading) return;
+  Future<void> loadPage(int page) async {
+    if (state.status == ImageSearchStatus.loading) return;
 
-    try {
-      final results = await imageSearchUseCase.execute(
-        state.query,
-        page: state.currentPage + 1,
-        country: country,
-        safesearch: safesearch,
-      );
+    const itemsPerPage = 10;
+    
+    // Yerelde sakladığımız tüm sonuçlardan ilgili sayfayı al
+    final pageResults = _getPageResults(page, itemsPerPage);
 
-      final hasReachedMax = results.length < 20;
-      
-      emit(state.copyWith(
-        status: ImageSearchStatus.success,
-        results: List.of(state.results)..addAll(results),
-        currentPage: state.currentPage + 1,
-        hasReachedMax: hasReachedMax,
-      ));
-    } catch (e) {
-      emit(state.copyWith(
-        status: ImageSearchStatus.failure,
-        errorMessage: e.toString(),
-      ));
+    emit(state.copyWith(
+      status: ImageSearchStatus.success,
+      results: pageResults,
+      currentPage: page,
+      hasReachedMax: pageResults.length < itemsPerPage,
+      // totalPages değişmediği için aynı kalacak
+    ));
+  }
+
+  // Sayfa numarasına göre sonuçları döndürür
+  List<ImageSearchResult> _getPageResults(int page, int itemsPerPage) {
+    final startIndex = (page - 1) * itemsPerPage;
+    final endIndex = startIndex + itemsPerPage;
+
+    if (startIndex >= _allResults.length) {
+      return [];
     }
+
+    return _allResults.sublist(
+      startIndex,
+      endIndex.clamp(0, _allResults.length),
+    );
   }
 
   void clearResults() {
+    _allResults = [];
     emit(const ImageSearchState());
   }
 }

@@ -1,10 +1,11 @@
-import '../../../domain/entities/web_search_result.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/utils/result.dart';
+import '../../../../domain/entities/web_search_result.dart';
 
 abstract class WebSearchRemoteDataSource {
-  Future<List<WebSearchResult>> searchWeb(
+  Future<Result<List<WebSearchResult>>> searchWeb(
     String query, {
     int count = 20,
     int offset = 0,
@@ -20,7 +21,7 @@ class WebSearchRemoteDataSourceImpl implements WebSearchRemoteDataSource {
   WebSearchRemoteDataSourceImpl(this.dio);
 
   @override
-  Future<List<WebSearchResult>> searchWeb(
+  Future<Result<List<WebSearchResult>>> searchWeb(
     String query, {
     int count = 20,
     int offset = 0,
@@ -28,8 +29,21 @@ class WebSearchRemoteDataSourceImpl implements WebSearchRemoteDataSource {
     String safesearch = 'strict',
   }) async {
     try {
+      // Input validation
+      if (query.trim().isEmpty) {
+        return  Result.failure('Arama sorgusu boş olamaz');
+      }
+      
+      if (count <= 0 || count > 20) {
+        return  Result.failure('Sayı değeri 1-20 arasında olmalıdır');
+      }
+
+      if (offset < 0 || offset > 9) {
+        return  Result.failure('Offset değeri 0-9 arasında olmalıdır');
+      }
+
       final queryParameters = <String, dynamic>{
-        'q': query,
+        'q': query.trim(),
         'count': count,
         'offset': offset,
         'safesearch': safesearch,
@@ -46,25 +60,46 @@ class WebSearchRemoteDataSourceImpl implements WebSearchRemoteDataSource {
 
       if (response.statusCode == 200) {
         final data = response.data;
+        
+        if (data == null) {
+          return  Result.failure('Sunucudan boş yanıt alındı');
+        }
+        
         final webResults = data['web']?['results'] as List<dynamic>? ?? [];
-        return webResults.map((json) => _parseWebSearchResult(json)).toList();
+        
+        if (webResults.isEmpty) {
+          return  Result.success([]);
+        }
+        
+        try {
+          final parsedResults = webResults
+              .map((json) => _parseWebSearchResult(json))
+              .whereType<WebSearchResult>()
+              .toList();
+              
+          return Result.success(parsedResults);
+        } catch (e) {
+          return Result.failure('Veri ayrıştırma hatası: ${e.toString()}');
+        }
       } else {
-        throw Exception('Web arama başarısız: ${response.statusCode}');
+        return Result.failure(_getErrorMessageByStatusCode(response.statusCode));
       }
+    } on DioException catch (dioError) {
+      return Result.failure(_handleDioError(dioError));
     } catch (e) {
-      throw Exception('Web arama hatası: $e');
+      return Result.failure('Beklenmeyen hata: ${e.toString()}');
     }
   }
 
   WebSearchResult _parseWebSearchResult(Map<String, dynamic> json) {
     return WebSearchResult(
-      title: json['title'] ?? '',
-      url: json['url'] ?? '',
-      description: json['description'] ?? '',
-      favicon: json['meta_url']?['favicon'],
-      language: json['language'],
+      title: json['title']?.toString() ?? '',
+      url: json['url']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      favicon: json['meta_url']?['favicon']?.toString(),
+      language: json['language']?.toString(),
       familyFriendly: json['family_friendly'] ?? true,
-      pageAge: json['age'],
+      pageAge: json['age']?.toString(),
       profile: _parseProfile(json['profile']),
       metaUrl: _parseMetaUrl(json['meta_url']),
       thumbnail: _parseThumbnail(json['thumbnail']),
@@ -76,10 +111,10 @@ class WebSearchRemoteDataSourceImpl implements WebSearchRemoteDataSource {
     if (json == null) return null;
     
     return WebProfile(
-      name: json['name'] ?? '',
-      url: json['url'] ?? '',
-      longName: json['long_name'] ?? '',
-      img: json['img'],
+      name: json['name']?.toString() ?? '',
+      url: json['url']?.toString() ?? '',
+      longName: json['long_name']?.toString() ?? '',
+      img: json['img']?.toString(),
     );
   }
 
@@ -87,11 +122,11 @@ class WebSearchRemoteDataSourceImpl implements WebSearchRemoteDataSource {
     if (json == null) return null;
     
     return WebMetaUrl(
-      scheme: json['scheme'] ?? '',
-      netloc: json['netloc'] ?? '',
-      hostname: json['hostname'] ?? '',
-      favicon: json['favicon'] ?? '',
-      path: json['path'] ?? '',
+      scheme: json['scheme']?.toString() ?? '',
+      netloc: json['netloc']?.toString() ?? '',
+      hostname: json['hostname']?.toString() ?? '',
+      favicon: json['favicon']?.toString() ?? '',
+      path: json['path']?.toString() ?? '',
     );
   }
 
@@ -99,8 +134,8 @@ class WebSearchRemoteDataSourceImpl implements WebSearchRemoteDataSource {
     if (json == null) return null;
     
     return WebThumbnail(
-      src: json['src'] ?? '',
-      original: json['original'] ?? '',
+      src: json['src']?.toString() ?? '',
+      original: json['original']?.toString() ?? '',
       logo: json['logo'],
     );
   }
@@ -109,10 +144,53 @@ class WebSearchRemoteDataSourceImpl implements WebSearchRemoteDataSource {
     if (jsonList == null) return null;
     
     return jsonList.map((json) => WebCluster(
-      title: json['title'] ?? '',
-      url: json['url'] ?? '',
-      description: json['description'] ?? '',
+      title: json['title']?.toString() ?? '',
+      url: json['url']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
       familyFriendly: json['family_friendly'] ?? true,
     )).toList();
+  }
+
+  String _getErrorMessageByStatusCode(int? statusCode) {
+    switch (statusCode) {
+      case 400:
+        return 'Geçersiz istek parametreleri';
+      case 401:
+        return 'Yetkilendirme hatası';
+      case 403:
+        return 'Erişim reddedildi';
+      case 404:
+        return 'Servis bulunamadı';
+      case 429:
+        return 'Çok fazla istek gönderildi, lütfen bekleyin';
+      case 500:
+        return 'Sunucu hatası';
+      case 502:
+        return 'Ağ geçidi hatası';
+      case 503:
+        return 'Servis geçici olarak kullanılamıyor';
+      default:
+        return 'HTTP hatası: $statusCode';
+    }
+  }
+
+  String _handleDioError(DioException dioError) {
+    switch (dioError.type) {
+      case DioExceptionType.connectionTimeout:
+        return 'Bağlantı zaman aşımına uğradı';
+      case DioExceptionType.sendTimeout:
+        return 'Veri gönderimi zaman aşımına uğradı';
+      case DioExceptionType.receiveTimeout:
+        return 'Veri alımı zaman aşımına uğradı';
+      case DioExceptionType.badCertificate:
+        return 'Güvenlik sertifikası hatası';
+      case DioExceptionType.cancel:
+        return 'İstek iptal edildi';
+      case DioExceptionType.connectionError:
+        return 'İnternet bağlantısı bulunamadı';
+      case DioExceptionType.unknown:
+      default:
+        return 'Ağ hatası: ${dioError.message}';
+    }
   }
 }

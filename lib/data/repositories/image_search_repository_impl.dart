@@ -1,3 +1,4 @@
+import 'package:brave_search/core/utils/result.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/image_search_result.dart';
@@ -11,17 +12,15 @@ class ImageSearchRepositoryImpl implements ImageSearchRepository {
   ImageSearchRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<List<ImageSearchResult>> searchImages(
+  Future<Result<List<ImageSearchResult>>> searchImages(
     String query, {
-    int count = 20,
-    int offset = 0,
+    int count = 50, // Sadece count parametresi
     String? country,
     String safesearch = 'strict',
-  }) {
-    return remoteDataSource.searchImages(
+  }) async {
+    return await remoteDataSource.searchImages(
       query,
       count: count,
-      offset: offset,
       country: country,
       safesearch: safesearch,
     );

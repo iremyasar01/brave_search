@@ -17,6 +17,7 @@ class ImageSearchState extends Equatable {
   final String? errorMessage;
   final bool hasReachedMax;
   final int currentPage;
+  final int totalPages; // Toplam sayfa sayısı
 
   const ImageSearchState({
     this.status = ImageSearchStatus.initial,
@@ -25,6 +26,7 @@ class ImageSearchState extends Equatable {
     this.errorMessage,
     this.hasReachedMax = false,
     this.currentPage = 1,
+    this.totalPages = 1,
   });
 
   ImageSearchState copyWith({
@@ -34,6 +36,7 @@ class ImageSearchState extends Equatable {
     String? errorMessage,
     bool? hasReachedMax,
     int? currentPage,
+    int? totalPages,
   }) {
     return ImageSearchState(
       status: status ?? this.status,
@@ -42,6 +45,7 @@ class ImageSearchState extends Equatable {
       errorMessage: errorMessage ?? this.errorMessage,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       currentPage: currentPage ?? this.currentPage,
+      totalPages: totalPages ?? this.totalPages,
     );
   }
 
@@ -53,5 +57,6 @@ class ImageSearchState extends Equatable {
         errorMessage,
         hasReachedMax,
         currentPage,
+        totalPages,
       ];
 }

@@ -1,27 +1,23 @@
+import 'package:brave_search/core/utils/result.dart';
+import 'package:brave_search/domain/entities/image_search_result.dart';
+import 'package:brave_search/domain/repositories/image_search_repository.dart';
 import 'package:injectable/injectable.dart';
-
-import '../entities/image_search_result.dart';
-import '../repositories/image_search_repository.dart';
-
 @injectable
 class ImageSearchUseCase {
   final ImageSearchRepository repository;
 
   ImageSearchUseCase(this.repository);
 
-  Future<List<ImageSearchResult>> execute(
+  Future<Result<List<ImageSearchResult>>> execute(
     String query, {
-    int page = 1,
-    int count = 20,
+    int count = 50, // Maksimum 50 çekiyoruz
     String? country,
     String safesearch = 'strict',
   }) async {
-    final offset = (page - 1) * count;
-    
-    return repository.searchImages(
+    // Offset kullanmadan, direkt count ile istek yapıyoruz
+    return await repository.searchImages(
       query,
-      count: count,
-      offset: offset,
+      count: count, // API'nin izin verdiği maksimum değer (50)
       country: country,
       safesearch: safesearch,
     );

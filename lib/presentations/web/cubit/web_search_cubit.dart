@@ -1,90 +1,110 @@
+import 'package:brave_search/domain/usecases/web_search_use_case.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
-
-import '../../../domain/usecases/web_search_use_case.dart';
 import 'web_search_state.dart';
 
-@injectable
 class WebSearchCubit extends Cubit<WebSearchState> {
   final WebSearchUseCase webSearchUseCase;
+  static const int maxPages = 10; // API offset 0-9 sınırı nedeniyle maksimum 10 sayfa
 
   WebSearchCubit(this.webSearchUseCase) : super(const WebSearchState());
 
-  Future<void> searchWeb(
-    String query, {
-    String? country,
-    String safesearch = 'strict',
-  }) async {
-    if (query.trim().isEmpty) {
-      emit(state.copyWith(status: WebSearchStatus.empty));
+  Future<void> searchWeb(String query, {int page = 1}) async {
+    if (query.trim().isEmpty) return;
+
+    // Sayfa sınırını kontrol et
+    if (page < 1 || page > maxPages) {
+      print('Sayfa sınırı aşıldı: $page (Max: $maxPages)');
       return;
     }
 
-    emit(state.copyWith(
-      status: WebSearchStatus.loading,
-      query: query,
-      currentPage: 1,
-      hasReachedMax: false,
-    ));
-
-    try {
-      final results = await webSearchUseCase.execute(
-        query,
-        country: country,
-        safesearch: safesearch,
-      );
-      
-      if (results.isEmpty) {
-        emit(state.copyWith(
-          status: WebSearchStatus.empty,
-          results: [],
-        ));
-      } else {
-        emit(state.copyWith(
-          status: WebSearchStatus.success,
-          results: results,
-          hasReachedMax: results.length < 20,
-        ));
-      }
-    } catch (e) {
+    // İlk sayfa için loading state
+    if (page == 1) {
       emit(state.copyWith(
-        status: WebSearchStatus.failure,
-        errorMessage: e.toString(),
+        status: WebSearchStatus.loading,
+        query: query,
+        currentPage: page,
+        hasReachedMax: false, // Reset et
+      ));
+    } else {
+      // Diğer sayfalar için mevcut durumu koru ama loading göster
+      emit(state.copyWith(
+        status: WebSearchStatus.loading,
+        currentPage: page,
       ));
     }
+
+    final result = await webSearchUseCase.execute(
+      query,
+      page: page,
+      count: 20, // API'den 20 sonuç iste
+    );
+
+    result.map(
+      success: (results) {
+        print('API Response: ${results.length} results for page $page');
+        
+        if (results.isEmpty && page == 1) {
+          emit(state.copyWith(
+            status: WebSearchStatus.empty,
+            results: [],
+            hasReachedMax: true,
+            currentPage: page,
+          ));
+        } else {
+          // hasReachedMax kontrolü:
+          // 1. Sayfa 10'a ulaştıysa (API sınırı)
+          // 2. Veya sonuç boşsa
+          // 3. Veya beklenen sonuç sayısından çok azsa
+          final hasReachedMax = page >= maxPages || 
+                                results.isEmpty || 
+                                results.length < 10; // Eğer 10'dan az sonuç varsa büyük ihtimalle son sayfa
+          
+          print('Page: $page, Results: ${results.length}, HasReachedMax: $hasReachedMax');
+          
+          emit(state.copyWith(
+            status: WebSearchStatus.success,
+            results: results,
+            currentPage: page,
+            hasReachedMax: hasReachedMax,
+            query: query,
+          ));
+        }
+      },
+      failure: (error) {
+        print('Search error: $error');
+        emit(state.copyWith(
+          status: WebSearchStatus.failure,
+          errorMessage: error,
+          currentPage: page,
+        ));
+      },
+    );
   }
 
-  Future<void> loadMore({
-    String? country,
-    String safesearch = 'strict',
-  }) async {
-    if (state.hasReachedMax || state.status == WebSearchStatus.loading) return;
-
-    try {
-      final results = await webSearchUseCase.execute(
-        state.query,
-        page: state.currentPage + 1,
-        country: country,
-        safesearch: safesearch,
-      );
-
-      final hasReachedMax = results.length < 20;
-      
-      emit(state.copyWith(
-        status: WebSearchStatus.success,
-        results: List.of(state.results)..addAll(results),
-        currentPage: state.currentPage + 1,
-        hasReachedMax: hasReachedMax,
-      ));
-    } catch (e) {
-      emit(state.copyWith(
-        status: WebSearchStatus.failure,
-        errorMessage: e.toString(),
-      ));
+  Future<void> loadPage(int page) async {
+    if (state.query.isNotEmpty && page >= 1 && page <= maxPages) {
+      print('Loading page: $page');
+      await searchWeb(state.query, page: page);
+    } else {
+      print('Invalid page request: $page (Query: "${state.query}")');
     }
   }
 
   void clearResults() {
     emit(const WebSearchState());
+  }
+
+  // Önceki sayfa
+  Future<void> previousPage() async {
+    if (state.currentPage > 1) {
+      await loadPage(state.currentPage - 1);
+    }
+  }
+
+  // Sonraki sayfa
+  Future<void> nextPage() async {
+    if (state.currentPage < maxPages && !state.hasReachedMax) {
+      await loadPage(state.currentPage + 1);
+    }
   }
 }

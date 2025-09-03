@@ -3,7 +3,7 @@ import 'package:lottie/lottie.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:brave_search/core/network/cubit/network_cubit.dart';
 import 'package:brave_search/presentations/browser/views/search_browser_screen.dart';
-import 'package:brave_search/core/theme/theme_extensions.dart'; // Theme extension'ını import edin
+import 'package:brave_search/core/theme/theme_extensions.dart'; 
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

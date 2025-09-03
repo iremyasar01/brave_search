@@ -1,10 +1,11 @@
 import '../entities/image_search_result.dart';
 
+import '../../core/utils/result.dart';
+
 abstract class ImageSearchRepository {
-  Future<List<ImageSearchResult>> searchImages(
+  Future<Result<List<ImageSearchResult>>> searchImages(
     String query, {
-    int count = 20,
-    int offset = 0,
+    int count = 50, // Sadece count parametresi
     String? country,
     String safesearch = 'strict',
   });
