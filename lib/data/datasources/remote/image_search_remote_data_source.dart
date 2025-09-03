@@ -1,3 +1,4 @@
+import 'package:brave_search/core/errors/api_error_handler.dart';
 import 'package:brave_search/core/utils/result.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
@@ -7,7 +8,7 @@ import '../../../domain/entities/image_search_result.dart';
 abstract class ImageSearchRemoteDataSource {
   Future<Result<List<ImageSearchResult>>> searchImages(
     String query, {
-    int count = 50, // Sadece count parametresi
+    int count = 50,
     String? country,
     String safesearch = 'strict',
   });
@@ -18,16 +19,26 @@ class ImageSearchRemoteDataSourceImpl implements ImageSearchRemoteDataSource {
   final Dio dio;
 
   ImageSearchRemoteDataSourceImpl(this.dio);
+
   @override
   Future<Result<List<ImageSearchResult>>> searchImages(
     String query, {
-    int count = 50, // Sadece count parametresi
+    int count = 50,
     String? country,
     String safesearch = 'strict',
   }) async {
     try {
+      // Input validation
+      if (query.trim().isEmpty) {
+        return Result.failure('Arama sorgusu boş olamaz');
+      }
+      
+      if (count <= 0 || count > 50) {
+        return Result.failure('Sayı değeri 1-50 arasında olmalıdır');
+      }
+
       final queryParameters = <String, dynamic>{
-        'q': query,
+        'q': query.trim(),
         'count': count,
         'safesearch': safesearch,
       };
@@ -43,32 +54,56 @@ class ImageSearchRemoteDataSourceImpl implements ImageSearchRemoteDataSource {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        final imageResults = data['results'] as List<dynamic>? ?? [];
-        final results = imageResults
-            .map((json) => _parseImageResult(json))
-            .whereType<ImageSearchResult>()
-            .toList();
         
-        return Success(results);
+        if (data == null) {
+          return Result.failure('Sunucudan boş yanıt alındı');
+        }
+        
+        final imageResults = data['results'] as List<dynamic>? ?? [];
+        
+        if (imageResults.isEmpty) {
+          return Result.success([]);
+        }
+        
+        try {
+          final results = imageResults
+              .map((json) => _parseImageResult(json))
+              .whereType<ImageSearchResult>()
+              .toList();
+          
+          return Result.success(results);
+        } catch (e) {
+          return Result.failure('Veri ayrıştırma hatası: ${e.toString()}');
+        }
       } else {
-        return Failure('HTTP Hatası: ${response.statusCode}');
+        // Merkezi hata yönetimi sınıfını kullan
+        return Result.failure(
+          ApiErrorHandler.getErrorMessageByStatusCode(response.statusCode)
+        );
       }
-    } on DioException catch (e) {
-      return Failure('Ağ Hatası: ${e.message}');
+    } on DioException catch (dioError) {
+      // Merkezi hata yönetimi sınıfını kullan
+      return Result.failure(
+        ApiErrorHandler.handleDioError(dioError)
+      );
     } catch (e) {
-      return Failure('Beklenmeyen Hata: $e');
+      // Merkezi hata yönetimi sınıfını kullan
+      return Result.failure(
+        ApiErrorHandler.getGenericErrorMessage()
+      );
     }
   }
+
   ImageSearchResult _parseImageResult(Map<String, dynamic> json) {
     return ImageSearchResult(
-      title: json['title'] ?? '',
-      url: json['url'] ?? '',
-      source: json['source'] ?? '',
-      imageUrl: json['properties']?['url'] ?? '',
-      thumbnailUrl: json['thumbnail']?['src'] ?? '',
-      width: json['properties']?['width'] ?? 0,
-      height: json['properties']?['height'] ?? 0,
-      pageFetched: json['page_fetched'],
+      title: json['title']?.toString() ?? '',
+      url: json['url']?.toString() ?? '',
+      source: json['source']?.toString() ?? '',
+      imageUrl: json['properties']?['url']?.toString() ?? '',
+      thumbnailUrl: json['thumbnail']?['src']?.toString() ?? '',
+      width: (json['properties']?['width'] as int?) ?? 0,
+      height: (json['properties']?['height'] as int?) ?? 0,
+      pageFetched: json['page_fetched']?.toString(),
       metaUrl: _parseMetaUrl(json['meta_url']),
     );
   }
@@ -77,11 +112,11 @@ class ImageSearchRemoteDataSourceImpl implements ImageSearchRemoteDataSource {
     if (json == null) return null;
     
     return MetaUrl(
-      scheme: json['scheme'] ?? '',
-      netloc: json['netloc'] ?? '',
-      hostname: json['hostname'] ?? '',
-      favicon: json['favicon'] ?? '',
-      path: json['path'] ?? '',
+      scheme: json['scheme']?.toString() ?? '',
+      netloc: json['netloc']?.toString() ?? '',
+      hostname: json['hostname']?.toString() ?? '',
+      favicon: json['favicon']?.toString() ?? '',
+      path: json['path']?.toString() ?? '',
     );
   }
 }

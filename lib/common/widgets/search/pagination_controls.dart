@@ -18,11 +18,9 @@ class GenericPaginationControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final totalPages = hasReachedMax ? currentPage : maxPages;
     
-    // Gösterilecek sayfa aralığını hesapla
     int startPage = (currentPage - 2).clamp(1, totalPages);
     int endPage = (currentPage + 2).clamp(1, totalPages);
 
-    // Eğer son sayfaya ulaşıldıysa, endPage'i güncelle
     if (hasReachedMax && currentPage < maxPages) {
       endPage = currentPage;
     }
@@ -34,7 +32,7 @@ class GenericPaginationControls extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Theme.of(context).shadowColor.withOpacity(0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -46,10 +44,10 @@ class GenericPaginationControls extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // İlk sayfa butonu
             if (currentPage > 1) ...[
               IconButton(
                 icon: const Icon(Icons.first_page),
+                color: Theme.of(context).iconTheme.color,
                 onPressed: () => onPageChanged(1),
                 tooltip: 'İlk sayfa',
                 iconSize: 20,
@@ -57,9 +55,9 @@ class GenericPaginationControls extends StatelessWidget {
               const SizedBox(width: 4),
             ],
 
-            // Önceki sayfa butonu
             IconButton(
               icon: const Icon(Icons.arrow_back_ios),
+              color: Theme.of(context).iconTheme.color,
               onPressed: currentPage > 1
                   ? () => onPageChanged(currentPage - 1)
                   : null,
@@ -69,7 +67,6 @@ class GenericPaginationControls extends StatelessWidget {
 
             const SizedBox(width: 8),
 
-            // Sayfa numaraları
             ...List.generate(
               endPage - startPage + 1,
               (index) {
@@ -82,27 +79,21 @@ class GenericPaginationControls extends StatelessWidget {
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: isDisabled
-                          ? null
-                          : () => onPageChanged(pageNumber),
+                      onTap: isDisabled ? null : () => onPageChanged(pageNumber),
                       borderRadius: BorderRadius.circular(6),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: isCurrentPage
                               ? Theme.of(context).primaryColor
                               : isDisabled
-                                  ? Colors.grey.withOpacity(0.3)
+                                  ? Theme.of(context).disabledColor.withOpacity(0.3)
                                   : Colors.transparent,
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
                             color: isCurrentPage
                                 ? Theme.of(context).primaryColor
                                 : Theme.of(context).dividerColor,
-                            width: 1,
                           ),
                         ),
                         child: Text(
@@ -111,11 +102,9 @@ class GenericPaginationControls extends StatelessWidget {
                             color: isCurrentPage
                                 ? Colors.white
                                 : isDisabled
-                                    ? Colors.grey
+                                    ? Theme.of(context).disabledColor
                                     : Theme.of(context).textTheme.bodyMedium?.color,
-                            fontWeight: isCurrentPage
-                                ? FontWeight.bold
-                                : FontWeight.normal,
+                            fontWeight: isCurrentPage ? FontWeight.bold : FontWeight.normal,
                             fontSize: 12,
                           ),
                         ),
@@ -128,9 +117,9 @@ class GenericPaginationControls extends StatelessWidget {
 
             const SizedBox(width: 8),
 
-            // Sonraki sayfa butonu
             IconButton(
               icon: const Icon(Icons.arrow_forward_ios),
+              color: Theme.of(context).iconTheme.color,
               onPressed: (currentPage < totalPages && !hasReachedMax)
                   ? () => onPageChanged(currentPage + 1)
                   : null,
@@ -140,18 +129,18 @@ class GenericPaginationControls extends StatelessWidget {
 
             const SizedBox(width: 4),
 
-            // Son sayfa butonu (sadece mevcut sayfa son sayfa değilse)
             if (currentPage < totalPages && !hasReachedMax) ...[
               IconButton(
                 icon: const Icon(Icons.last_page),
+                color: Theme.of(context).iconTheme.color,
                 onPressed: () => onPageChanged(totalPages),
                 tooltip: 'Son sayfa',
                 iconSize: 20,
               ),
             ],
 
-            // Sayfa bilgisi
             const SizedBox(width: 12),
+
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(

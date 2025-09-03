@@ -14,18 +14,17 @@ class ImagesResultsView extends StatelessWidget {
   const ImagesResultsView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+   Widget build(BuildContext context) {
     return BlocBuilder<ImageSearchCubit, ImageSearchState>(
       builder: (context, state) {
         return Column(
           children: [
-            // Sayfa navigasyonu
-            if (state.status == ImageSearchStatus.success)
-              ImageSearchPaginationControls(state: state),
-
             Expanded(
               child: _buildContent(context, state),
             ),
+            // Sayfa navigasyonu - en alta taşındı
+            if (state.status == ImageSearchStatus.success)
+              ImageSearchPaginationControls(state: state),
           ],
         );
       },
