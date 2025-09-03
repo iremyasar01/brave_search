@@ -1,3 +1,4 @@
+/*
 import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/common/widgets/error/search_error_widget.dart';
 import 'package:flutter/material.dart';
@@ -23,3 +24,4 @@ class WebSearchErrorWidget extends StatelessWidget {
     );
   }
 }
+*/

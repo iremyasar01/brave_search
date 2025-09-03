@@ -1,3 +1,4 @@
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/common/widgets/initial/search_initial_state.dart';
 import 'package:brave_search/common/widgets/search/pagination_controls.dart';
 import 'package:brave_search/common/widgets/search/search_error_widget.dart';
@@ -39,12 +40,12 @@ class VideosResultsView extends StatelessWidget {
   Widget _buildContent(BuildContext context, VideoSearchState state) {
     switch (state.status) {
       case VideoSearchStatus.initial:
-        return const SearchInitialWidget(message: 'Video aramak için üstteki çubuğu kullanın');
+        return const SearchInitialWidget(message: VideoSearchStrings.videoInitialMessage);
       case VideoSearchStatus.loading:
         return const AppLoadingIndicator();
       case VideoSearchStatus.empty:
         return const AppEmptyState(
-          message: 'Video bulunamadı', 
+          message: VideoSearchStrings.videoEmptyMessage, 
           icon: Icons.video_library_outlined,
         );
       case VideoSearchStatus.failure:
@@ -55,7 +56,7 @@ class VideosResultsView extends StatelessWidget {
       case VideoSearchStatus.success:
         return state.results.isEmpty
             ? const AppEmptyState(
-                message: 'Video bulunamadı', 
+                message: VideoSearchStrings.videoNoResultsMessage, 
                 icon: Icons.video_library_outlined,
               )
             : GenericSearchResultsList(

@@ -1,8 +1,6 @@
 import 'package:brave_search/domain/entities/news_search_result.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-
-
 import '../../../domain/usecases/news_search_use_case.dart';
 import 'news_search_state.dart';
 
@@ -10,6 +8,7 @@ import 'news_search_state.dart';
 class NewsSearchCubit extends Cubit<NewsSearchState> {
   final NewsSearchUseCase newsSearchUseCase;
   final Map<int, List<NewsSearchResult>> _pageCache = {};
+  static const int maxPages = 10; // Maksimum 10 sayfa (offset 0-9)
 
   NewsSearchCubit(this.newsSearchUseCase) : super(const NewsSearchState());
 
@@ -40,6 +39,11 @@ class NewsSearchCubit extends Cubit<NewsSearchState> {
   }
 
   Future<void> loadPage(int page) async {
+    // Sayfa sınırını kontrol et (1-10 arası)
+    if (page < 1 || page > maxPages) {
+      return;
+    }
+    
     if (state.status == NewsSearchStatus.loading) return;
     
     // Eğer bu sayfa önceden yüklenmişse, cache'ten göster
@@ -70,11 +74,19 @@ class NewsSearchCubit extends Cubit<NewsSearchState> {
         // Sonuçları cache'e kaydet
         _pageCache[page] = data;
         
+        // hasReachedMax kontrolü:
+        // 1. Sayfa 10'a ulaştıysa (API sınırı)
+        // 2. Veya sonuç boşsa
+        // 3. Veya beklenen sonuç sayısından azsa
+        final hasReachedMax = page >= maxPages ||
+            data.isEmpty ||
+            data.length < 20;
+
         emit(state.copyWith(
           status: NewsSearchStatus.success,
           results: data,
           currentPage: page,
-          hasReachedMax: data.isEmpty || data.length < 20,
+          hasReachedMax: hasReachedMax,
         ));
       },
       failure: (error) {
