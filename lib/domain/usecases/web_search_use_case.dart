@@ -21,16 +21,14 @@ class WebSearchUseCase {
     if (page < 1 || page > 10) {
       return Result.failure('Sayfa numarası 1-10 arasında olmalıdır');
     }
-    
+
     // Offset hesapla (sayfa - 1)
     // Sayfa 1 -> offset 0
     // Sayfa 2 -> offset 1
     // ...
     // Sayfa 10 -> offset 9
     final offset = (page - 1).clamp(0, 9);
-    
-    print('UseCase - Page: $page, Offset: $offset, Count: $count');
-    
+
     return await repository.searchWeb(
       query,
       count: count,

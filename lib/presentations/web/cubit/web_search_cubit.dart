@@ -1,10 +1,12 @@
 import 'package:brave_search/domain/usecases/web_search_use_case.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'web_search_state.dart';
 
 class WebSearchCubit extends Cubit<WebSearchState> {
   final WebSearchUseCase webSearchUseCase;
-  static const int maxPages = 10; // API offset 0-9 sınırı nedeniyle maksimum 10 sayfa
+  static const int maxPages = 10;
+  // API offset 0-9 sınırı nedeniyle maksimum 10 sayfa
 
   WebSearchCubit(this.webSearchUseCase) : super(const WebSearchState());
 
@@ -13,7 +15,7 @@ class WebSearchCubit extends Cubit<WebSearchState> {
 
     // Sayfa sınırını kontrol et
     if (page < 1 || page > maxPages) {
-      print('Sayfa sınırı aşıldı: $page (Max: $maxPages)');
+      debugPrint('Sayfa sınırı aşıldı: $page (Max: $maxPages)');
       return;
     }
 
@@ -41,8 +43,6 @@ class WebSearchCubit extends Cubit<WebSearchState> {
 
     result.map(
       success: (results) {
-        print('API Response: ${results.length} results for page $page');
-        
         if (results.isEmpty && page == 1) {
           emit(state.copyWith(
             status: WebSearchStatus.empty,
@@ -55,12 +55,11 @@ class WebSearchCubit extends Cubit<WebSearchState> {
           // 1. Sayfa 10'a ulaştıysa (API sınırı)
           // 2. Veya sonuç boşsa
           // 3. Veya beklenen sonuç sayısından çok azsa
-          final hasReachedMax = page >= maxPages || 
-                                results.isEmpty || 
-                                results.length < 10; // Eğer 10'dan az sonuç varsa büyük ihtimalle son sayfa
-          
-          print('Page: $page, Results: ${results.length}, HasReachedMax: $hasReachedMax');
-          
+          final hasReachedMax = page >= maxPages ||
+              results.isEmpty ||
+              results.length <
+                  10; // Eğer 10'dan az sonuç varsa büyük ihtimalle son sayfa
+
           emit(state.copyWith(
             status: WebSearchStatus.success,
             results: results,
@@ -71,7 +70,6 @@ class WebSearchCubit extends Cubit<WebSearchState> {
         }
       },
       failure: (error) {
-        print('Search error: $error');
         emit(state.copyWith(
           status: WebSearchStatus.failure,
           errorMessage: error,
@@ -83,11 +81,8 @@ class WebSearchCubit extends Cubit<WebSearchState> {
 
   Future<void> loadPage(int page) async {
     if (state.query.isNotEmpty && page >= 1 && page <= maxPages) {
-      print('Loading page: $page');
       await searchWeb(state.query, page: page);
-    } else {
-      print('Invalid page request: $page (Query: "${state.query}")');
-    }
+    } else {}
   }
 
   void clearResults() {
