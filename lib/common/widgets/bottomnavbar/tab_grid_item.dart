@@ -1,5 +1,5 @@
-import 'package:brave_search/common/widgets/tab_item_header.dart';
-import 'package:brave_search/common/widgets/tab_preview.dart';
+import 'package:brave_search/common/widgets/bottomnavbar/tab_item_header.dart';
+import 'package:brave_search/common/widgets/bottomnavbar/tab_preview.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_cubit.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_state.dart';

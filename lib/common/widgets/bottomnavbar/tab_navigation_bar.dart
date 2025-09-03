@@ -1,8 +1,8 @@
-import 'package:brave_search/common/widgets/add_tab_button.dart';
-import 'package:brave_search/common/widgets/home_button.dart';
-import 'package:brave_search/common/widgets/menu_button.dart';
-import 'package:brave_search/common/widgets/tab_counter.dart';
-import 'package:brave_search/common/widgets/tabs_overview_modal.dart';
+import 'package:brave_search/common/widgets/bottomnavbar/add_tab_button.dart';
+import 'package:brave_search/common/widgets/bottomnavbar/home_button.dart';
+import 'package:brave_search/common/widgets/bottomnavbar/menu_button.dart';
+import 'package:brave_search/common/widgets/bottomnavbar/tab_counter.dart';
+import 'package:brave_search/common/widgets/bottomnavbar/tabs_overview_modal.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_cubit.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';

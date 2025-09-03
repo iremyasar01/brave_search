@@ -1,6 +1,6 @@
-import 'package:brave_search/common/widgets/network_status_banner.dart';
-import 'package:brave_search/common/widgets/no_internet_screen.dart';
-import 'package:brave_search/common/widgets/tab_navigation_bar.dart';
+import 'package:brave_search/common/widgets/bottomnavbar/tab_navigation_bar.dart';
+import 'package:brave_search/core/internetcontrol/network_status_banner.dart';
+import 'package:brave_search/core/internetcontrol/no_internet_screen.dart';
 import 'package:brave_search/presentations/news/cubit/news_search_cubit.dart';
 import 'package:brave_search/presentations/videos/cubit/video_search_cubit.dart';
 import 'package:brave_search/core/network/cubit/network_cubit.dart';

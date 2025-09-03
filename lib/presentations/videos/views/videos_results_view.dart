@@ -1,3 +1,9 @@
+import 'package:brave_search/common/widgets/initial/search_initial_state.dart';
+import 'package:brave_search/common/widgets/search/pagination_controls.dart';
+import 'package:brave_search/common/widgets/search/search_error_widget.dart';
+import 'package:brave_search/common/widgets/search/search_results_list.dart';
+import 'package:brave_search/core/widgets/empty/empty_state.dart';
+import 'package:brave_search/core/widgets/loading/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/video_search_cubit.dart';
@@ -9,68 +15,53 @@ class VideosResultsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     return BlocBuilder<VideoSearchCubit, VideoSearchState>(
       builder: (context, state) {
-        switch (state.status) {
-          case VideoSearchStatus.initial:
-            return Center(
-              child: Text(
-                'Video aramak için üstteki çubuğu kullanın',
-                style: theme.textTheme.bodyMedium,
+        return Column(
+          children: [
+            Expanded(
+              child: _buildContent(context, state),
+            ),
+            // Sayfa navigasyonu - sadece success durumunda göster
+            if (state.status == VideoSearchStatus.success)
+              GenericPaginationControls(
+                currentPage: state.currentPage,
+                hasReachedMax: state.hasReachedMax,
+                onPageChanged: (page) => context.read<VideoSearchCubit>().loadPage(page),
+                maxPages: 10, // Video arama için maksimum 10 sayfa
               ),
-            );
-          case VideoSearchStatus.loading:
-            return Center(
-              child: CircularProgressIndicator(color: theme.primaryColor),
-            );
-          case VideoSearchStatus.empty:
-            return Center(
-              child: Text(
-                'Video bulunamadı',
-                style: theme.textTheme.bodyMedium,
-              ),
-            );
-          case VideoSearchStatus.failure:
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error, color: theme.colorScheme.error, size: 48),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Bir hata oluştu',
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    state.errorMessage ?? '',
-                    style: theme.textTheme.bodySmall,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            );
-          case VideoSearchStatus.success:
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: state.results.length + (state.hasReachedMax ? 0 : 1),
-              itemBuilder: (context, index) {
-                if (index >= state.results.length) {
-                  return Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Center(
-                      child: CircularProgressIndicator(color: theme.primaryColor),
-                    ),
-                  );
-                }
-                
-                return VideoSearchResultItem(result: state.results[index]);
-              },
-            );
-        }
+          ],
+        );
       },
     );
+  }
+
+  Widget _buildContent(BuildContext context, VideoSearchState state) {
+    switch (state.status) {
+      case VideoSearchStatus.initial:
+        return const SearchInitialWidget(message: 'Video aramak için üstteki çubuğu kullanın');
+      case VideoSearchStatus.loading:
+        return const AppLoadingIndicator();
+      case VideoSearchStatus.empty:
+        return const AppEmptyState(
+          message: 'Video bulunamadı', 
+          icon: Icons.video_library_outlined,
+        );
+      case VideoSearchStatus.failure:
+        return GenericSearchErrorWidget(
+          errorMessage: state.errorMessage,
+          onRetry: () => context.read<VideoSearchCubit>().searchVideos(state.query),
+        );
+      case VideoSearchStatus.success:
+        return state.results.isEmpty
+            ? const AppEmptyState(
+                message: 'Video bulunamadı', 
+                icon: Icons.video_library_outlined,
+              )
+            : GenericSearchResultsList(
+                results: state.results,
+                itemBuilder: (result, index) => VideoSearchResultItem(result: result),
+              );
+    }
   }
 }

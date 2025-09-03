@@ -1,29 +1,30 @@
+import 'package:brave_search/common/constant/app_constant.dart';
+import 'package:brave_search/common/widgets/initial/search_initial_state.dart';
+import 'package:brave_search/core/widgets/empty/empty_state.dart';
+import 'package:brave_search/core/widgets/loading/loading_indicator.dart';
+import 'package:brave_search/presentations/images/widgets/image_search_error_widget.dart';
+import 'package:brave_search/presentations/images/widgets/image_search_pagination_controls.dart';
+import 'package:brave_search/presentations/images/widgets/image_search_results_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import '../../../core/theme/theme_extensions.dart';
 import '../cubit/image_search_cubit.dart';
 import '../cubit/image_search_state.dart';
-import '../widgets/image_search_result_item.dart';
 
 class ImagesResultsView extends StatelessWidget {
   const ImagesResultsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.extension<AppColorsExtension>()!;
-    
     return BlocBuilder<ImageSearchCubit, ImageSearchState>(
       builder: (context, state) {
         return Column(
           children: [
             // Sayfa navigasyonu
             if (state.status == ImageSearchStatus.success)
-              _buildPaginationControls(context, state),
-            
+              ImageSearchPaginationControls(state: state),
+
             Expanded(
-              child: _buildContent(context, state, theme, colors),
+              child: _buildContent(context, state),
             ),
           ],
         );
@@ -31,102 +32,22 @@ class ImagesResultsView extends StatelessWidget {
     );
   }
 
-  Widget _buildPaginationControls(BuildContext context, ImageSearchState state) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: state.currentPage > 1
-                ? () => context.read<ImageSearchCubit>().loadPage(state.currentPage - 1)
-                : null,
-          ),
-          Text(
-            'Sayfa ${state.currentPage} / ${state.totalPages}',
-            style: TextStyle(
-              color: Theme.of(context).textTheme.bodyMedium?.color,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.arrow_forward),
-            onPressed: state.currentPage < state.totalPages
-                ? () => context.read<ImageSearchCubit>().loadPage(state.currentPage + 1)
-                : null,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContent(BuildContext context, ImageSearchState state, ThemeData theme, AppColorsExtension colors) {
+  Widget _buildContent(BuildContext context, ImageSearchState state) {
     switch (state.status) {
       case ImageSearchStatus.initial:
-        return Center(
-          child: Text(
-            'Görsel aramak için üstteki çubuğu kullanın',
-            style: TextStyle(color: theme.textTheme.bodyMedium?.color),
-          ),
-        );
+        return const SearchInitialWidget(message: ImageSearchStrings.imageInitialMessage,);
       case ImageSearchStatus.loading:
-        return Center(
-          child: CircularProgressIndicator(color: theme.primaryColor),
-        );
+        return const AppLoadingIndicator();
       case ImageSearchStatus.empty:
-        return Center(
-          child: Text(
-            'Görsel bulunamadı',
-            style: TextStyle(color: theme.textTheme.bodyMedium?.color),
-          ),
-        );
+        return const AppEmptyState( message: ImageSearchStrings.imageEmptyMessage,
+      icon: Icons.image_not_supported);
       case ImageSearchStatus.failure:
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error, 
-                color: theme.colorScheme.error, 
-                size: 48,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Bir hata oluştu',
-                style: TextStyle(
-                  color: theme.textTheme.bodyMedium?.color, 
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                state.errorMessage ?? '',
-                style: TextStyle(
-                  color: colors.textHint, 
-                  fontSize: 12,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => context.read<ImageSearchCubit>().searchImages(state.query),
-                child: const Text('Tekrar Dene'),
-              ),
-            ],
-          ),
+        return ImageSearchErrorWidget(
+          errorMessage: state.errorMessage,
+          query: state.query,
         );
       case ImageSearchStatus.success:
-        return MasonryGridView.count(
-          padding: const EdgeInsets.all(8),
-          crossAxisCount: 2,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          itemCount: state.results.length,
-          itemBuilder: (context, index) {
-            return ImageSearchResultItem(result: state.results[index]);
-          },
-        );
+        return ImageSearchResultsGrid(results: state.results);
     }
   }
 }

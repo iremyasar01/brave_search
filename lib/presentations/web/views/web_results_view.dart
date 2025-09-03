@@ -1,17 +1,17 @@
+import 'package:brave_search/common/constant/app_constant.dart';
+import 'package:brave_search/common/widgets/initial/search_initial_state.dart';
+import 'package:brave_search/core/widgets/empty/empty_state.dart';
+import 'package:brave_search/core/widgets/loading/loading_indicator.dart';
 import 'package:brave_search/presentations/web/widgets/web_search_pagination_control.dart';
 import 'package:brave_search/presentations/web/widgets/web_search_result_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 import '../cubit/web_search_cubit.dart';
 import '../cubit/web_search_state.dart';
 
-import '../widgets/web_search_initial_widget.dart';
-import '../widgets/web_search_loading_widget.dart';
-import '../widgets/web_search_empty_widget.dart';
-import '../widgets/web_search_error_widget.dart';
 
+import '../widgets/web_search_error_widget.dart';
 
 class WebResultsView extends StatelessWidget {
   const WebResultsView({super.key});
@@ -25,8 +25,8 @@ class WebResultsView extends StatelessWidget {
             Expanded(
               child: _buildContent(context, state),
             ),
-            
-            // Sayfa navigasyonu (en alta taşındı)
+
+            // Sayfa navigasyonu
             if (state.status == WebSearchStatus.success)
               WebSearchPaginationControls(state: state),
           ],
@@ -38,11 +38,12 @@ class WebResultsView extends StatelessWidget {
   Widget _buildContent(BuildContext context, WebSearchState state) {
     switch (state.status) {
       case WebSearchStatus.initial:
-        return const WebSearchInitialWidget();
+        return const SearchInitialWidget(message:WebSearchStrings.webInitialMessage);
       case WebSearchStatus.loading:
-        return const WebSearchLoadingWidget();
+        return const AppLoadingIndicator();
       case WebSearchStatus.empty:
-        return const WebSearchEmptyWidget();
+        return const AppEmptyState(
+            message: WebSearchStrings.webEmptyMessage, icon: Icons.search_off);
       case WebSearchStatus.failure:
         return WebSearchErrorWidget(
           errorMessage: state.errorMessage,
@@ -50,7 +51,8 @@ class WebResultsView extends StatelessWidget {
         );
       case WebSearchStatus.success:
         return state.results.isEmpty
-            ? const WebSearchEmptyWidget()
+            ? const AppEmptyState(
+                message: WebSearchStrings.webEmptyMessage, icon: Icons.search_off)
             : WebSearchResultsList(results: state.results);
     }
   }

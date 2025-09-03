@@ -1,4 +1,4 @@
-import 'package:brave_search/common/widgets/tab_grid_item.dart';
+import 'package:brave_search/common/widgets/bottomnavbar/tab_grid_item.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
 import 'package:flutter/material.dart';

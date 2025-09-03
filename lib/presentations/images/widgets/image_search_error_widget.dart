@@ -1,15 +1,18 @@
 import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/common/widgets/error/search_error_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../cubit/image_search_cubit.dart';
 
-class WebSearchErrorWidget extends StatelessWidget {
+
+class ImageSearchErrorWidget extends StatelessWidget {
   final String? errorMessage;
-  final VoidCallback onRetry;
+  final String query;
 
-  const WebSearchErrorWidget({
+  const ImageSearchErrorWidget({
     super.key,
     required this.errorMessage,
-    required this.onRetry,
+    required this.query,
   });
 
   @override
@@ -18,8 +21,8 @@ class WebSearchErrorWidget extends StatelessWidget {
       errorMessage: errorMessage,
       errorTitle: AppConstant.constErrorMessage,
       buttonText: AppConstant.tryAgain,
-      onRetry: onRetry,
-      icon: Icons.public_off,
+      onRetry: () => context.read<ImageSearchCubit>().searchImages(query),
+      icon: Icons.image_not_supported,
     );
   }
 }

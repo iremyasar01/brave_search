@@ -1,6 +1,6 @@
-import 'package:brave_search/common/widgets/add_tab_button_large.dart';
-import 'package:brave_search/common/widgets/modal_header.dart';
-import 'package:brave_search/common/widgets/tabs_grid.dart';
+import 'package:brave_search/common/widgets/bottomnavbar/add_tab_button_large.dart';
+import 'package:brave_search/common/widgets/bottomnavbar/modal_header.dart';
+import 'package:brave_search/common/widgets/bottomnavbar/tabs_grid.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_cubit.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
 import 'package:flutter/material.dart';
