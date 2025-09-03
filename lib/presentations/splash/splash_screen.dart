@@ -3,6 +3,7 @@ import 'package:lottie/lottie.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:brave_search/core/network/cubit/network_cubit.dart';
 import 'package:brave_search/presentations/browser/views/search_browser_screen.dart';
+import 'package:brave_search/core/theme/theme_extensions.dart'; // Theme extension'ını import edin
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -11,26 +12,27 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    
+
     _controller = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    
+
     _animation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOut,
     );
 
     _controller.forward();
-    
+
     // Uygulama başlangıç işlemleri ve yönlendirme
     _initializeApp();
   }
@@ -38,10 +40,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Future<void> _initializeApp() async {
     // Gerekli başlangıç kontrolleri
     await context.read<NetworkCubit>().checkConnection();
-    
+
     // Animasyon süresini bekleyip ana ekrana geç
     await Future.delayed(const Duration(seconds: 3));
-    
+
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const SearchBrowserScreen()),
@@ -57,15 +59,26 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExtension>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
+    // Tema renklerini kullan, eğer yoksa yedek renkler kullan
+    final backgroundColor = isDark
+        ? colors?.bottomNavBackground ?? const Color(0xFF0A0A0A)
+        : colors?.bottomNavBackground ?? const Color(0xFFF8F9FA);
+
+    final textColor = isDark
+        ? colors?.iconSecondary ?? Colors.white
+        : colors?.textHint ?? Colors.black87;
+
+    //final progressColor = colors?.accent ?? Theme.of(context).colorScheme.primary;
+
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF8F9FA),
+      backgroundColor: backgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Lottie Animasyonu
             Lottie.asset(
               'assets/animations/Web Search..json',
               width: 200,
@@ -77,10 +90,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   ..forward();
               },
             ),
-            
             const SizedBox(height: 24),
-            
-            // Uygulama Adı
             FadeTransition(
               opacity: _animation,
               child: Text(
@@ -88,17 +98,18 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.black87,
+                  color: textColor,
                 ),
               ),
             ),
-            
             const SizedBox(height: 16),
-            
-            // Yükleniyor İndikatörü
-            const CircularProgressIndicator(
+            /*
+            // Yükleniyor İndikatörü 
+            CircularProgressIndicator(
               strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(progressColor),
             ),
+            */
           ],
         ),
       ),

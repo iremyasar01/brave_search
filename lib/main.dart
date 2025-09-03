@@ -9,21 +9,16 @@ import 'core/theme/theme_cubit.dart';
 import 'presentations/browser/cubit/browser_cubit.dart';
 import 'presentations/web/cubit/web_search_cubit.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Uygulama başlangıç yüklemeleri
   await _initializeApp();
   
   runApp(const MyApp());
 }
 
 Future<void> _initializeApp() async {
-  // Environment variables yükle
   await dotenv.load(fileName: ".env");
-  
-  // Dependency injection'ı kur
   configureDependencies();
 }
 
@@ -41,27 +36,17 @@ class MyApp extends StatelessWidget {
       ],
       child: BlocBuilder<ThemeCubit, AppThemeMode>(
         builder: (context, themeMode) {
+          final themeCubit = context.read<ThemeCubit>();
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Brave Search Browser',
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
-            themeMode: _getThemeMode(themeMode),
-            home: const SplashScreen(), // Splash screen'i başlangıç ekranı yap
+            themeMode: themeCubit.themeMode, // ThemeCubit'teki getter'ı çağırıyo.
+            home: const SplashScreen(),
           );
         },
       ),
     );
-  }
-
-  ThemeMode _getThemeMode(AppThemeMode mode) {
-    switch (mode) {
-      case AppThemeMode.light:
-        return ThemeMode.light;
-      case AppThemeMode.dark:
-        return ThemeMode.dark;
-      case AppThemeMode.system:
-        return ThemeMode.system;
-    }
   }
 }
