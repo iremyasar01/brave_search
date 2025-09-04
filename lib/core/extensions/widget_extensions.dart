@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Padding extension methods for Widget
+// Padding extension
 extension PaddingExtension on Widget {
-  /// Adds padding to all sides
+
   Widget allPadding(double value) {
     return Padding(
       padding: EdgeInsets.all(value),
@@ -10,7 +10,7 @@ extension PaddingExtension on Widget {
     );
   }
 
-  /// Adds symmetric padding (vertical and horizontal)
+  //  symmetric padding (vertical ve horizontal için )
   Widget symmetricPadding({
     double vertical = 0,
     double horizontal = 0,
@@ -21,7 +21,7 @@ extension PaddingExtension on Widget {
     );
   }
 
-  /// Adds padding to specific sides only
+  //spesifif kenarları için
   Widget onlyPadding({
     double bottom = 0,
     double left = 0,
@@ -34,7 +34,7 @@ extension PaddingExtension on Widget {
     );
   }
 
-  /// Quick padding shortcuts
+
   Widget paddingTop(double value) => onlyPadding(top: value);
   Widget paddingBottom(double value) => onlyPadding(bottom: value);
   Widget paddingLeft(double value) => onlyPadding(left: value);
@@ -43,9 +43,8 @@ extension PaddingExtension on Widget {
   Widget paddingVertical(double value) => symmetricPadding(vertical: value);
 }
 
-/// Spacing extension methods for Widget
+/// space için
 extension SpacingExtension on Widget {
-  /// Adds SizedBox with height after this widget
   Widget spaceBottom(double height) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -56,7 +55,7 @@ extension SpacingExtension on Widget {
     );
   }
 
-  /// Adds SizedBox with width after this widget
+
   Widget spaceRight(double width) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -67,7 +66,7 @@ extension SpacingExtension on Widget {
     );
   }
 
-  /// Quick spacing shortcuts
+
   Widget space4() => spaceBottom(4);
   Widget space8() => spaceBottom(8);
   Widget space12() => spaceBottom(12);
@@ -76,9 +75,8 @@ extension SpacingExtension on Widget {
   Widget space24() => spaceBottom(24);
 }
 
-/// Margin extension methods for Widget
+/// Margin için
 extension MarginExtension on Widget {
-  /// Adds margin to all sides
   Widget allMargin(double value) {
     return Container(
       margin: EdgeInsets.all(value),
@@ -86,7 +84,7 @@ extension MarginExtension on Widget {
     );
   }
 
-  /// Adds symmetric margin
+  
   Widget symmetricMargin({
     double vertical = 0,
     double horizontal = 0,
@@ -97,7 +95,7 @@ extension MarginExtension on Widget {
     );
   }
 
-  /// Adds margin to specific sides only
+  //spesifik margin
   Widget onlyMargin({
     double bottom = 0,
     double left = 0,
@@ -110,7 +108,7 @@ extension MarginExtension on Widget {
     );
   }
 
-  /// Quick margin shortcuts
+
   Widget marginTop(double value) => onlyMargin(top: value);
   Widget marginBottom(double value) => onlyMargin(bottom: value);
   Widget marginLeft(double value) => onlyMargin(left: value);
@@ -119,9 +117,8 @@ extension MarginExtension on Widget {
   Widget marginVertical(double value) => symmetricMargin(vertical: value);
 }
 
-/// Border radius extension methods for Widget
+// Border radius için
 extension BorderRadiusExtension on Widget {
-  /// Adds border radius to widget (wraps in Container with decoration)
   Widget borderRadius(double radius) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
@@ -129,7 +126,7 @@ extension BorderRadiusExtension on Widget {
     );
   }
 
-  /// Adds custom border radius
+ 
   Widget customBorderRadius(BorderRadius borderRadius) {
     return ClipRRect(
       borderRadius: borderRadius,
@@ -137,7 +134,7 @@ extension BorderRadiusExtension on Widget {
     );
   }
 
-  /// Quick border radius shortcuts
+
   Widget rounded4() => borderRadius(4);
   Widget rounded8() => borderRadius(8);
   Widget rounded12() => borderRadius(12);
@@ -145,18 +142,18 @@ extension BorderRadiusExtension on Widget {
   Widget roundedCircle() => ClipOval(child: this);
 }
 
-/// General utility extensions for Widget
+/// Genel utility extensions 
 extension WidgetUtilExtension on Widget {
-  /// Centers the widget
+  
   Widget center() => Center(child: this);
 
-  /// Expands the widget
+
   Widget expand([int flex = 1]) => Expanded(flex: flex, child: this);
 
-  /// Adds flexible to widget
+
   Widget flexible([int flex = 1]) => Flexible(flex: flex, child: this);
 
-  /// Adds gesture detector with onTap
+
   Widget onTap(VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
@@ -164,7 +161,7 @@ extension WidgetUtilExtension on Widget {
     );
   }
 
-  /// Adds InkWell with onTap
+
   Widget inkWell(VoidCallback onTap, {BorderRadius? borderRadius}) {
     return InkWell(
       onTap: onTap,
@@ -173,7 +170,7 @@ extension WidgetUtilExtension on Widget {
     );
   }
 
-  /// Makes widget visible or invisible
+
   Widget visible(bool isVisible) {
     return Visibility(
       visible: isVisible,
@@ -181,7 +178,7 @@ extension WidgetUtilExtension on Widget {
     );
   }
 
-  /// Adds opacity to widget
+
   Widget opacity(double opacity) {
     return Opacity(
       opacity: opacity,
@@ -189,9 +186,9 @@ extension WidgetUtilExtension on Widget {
     );
   }  
 }
-/// Decoration extension methods for Widget
+/// Decoration extension 
 extension DecorationExtension on Widget {
-  /// Adds decoration to widget
+
   Widget decorated({
     Color? color,
     BorderRadius? borderRadius,
@@ -208,7 +205,7 @@ extension DecorationExtension on Widget {
       child: this,
     );
   }
- /// Adds box shadow to widget
+ // box shadow 
   Widget withShadow({
     Color color = const Color(0xFF000000),
     double blurRadius = 4,
