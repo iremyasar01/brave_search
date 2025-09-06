@@ -1,6 +1,9 @@
 class AppConstant {
   static const constErrorMessage = 'Bir hata oluştu';
   static const tryAgain = 'tekrar dene';
+  static const braveSearchBrowser= 'Brave Search Browser';
+  static const slogan = 'Gizliliğinizi koruyarak arama yapın';
+  static const hintText = 'Ara veya adres gir...';
 }
 
 class ImageSearchStrings {

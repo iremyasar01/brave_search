@@ -1,3 +1,5 @@
+import 'package:brave_search/common/constant/app_constant.dart';
+import 'package:brave_search/common/constant/asset_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -80,7 +82,7 @@ class _SplashScreenState extends State<SplashScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Lottie.asset(
-              'assets/animations/Web Search..json',
+             AssetConstants.constAnimation,
               width: 200,
               height: 200,
               controller: _controller,
@@ -94,7 +96,7 @@ class _SplashScreenState extends State<SplashScreen>
             FadeTransition(
               opacity: _animation,
               child: Text(
-                'Brave Search Browser',
+               AppConstant.braveSearchBrowser,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

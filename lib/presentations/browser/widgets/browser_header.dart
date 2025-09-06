@@ -1,3 +1,4 @@
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/presentations/images/cubit/image_search_cubit.dart';
 import 'package:brave_search/presentations/news/cubit/news_search_cubit.dart';
 import 'package:brave_search/presentations/videos/cubit/video_search_cubit.dart';
@@ -98,7 +99,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
                           focusNode: _searchFocus,
                           style: theme.textTheme.bodyLarge,
                           decoration: InputDecoration(
-                            hintText: 'Ara veya adres gir...',
+                            hintText: AppConstant.hintText,
                             hintStyle: TextStyle(color: colors.textHint),
                             border: InputBorder.none,
                           ),

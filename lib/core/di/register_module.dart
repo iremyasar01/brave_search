@@ -1,4 +1,4 @@
-import 'package:brave_search/core/constants/api_constants.dart';
+import 'package:brave_search/common/constant/api_constants.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:injectable/injectable.dart';
