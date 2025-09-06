@@ -1,5 +1,4 @@
 import 'package:brave_search/common/widgets/bottomnavbar/add_tab_button.dart';
-import 'package:brave_search/common/widgets/bottomnavbar/home_button.dart';
 import 'package:brave_search/common/widgets/bottomnavbar/menu_button.dart';
 import 'package:brave_search/common/widgets/bottomnavbar/tab_counter.dart';
 import 'package:brave_search/common/widgets/bottomnavbar/tabs_overview_modal.dart';
@@ -35,7 +34,6 @@ class TabNavigationBar extends StatelessWidget {
             children: [
               TabCounter(browserState: browserState),
               const Spacer(),
-              HomeButton(colors: colors),
               AddTabButton(colors: colors, onAddTab: onAddTab),
               MenuButton(
                 colors: colors,

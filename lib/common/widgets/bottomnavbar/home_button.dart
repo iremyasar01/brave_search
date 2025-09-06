@@ -1,3 +1,4 @@
+/*
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 class HomeButton extends StatelessWidget {
@@ -13,3 +14,4 @@ class HomeButton extends StatelessWidget {
     );
   }
 }
+*/
