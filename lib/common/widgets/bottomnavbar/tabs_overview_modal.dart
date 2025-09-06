@@ -1,11 +1,9 @@
-import 'package:brave_search/common/widgets/bottomnavbar/add_tab_button_large.dart';
 import 'package:brave_search/common/widgets/bottomnavbar/modal_header.dart';
 import 'package:brave_search/common/widgets/bottomnavbar/tabs_grid.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_cubit.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:brave_search/core/extensions/widget_extensions.dart';
 
 class TabsOverviewModal extends StatelessWidget {
   final BuildContext parentContext;
@@ -24,10 +22,33 @@ class TabsOverviewModal extends StatelessWidget {
     return BlocBuilder<BrowserCubit, BrowserState>(
       bloc: parentContext.read<BrowserCubit>(),
       builder: (context, currentBrowserState) {
-        return SizedBox(
+        return Container(
           height: MediaQuery.of(context).size.height * 0.8,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(20),
+            ),
+          ),
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: MediaQuery.of(context).padding.bottom + 16,
+          ),
           child: Column(
             children: [
+              // Handle bar
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).iconTheme.color?.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              
               ModalHeader(
                 tabCount: currentBrowserState.tabs.length,
               ),
@@ -38,11 +59,24 @@ class TabsOverviewModal extends StatelessWidget {
                 parentContext: parentContext,
               ),
               const SizedBox(height: 16),
-              AddTabButtonLarge(
-                onAddTab: onAddTab,
+              ElevatedButton.icon(
+                onPressed: () {
+                  onAddTab();
+                  // Modal'ı kapatma - state değişikliği otomatik yansıyacak
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('Yeni Sekme'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
               ),
             ],
-          ).allPadding(16),
+          ),
         );
       },
     );

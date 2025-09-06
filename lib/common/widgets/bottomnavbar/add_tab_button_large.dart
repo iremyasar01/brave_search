@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+
 class AddTabButtonLarge extends StatelessWidget {
   final VoidCallback onAddTab;
+  final bool closeModal;
 
-  const AddTabButtonLarge({super.key, required this.onAddTab});
+  const AddTabButtonLarge({
+    super.key, 
+    required this.onAddTab,
+    this.closeModal = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +17,9 @@ class AddTabButtonLarge extends StatelessWidget {
     return ElevatedButton.icon(
       onPressed: () {
         onAddTab();
-        Navigator.pop(context);
+        if (closeModal) {
+          Navigator.pop(context);
+        }
       },
       icon: const Icon(Icons.add),
       label: const Text('Yeni Sekme'),
