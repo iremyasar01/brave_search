@@ -20,6 +20,7 @@ class BrowserHeader extends StatefulWidget {
 class _BrowserHeaderState extends State<BrowserHeader> {
   late TextEditingController _searchController;
   late FocusNode _searchFocus;
+  String _lastSearchedQuery = '';
 
   @override
   void initState() {
@@ -47,13 +48,10 @@ class _BrowserHeaderState extends State<BrowserHeader> {
           Expanded(
             child: BlocBuilder<BrowserCubit, BrowserState>(
               builder: (context, browserState) {
-                String currentQuery = '';
-                if (browserState.tabs.isNotEmpty && 
-                    browserState.activeTabIndex < browserState.tabs.length) {
-                  final currentTabId = browserState.tabs[browserState.activeTabIndex];
-                  currentQuery = browserState.tabQueries[currentTabId] ?? '';
-                }
+                final browserCubit = context.read<BrowserCubit>();
+                final currentQuery = browserCubit.activeTabQuery;
 
+                // Kontrolcüyü güncel sorgu ile senkronize et
                 if (_searchController.text != currentQuery) {
                   _searchController.text = currentQuery;
                 }
@@ -89,6 +87,12 @@ class _BrowserHeaderState extends State<BrowserHeader> {
                             if (browserState.tabs.isNotEmpty) {
                               final currentTabId = browserState.tabs[browserState.activeTabIndex];
                               context.read<BrowserCubit>().updateTabQuery(currentTabId, query);
+                              
+                              // Yazarken eski sonuçları temizle
+                              if (query.length < _lastSearchedQuery.length || 
+                                  !query.contains(_lastSearchedQuery)) {
+                                _clearSearchResults(context, browserState.searchFilter);
+                              }
                             }
                           },
                         ),
@@ -99,7 +103,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
                           color: colors.iconSecondary, 
                           size: 20,
                         ),
-                        onPressed: () => _performSearch(context, _searchController.text, browserState.searchFilter),
+                        onPressed: () => _performSearch(context, _searchController.text, browserState.searchFilter, forceRefresh: true),
                       ),
                     ],
                   ),
@@ -112,7 +116,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
     );
   }
 
-  void _performSearch(BuildContext context, String query, String currentFilter) {
+  void _performSearch(BuildContext context, String query, String currentFilter, {bool forceRefresh = false}) {
     if (query.trim().isEmpty) return;
 
     final browserCubit = context.read<BrowserCubit>();
@@ -122,27 +126,58 @@ class _BrowserHeaderState extends State<BrowserHeader> {
         browserState.activeTabIndex < browserState.tabs.length) {
       final currentTabId = browserState.tabs[browserState.activeTabIndex];
       browserCubit.updateTabQuery(currentTabId, query);
-      browserCubit.markTabAsSearched(currentTabId);
+      
+      // Arama geçmişine ekle
+      browserCubit.addToSearchHistory(
+        currentTabId, 
+        query, 
+        browserCubit.activeTabSearchType
+      );
+      
+      // Son arama sorgusunu kaydet
+      _lastSearchedQuery = query;
     }
 
+    // Filtre türüne göre ilgili cubit'i tetikle
     switch (currentFilter) {
       case 'all':
       case 'web':
-        context.read<WebSearchCubit>().searchWeb(query);
+        context.read<WebSearchCubit>().searchWeb(query, forceRefresh: forceRefresh);
         break;
       case 'images':
-        context.read<ImageSearchCubit>().searchImages(query);
+        context.read<ImageSearchCubit>().searchImages(query, forceRefresh: forceRefresh);
         break;
       case 'videos':
-        context.read<VideoSearchCubit>().searchVideos(query);
+        context.read<VideoSearchCubit>().searchVideos(query, forceRefresh: forceRefresh);
         break;
       case 'news':
-        context.read<NewsSearchCubit>().searchNews(query);
+        context.read<NewsSearchCubit>().searchNews(query, forceRefresh: forceRefresh);
         break;
       default:
-        context.read<WebSearchCubit>().searchWeb(query);
+        context.read<WebSearchCubit>().searchWeb(query, forceRefresh: forceRefresh);
     }
 
     _searchFocus.unfocus();
+  }
+
+  void _clearSearchResults(BuildContext context, String currentFilter) {
+    // Filtre türüne göre ilgili cubit'in sonuçlarını temizle
+    switch (currentFilter) {
+      case 'all':
+      case 'web':
+        context.read<WebSearchCubit>().clearResults();
+        break;
+      case 'images':
+        context.read<ImageSearchCubit>().clearResults();
+        break;
+      case 'videos':
+        context.read<VideoSearchCubit>().clearResults();
+        break;
+      case 'news':
+        context.read<NewsSearchCubit>().clearResults();
+        break;
+      default:
+        context.read<WebSearchCubit>().clearResults();
+    }
   }
 }

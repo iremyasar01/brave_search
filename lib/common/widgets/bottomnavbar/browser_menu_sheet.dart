@@ -2,6 +2,8 @@ import 'package:brave_search/common/widgets/bottomnavbar/menu_item.dart';
 import 'package:brave_search/core/theme/theme_cubit.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
+import 'package:brave_search/presentations/history/cubit/history_cubit.dart';
+import 'package:brave_search/presentations/history/views/history_view.dart';
 import 'package:flutter/material.dart';
 import 'package:brave_search/core/extensions/widget_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -78,80 +80,20 @@ class BrowserMenuSheet extends StatelessWidget {
       ),
     );
   }
-
-  void _showHistory(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.extension<AppColorsExtension>()!;
-    
+   void _showHistory(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.8,
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 16,
-            bottom: MediaQuery.of(context).padding.bottom + 16,
-          ),
-          child: Column(
-            children: [
-              // Header
-              Container(
-                padding: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: colors.bottomNavBorder.withOpacity(0.3),
-                    ),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Arama Geçmişi',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: Icon(Icons.close, color: theme.iconTheme.color),
-                    ),
-                  ],
-                ),
-              ),
-              
-              // History list
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.history,
-                        color: colors.iconSecondary,
-                        size: 64,
-                      ).paddingBottom(16),
-                      Text(
-                        'Henüz arama geçmişi yok',
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: colors.textHint,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+        return BlocProvider.value(
+          value: context.read<HistoryCubit>()..loadHistory(),
+          child: const HistoryView(),
         );
       },
     );
-  }}
+  }
+}

@@ -7,8 +7,8 @@ import 'video_search_state.dart';
 @injectable
 class VideoSearchCubit extends Cubit<VideoSearchState> {
   final VideoSearchUseCase videoSearchUseCase;
-  final Map<int, List<VideoSearchResult>> _pageCache = {};
-  static const int maxPages = 10; // Maksimum 10 sayfa (offset 0-9)
+  final Map<String, Map<int, List<VideoSearchResult>>> _queryCache = {};
+  static const int maxPages = 10;
 
   VideoSearchCubit(this.videoSearchUseCase) : super(const VideoSearchState());
 
@@ -16,15 +16,24 @@ class VideoSearchCubit extends Cubit<VideoSearchState> {
     String query, {
     String? country,
     String safesearch = 'strict',
+    bool forceRefresh = false,
   }) async {
     if (query.trim().isEmpty) {
       emit(state.copyWith(status: VideoSearchStatus.empty));
       return;
     }
 
+    // Aynı sorgu için cache'de veri varsa ve forceRefresh false ise cache'den getir
+    if (!forceRefresh && 
+        _isCached(query, 1) && 
+        state.status != VideoSearchStatus.loading) {
+      _emitFromCache(query, 1);
+      return;
+    }
+
     // Yeni arama yapılıyorsa cache'i temizle
     if (state.query != query) {
-      _pageCache.clear();
+      _queryCache.remove(query);
     }
 
     emit(state.copyWith(
@@ -38,23 +47,23 @@ class VideoSearchCubit extends Cubit<VideoSearchState> {
     await _loadPage(1, country: country, safesearch: safesearch);
   }
 
-  Future<void> loadPage(int page) async {
+  Future<void> loadPage(int page, {bool forceRefresh = false}) async {
+    if (state.query.isEmpty) return;
+    
     // Sayfa sınırını kontrol et (1-10 arası)
     if (page < 1 || page > maxPages) {
       return;
     }
     
-    if (state.status == VideoSearchStatus.loading) return;
-    
-    // Eğer bu sayfa önceden yüklenmişse, cache'ten göster
-    if (_pageCache.containsKey(page)) {
-      emit(state.copyWith(
-        status: VideoSearchStatus.success,
-        results: _pageCache[page]!,
-        currentPage: page,
-      ));
+    // Aynı sorgu ve sayfa için cache'de veri varsa ve forceRefresh false ise cache'den getir
+    if (!forceRefresh && 
+        _isCached(state.query, page) && 
+        state.status != VideoSearchStatus.loading) {
+      _emitFromCache(state.query, page);
       return;
     }
+    
+    if (state.status == VideoSearchStatus.loading) return;
 
     await _loadPage(page);
   }
@@ -72,12 +81,8 @@ class VideoSearchCubit extends Cubit<VideoSearchState> {
     result.map(
       success: (data) {
         // Sonuçları cache'e kaydet
-        _pageCache[page] = data;
+        _addToCache(state.query, page, data);
         
-        // hasReachedMax kontrolü:
-        // 1. Sayfa 10'a ulaştıysa (offset 9 olduğu için)
-        // 2. Veya sonuç boşsa
-        // 3. Veya beklenen sonuç sayısından azsa
         final hasReachedMax = page >= maxPages ||
             data.isEmpty ||
             data.length < 20;
@@ -98,8 +103,30 @@ class VideoSearchCubit extends Cubit<VideoSearchState> {
     );
   }
 
+  bool _isCached(String query, int page) {
+    return _queryCache.containsKey(query) && _queryCache[query]!.containsKey(page);
+  }
+
+  void _emitFromCache(String query, int page) {
+    final cachedResults = _queryCache[query]![page]!;
+    emit(state.copyWith(
+      status: VideoSearchStatus.success,
+      results: cachedResults,
+      currentPage: page,
+      query: query,
+      hasReachedMax: page >= maxPages || cachedResults.isEmpty || cachedResults.length < 20,
+    ));
+  }
+
+  void _addToCache(String query, int page, List<VideoSearchResult> results) {
+    if (!_queryCache.containsKey(query)) {
+      _queryCache[query] = {};
+    }
+    _queryCache[query]![page] = results;
+  }
+
   void clearResults() {
-    _pageCache.clear();
+    _queryCache.clear();
     emit(const VideoSearchState());
   }
 }

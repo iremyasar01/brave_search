@@ -1,17 +1,89 @@
+import 'package:brave_search/domain/entities/news_search_result.dart';
+import 'package:brave_search/domain/entities/search_history_item.dart';
+import 'package:brave_search/domain/entities/tab_data.dart';
 import 'package:brave_search/domain/entities/web_search_result.dart';
+import 'package:brave_search/domain/usecases/delete_tab_data.dart';
+import 'package:brave_search/domain/usecases/save_tab_data.dart';
+import 'package:brave_search/domain/usecases/get_tab_data.dart';
+import 'package:brave_search/domain/usecases/save_search_history.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-
 import 'browser_state.dart';
 
 @injectable
 class BrowserCubit extends Cubit<BrowserState> {
-  BrowserCubit() : super(const BrowserState()) {
-    // Başlangıçta bir sekme oluştur
-    _initializeWithDefaultTab();
+  final SaveTabData _saveTabData;
+  final GetTabData _getTabData;
+  final DeleteTabData _deleteTabData;
+  final SaveSearchHistory _saveSearchHistory;
+
+  BrowserCubit(
+    this._saveTabData,
+    this._getTabData,
+    this._deleteTabData,
+    this._saveSearchHistory,
+  ) : super(const BrowserState()) {
+    _initialize();
   }
 
+  // Tarayıcıyı başlat - kayıtlı sekmeleri yükle
+  Future<void> _initialize() async {
+    await _loadSavedTabs();
+  }
+
+  // Kayıtlı sekmeleri yükle
+  Future<void> _loadSavedTabs() async {
+    try {
+      final savedTabs = await _getTabData();
+      
+      if (savedTabs.isNotEmpty) {
+        // Kayıtlı sekmeleri state'e yükle
+        final tabIds = savedTabs.keys.toList();
+        final tabQueries = Map<String, String>.fromIterables(
+          savedTabs.keys,
+          savedTabs.values.map((tab) => tab.query),
+        );
+        
+        final tabWebResults = Map<String, List<WebSearchResult>>.fromIterables(
+          savedTabs.keys,
+          savedTabs.values.map((tab) => tab.webResults),
+        );
+        
+        final tabNewsResults = Map<String, List<NewsSearchResult>>.fromIterables(
+          savedTabs.keys,
+          savedTabs.values.map((tab) => tab.newsResults),
+        );
+        
+        final hasSearched = Map<String, bool>.fromIterables(
+          savedTabs.keys,
+          savedTabs.values.map((tab) => tab.query.isNotEmpty),
+        );
+        
+        final searchTypes = Map<String, String>.fromIterables(
+          savedTabs.keys,
+          savedTabs.values.map((tab) => tab.searchType),
+        );
+
+        emit(state.copyWith(
+          tabs: tabIds,
+          activeTabIndex: 0,
+          tabQueries: tabQueries,
+          tabWebResults: tabWebResults,
+          tabNewsResults: tabNewsResults,
+          hasSearched: hasSearched,
+          searchTypes: searchTypes,
+        ));
+      } else {
+        _initializeWithDefaultTab();
+      }
+    } catch (e) {
+      debugPrint('Error loading saved tabs: $e');
+      _initializeWithDefaultTab();
+    }
+  }
+
+  // Varsayılan sekme ile başlat
   void _initializeWithDefaultTab() {
     final defaultTabId = 'tab_${DateTime.now().millisecondsSinceEpoch}';
     emit(state.copyWith(
@@ -19,27 +91,63 @@ class BrowserCubit extends Cubit<BrowserState> {
       activeTabIndex: 0,
       tabQueries: {defaultTabId: ''},
       hasSearched: {defaultTabId: false},
+      searchTypes: {defaultTabId: 'web'},
+    ));
+    
+    _saveTabData(TabData(
+      tabId: defaultTabId,
+      query: '',
+      webResults: [],
+      newsResults: [],
+      lastUpdated: DateTime.now(),
+      searchType: 'web',
     ));
   }
+// BrowserCubit'e aşağıdaki değişiklikleri yapın:
 
-  void addTab() {
-    final newTabId = 'tab_${DateTime.now().millisecondsSinceEpoch}';
-    final updatedTabs = List.of(state.tabs)..add(newTabId);
-    final updatedQueries = Map.of(state.tabQueries);
-    final updatedHasSearched = Map.of(state.hasSearched);
-    
-    // Yeni sekme için boş sorgu ve arama yapılmamış durumu ekle
-    updatedQueries[newTabId] = '';
-    updatedHasSearched[newTabId] = false;
+void addTab() {
+  final newTabId = 'tab_${DateTime.now().millisecondsSinceEpoch}';
+  final updatedTabs = List.of(state.tabs)..add(newTabId);
+  final updatedQueries = Map.of(state.tabQueries);
+  final updatedHasSearched = Map.of(state.hasSearched);
+  final updatedSearchTypes = Map.of(state.searchTypes);
+  
+  updatedQueries[newTabId] = '';
+  updatedHasSearched[newTabId] = false;
+  updatedSearchTypes[newTabId] = 'web'; // Yeni sekmeler web'den başlasın
+  
+  emit(state.copyWith(
+    tabs: updatedTabs,
+    activeTabIndex: updatedTabs.length - 1,
+    tabQueries: updatedQueries,
+    hasSearched: updatedHasSearched,
+    searchTypes: updatedSearchTypes,
+    searchFilter: 'web', // Yeni sekmede filtre web olsun
+  ));
+  
+  _saveTabData(TabData(
+    tabId: newTabId,
+    query: '',
+    webResults: [],
+    newsResults: [],
+    lastUpdated: DateTime.now(),
+    searchType: 'web', // Yeni sekmeler web'den başlasın
+  ));
+}
+
+void switchTab(int index) {
+  if (index >= 0 && index < state.tabs.length) {
+    final tabId = state.tabs[index];
+    final tabSearchType = state.searchTypes[tabId] ?? 'web';
     
     emit(state.copyWith(
-      tabs: updatedTabs,
-      activeTabIndex: updatedTabs.length - 1, // Son eklenen sekmeyi aktif yap
-      tabQueries: updatedQueries,
-      hasSearched: updatedHasSearched,
+      activeTabIndex: index,
+      searchFilter: tabSearchType, // Sekme değiştirildiğinde o sekmenin arama türüne geç
     ));
   }
+}
 
+  // Sekme kapat
   void closeTab(int index) {
     if (state.tabs.length <= 1) {
       debugPrint('Son sekme, kapatılmıyor');
@@ -50,55 +158,132 @@ class BrowserCubit extends Cubit<BrowserState> {
     final tabId = tabs[index];
     tabs.removeAt(index);
 
-    final tabResults = Map.of(state.tabResults);
+    _deleteTabData(tabId);
+
+    final tabWebResults = Map.of(state.tabWebResults);
+    final tabNewsResults = Map.of(state.tabNewsResults);
     final tabQueries = Map.of(state.tabQueries);
-    tabResults.remove(tabId);
+    final searchTypes = Map.of(state.searchTypes);
+    
+    tabWebResults.remove(tabId);
+    tabNewsResults.remove(tabId);
     tabQueries.remove(tabId);
+    searchTypes.remove(tabId);
 
     int newActiveIndex = state.activeTabIndex;
     if (index <= state.activeTabIndex && state.activeTabIndex > 0) {
       newActiveIndex = state.activeTabIndex - 1;
-    } else if (index < state.activeTabIndex) {
-      newActiveIndex = state.activeTabIndex - 1;
-    } else if (index == state.activeTabIndex && index >= tabs.length) {
-      newActiveIndex = tabs.length - 1;
     }
 
     emit(state.copyWith(
       tabs: tabs,
       activeTabIndex: newActiveIndex,
-      tabResults: tabResults,
+      tabWebResults: tabWebResults,
+      tabNewsResults: tabNewsResults,
       tabQueries: tabQueries,
+      searchTypes: searchTypes,
     ));
   }
 
-  void switchTab(int index) {
-    if (index >= 0 && index < state.tabs.length && index != state.activeTabIndex) {
-      emit(state.copyWith(activeTabIndex: index));
-    }
+  // Web arama sonuçlarını güncelle
+  void updateTabWebResults(String tabId, List<WebSearchResult> results) {
+    final tabWebResults = Map.of(state.tabWebResults);
+    tabWebResults[tabId] = results;
+    
+    final updatedHasSearched = Map.of(state.hasSearched);
+    updatedHasSearched[tabId] = true;
+    
+    emit(state.copyWith(
+      tabWebResults: tabWebResults,
+      hasSearched: updatedHasSearched,
+    ));
+    
+    _saveTabData(TabData(
+      tabId: tabId,
+      query: state.tabQueries[tabId] ?? '',
+      webResults: results,
+      newsResults: state.tabNewsResults[tabId] ?? [],
+      lastUpdated: DateTime.now(),
+      searchType: state.searchTypes[tabId] ?? 'web',
+    ));
   }
 
-  void setSearchFilter(String filter) {
-    // Filtre değiştiğinde mevcut sonuçları temizleme, sadece filtreyi güncelle
-    emit(state.copyWith(searchFilter: filter));
+  // Haber arama sonuçlarını güncelle
+  void updateTabNewsResults(String tabId, List<NewsSearchResult> results) {
+    final tabNewsResults = Map.of(state.tabNewsResults);
+    tabNewsResults[tabId] = results;
+    
+    final updatedHasSearched = Map.of(state.hasSearched);
+    updatedHasSearched[tabId] = true;
+    
+    emit(state.copyWith(
+      tabNewsResults: tabNewsResults,
+      hasSearched: updatedHasSearched,
+    ));
+    
+    _saveTabData(TabData(
+      tabId: tabId,
+      query: state.tabQueries[tabId] ?? '',
+      webResults: state.tabWebResults[tabId] ?? [],
+      newsResults: results,
+      lastUpdated: DateTime.now(),
+      searchType: state.searchTypes[tabId] ?? 'news',
+    ));
   }
 
-  void updateTabResults(String tabId, List<WebSearchResult> results) {
-    final tabResults = Map.of(state.tabResults);
-    tabResults[tabId] = results;
-    emit(state.copyWith(tabResults: tabResults));
-  }
-
+  // Sekme sorgusunu güncelle
   void updateTabQuery(String tabId, String query) {
     final tabQueries = Map.of(state.tabQueries);
     
     if (tabQueries[tabId] != query) {
       tabQueries[tabId] = query;
-      emit(state.copyWith(tabQueries: tabQueries));
+      
+      final updatedHasSearched = Map.of(state.hasSearched);
+      updatedHasSearched[tabId] = query.isNotEmpty;
+      
+      emit(state.copyWith(
+        tabQueries: tabQueries,
+        hasSearched: updatedHasSearched,
+      ));
+      
+      _saveTabData(TabData(
+        tabId: tabId,
+        query: query,
+        webResults: state.tabWebResults[tabId] ?? [],
+        newsResults: state.tabNewsResults[tabId] ?? [],
+        lastUpdated: DateTime.now(),
+        searchType: state.searchTypes[tabId] ?? 'web',
+      ));
     }
   }
 
-  // Aktif sekmenin ID'sini almak için yardımcı metod
+  // Arama türünü ayarla
+  void setSearchType(String tabId, String type) {
+    final searchTypes = Map.of(state.searchTypes);
+    searchTypes[tabId] = type;
+    emit(state.copyWith(searchTypes: searchTypes));
+    
+    _saveTabData(TabData(
+      tabId: tabId,
+      query: state.tabQueries[tabId] ?? '',
+      webResults: state.tabWebResults[tabId] ?? [],
+      newsResults: state.tabNewsResults[tabId] ?? [],
+      lastUpdated: DateTime.now(),
+      searchType: type,
+    ));
+  }
+
+  // Arama geçmişine ekle
+  void addToSearchHistory(String tabId, String query, String searchType) {
+    _saveSearchHistory(SearchHistoryItem(
+      query: query,
+      timestamp: DateTime.now(),
+      tabId: tabId,
+      searchType: searchType,
+    ));
+  }
+
+  // Aktif sekme ID'sini getir
   String? get activeTabId {
     if (state.tabs.isNotEmpty && state.activeTabIndex < state.tabs.length) {
       return state.tabs[state.activeTabIndex];
@@ -106,7 +291,7 @@ class BrowserCubit extends Cubit<BrowserState> {
     return null;
   }
 
-  // Aktif sekmenin sorgusunu almak için yardımcı metod
+  // Aktif sekme sorgusunu getir
   String get activeTabQuery {
     final tabId = activeTabId;
     if (tabId != null) {
@@ -115,23 +300,41 @@ class BrowserCubit extends Cubit<BrowserState> {
     return '';
   }
 
-  // Aktif sekmenin sonuçlarını almak için yardımcı metod
-  List<WebSearchResult> get activeTabResults {
+  // Aktif sekme web sonuçlarını getir
+  List<WebSearchResult> get activeTabWebResults {
     final tabId = activeTabId;
     if (tabId != null) {
-      return state.tabResults[tabId] ?? [];
+      return state.tabWebResults[tabId] ?? [];
     }
     return [];
   }
 
-  // Arama yapıldığını işaretle
-  void markTabAsSearched(String tabId) {
-    final updatedHasSearched = Map.of(state.hasSearched);
-    updatedHasSearched[tabId] = true;
-    emit(state.copyWith(hasSearched: updatedHasSearched));
+  // Aktif sekme haber sonuçlarını getir
+  List<NewsSearchResult> get activeTabNewsResults {
+    final tabId = activeTabId;
+    if (tabId != null) {
+      return state.tabNewsResults[tabId] ?? [];
+    }
+    return [];
   }
 
-  // Aktif sekmenin arama durumunu al
+  // Aktif sekme arama türünü getir
+  String get activeTabSearchType {
+    final tabId = activeTabId;
+    if (tabId != null) {
+      return state.searchTypes[tabId] ?? 'web';
+    }
+    return 'web';
+  }
+  
+ 
+  
+  // Arama filtresini ayarla
+  void setSearchFilter(String newFilter) {
+    emit(state.copyWith(searchFilter: newFilter));
+  }
+  
+  // Aktif sekmede arama yapılıp yapılmadığını kontrol et
   bool get activeTabHasSearched {
     final tabId = activeTabId;
     if (tabId != null) {

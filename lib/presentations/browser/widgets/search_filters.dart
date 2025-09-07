@@ -54,19 +54,20 @@ class SearchFilters extends StatelessWidget {
     final currentQuery = browserCubit.activeTabQuery;
     
     if (currentQuery.isNotEmpty) {
+      // ForceRefresh false yaparak cache'den getirmesini sağla
       switch (newFilter) {
         case 'all':
         case 'web':
-          context.read<WebSearchCubit>().searchWeb(currentQuery);
+          context.read<WebSearchCubit>().searchWeb(currentQuery, forceRefresh: false);
           break;
         case 'images':
-          context.read<ImageSearchCubit>().searchImages(currentQuery);
+          context.read<ImageSearchCubit>().searchImages(currentQuery, forceRefresh: false);
           break;
         case 'videos':
-          context.read<VideoSearchCubit>().searchVideos(currentQuery);
+          context.read<VideoSearchCubit>().searchVideos(currentQuery, forceRefresh: false);
           break;
         case 'news':
-          context.read<NewsSearchCubit>().searchNews(currentQuery); // Yeni eklenen satır
+          context.read<NewsSearchCubit>().searchNews(currentQuery, forceRefresh: false);
           break;
       }
     }

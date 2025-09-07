@@ -16,8 +16,7 @@ import '../widgets/search_results_view.dart';
 import '../../web/cubit/web_search_cubit.dart';
 import '../../images/cubit/image_search_cubit.dart';
 
-
-
+// Ana tarayıcı ekranı
 class SearchBrowserScreen extends StatefulWidget {
   const SearchBrowserScreen({super.key});
 
@@ -36,18 +35,18 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
   void initState() {
     super.initState();
     
+    // Dependency Injection ile cubit'leri al
     _browserCubit = GetIt.instance<BrowserCubit>();
     _webSearchCubit = GetIt.instance<WebSearchCubit>();
     _imageSearchCubit = GetIt.instance<ImageSearchCubit>();
     _videoSearchCubit = GetIt.instance<VideoSearchCubit>();
     _newsSearchCubit = GetIt.instance<NewsSearchCubit>();
-    
-    if (_browserCubit.state.tabs.isEmpty) {
-      _browserCubit.addTab();
-    }
   }
 
+  // Sekme değiştirme işlemi
   void _onTabTapped(int index) => _browserCubit.switchTab(index);
+  
+  // Yeni sekme ekleme işlemi
   void _addNewTab() => _browserCubit.addTab();
 
   @override
@@ -65,21 +64,23 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              const NetworkStatusBanner(),
-              const BrowserHeader(),
+              const NetworkStatusBanner(), // Ağ durumu bildirimi
+              const BrowserHeader(), // Arama başlığı
               Expanded(
                 child: BlocBuilder<NetworkCubit, NetworkState>(
                   builder: (context, networkState) {
+                    // İnternet bağlantısı kontrolü
                     if (networkState is NetworkDisconnected) {
                       return const NoInternetScreen();
                     }
                     
                     return BlocBuilder<BrowserCubit, BrowserState>(
                       builder: (context, browserState) {
+                        // Sekme yoksa boş durum göster
                         if (browserState.tabs.isEmpty) {
                           return const EmptyBrowserState();
                         }
-                        return const SearchResultsView();
+                        return const SearchResultsView(); // Arama sonuçlarını göster
                       },
                     );
                   },
@@ -99,10 +100,5 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }

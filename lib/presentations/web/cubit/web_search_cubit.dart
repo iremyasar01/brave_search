@@ -8,13 +8,21 @@ import 'web_search_state.dart';
 @injectable
 class WebSearchCubit extends Cubit<WebSearchState> {
   final WebSearchUseCase webSearchUseCase;
-  final Map<int, List<WebSearchResult>> _pageCache = {};
+  final Map<String, Map<int, List<WebSearchResult>>> _queryCache = {};
   static const int maxPages = 10;
 
   WebSearchCubit(this.webSearchUseCase) : super(const WebSearchState());
 
-  Future<void> searchWeb(String query, {int page = 1}) async {
+  Future<void> searchWeb(String query, {int page = 1, bool forceRefresh = false}) async {
     if (query.trim().isEmpty) return;
+
+    // Aynı sorgu ve sayfa için cache'de veri varsa ve forceRefresh false ise cache'den getir
+    if (!forceRefresh && 
+        _isCached(query, page) && 
+        state.status != WebSearchStatus.loading) {
+      _emitFromCache(query, page);
+      return;
+    }
 
     // Sayfa sınırını kontrol et
     if (page < 1 || page > maxPages) {
@@ -22,13 +30,8 @@ class WebSearchCubit extends Cubit<WebSearchState> {
       return;
     }
 
-    // Yeni arama yapılıyorsa cache'i temizle
-    if (state.query != query) {
-      _pageCache.clear();
-    }
-
-    // İlk sayfa için loading state
-    if (page == 1) {
+    // Yeni arama yapılıyorsa veya forceRefresh true ise loading state'i göster
+    if (page == 1 || state.query != query) {
       emit(state.copyWith(
         status: WebSearchStatus.loading,
         query: query,
@@ -37,21 +40,10 @@ class WebSearchCubit extends Cubit<WebSearchState> {
         results: [],
       ));
     } else {
-      // Diğer sayfalar için mevcut durumu koru ama loading göster
       emit(state.copyWith(
         status: WebSearchStatus.loading,
         currentPage: page,
       ));
-    }
-
-    // Eğer bu sayfa önceden yüklenmişse, cache'ten göster
-    if (_pageCache.containsKey(page)) {
-      emit(state.copyWith(
-        status: WebSearchStatus.success,
-        results: _pageCache[page]!,
-        currentPage: page,
-      ));
-      return;
     }
 
     final result = await webSearchUseCase.execute(
@@ -63,7 +55,7 @@ class WebSearchCubit extends Cubit<WebSearchState> {
     result.map(
       success: (results) {
         // Sonuçları cache'e kaydet
-        _pageCache[page] = results;
+        _addToCache(query, page, results);
         
         if (results.isEmpty && page == 1) {
           emit(state.copyWith(
@@ -96,6 +88,28 @@ class WebSearchCubit extends Cubit<WebSearchState> {
     );
   }
 
+  bool _isCached(String query, int page) {
+    return _queryCache.containsKey(query) && _queryCache[query]!.containsKey(page);
+  }
+
+  void _emitFromCache(String query, int page) {
+    final cachedResults = _queryCache[query]![page]!;
+    emit(state.copyWith(
+      status: WebSearchStatus.success,
+      results: cachedResults,
+      currentPage: page,
+      query: query,
+      hasReachedMax: page >= maxPages || cachedResults.isEmpty || cachedResults.length < 10,
+    ));
+  }
+
+  void _addToCache(String query, int page, List<WebSearchResult> results) {
+    if (!_queryCache.containsKey(query)) {
+      _queryCache[query] = {};
+    }
+    _queryCache[query]![page] = results;
+  }
+
   Future<void> loadPage(int page) async {
     if (state.query.isNotEmpty && page >= 1 && page <= maxPages) {
       await searchWeb(state.query, page: page);
@@ -103,7 +117,7 @@ class WebSearchCubit extends Cubit<WebSearchState> {
   }
 
   void clearResults() {
-    _pageCache.clear();
+    _queryCache.clear();
     emit(const WebSearchState());
   }
 
