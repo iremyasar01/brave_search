@@ -5,7 +5,6 @@ import 'package:brave_search/presentations/videos/cubit/video_search_cubit.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
-import 'package:brave_search/core/theme/theme_cubit.dart';
 import 'package:brave_search/core/extensions/widget_extensions.dart';
 import '../cubit/browser_cubit.dart';
 import '../cubit/browser_state.dart';
@@ -45,24 +44,6 @@ class _BrowserHeaderState extends State<BrowserHeader> {
       color: theme.appBarTheme.backgroundColor,
       child: Row(
         children: [
-          IconButton(
-            icon: Icon(
-              theme.brightness == Brightness.dark 
-                ? Icons.light_mode 
-                : Icons.dark_mode,
-              color: theme.iconTheme.color,
-            ),
-            onPressed: () {
-              context.read<ThemeCubit>().toggleTheme();
-            },
-            tooltip: theme.brightness == Brightness.dark 
-              ? 'Açık Tema' 
-              : 'Koyu Tema',
-          ),
-          
-          const SizedBox(width: 8),
-          
-          // Search bar
           Expanded(
             child: BlocBuilder<BrowserCubit, BrowserState>(
               builder: (context, browserState) {
