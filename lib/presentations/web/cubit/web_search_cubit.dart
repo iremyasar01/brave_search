@@ -1,78 +1,85 @@
+import 'package:brave_search/common/interfaces/base_search_cubit.dart';
 import 'package:brave_search/domain/entities/web_search_result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import '../../../domain/usecases/web_search_use_case.dart';
+import 'package:brave_search/core/cache/cache_manager.dart';
+import 'package:brave_search/domain/usecases/web_search_use_case.dart';
 import 'web_search_state.dart';
 
 @injectable
-class WebSearchCubit extends Cubit<WebSearchState> {
+class WebSearchCubit extends BaseSearchCubit<WebSearchResult, WebSearchState> {
   final WebSearchUseCase webSearchUseCase;
-  final Map<String, Map<int, List<WebSearchResult>>> _queryCache = {};
+  final Map<String, int> _queryCurrentPage = {};
   static const int maxPages = 10;
 
-  WebSearchCubit(this.webSearchUseCase) : super(const WebSearchState());
+  WebSearchCubit(
+    this.webSearchUseCase,
+    @Named('webCacheManager') CacheManager<WebSearchResult> cacheManager,
+  ) : super(cacheManager, const WebSearchState());
 
-  Future<void> searchWeb(String query, {int page = 1, bool forceRefresh = false}) async {
+  Future<void> searchWeb(String query, {int? page, bool forceRefresh = false}) async {
     if (query.trim().isEmpty) return;
 
-    // Aynı sorgu ve sayfa için cache'de veri varsa ve forceRefresh false ise cache'den getir
-    if (!forceRefresh && 
-        _isCached(query, page) && 
-        state.status != WebSearchStatus.loading) {
-      _emitFromCache(query, page);
+    // Sayfa belirtilmemişse, önceki sayfayı kullan veya 1 yap
+    final int targetPage = page ?? _queryCurrentPage[query] ?? 1;
+
+    // Sayfa sınırını kontrol et
+    if (targetPage < 1 || targetPage > maxPages) {
+      debugPrint('Sayfa sınırı aşıldı: $targetPage (Max: $maxPages)');
       return;
     }
 
-    // Sayfa sınırını kontrol et
-    if (page < 1 || page > maxPages) {
-      debugPrint('Sayfa sınırı aşıldı: $page (Max: $maxPages)');
+    // Cache kontrolü - forceRefresh false ise cache'den getir
+    if (!forceRefresh && await checkAndEmitFromCache(query, targetPage)) {
       return;
     }
 
     // Yeni arama yapılıyorsa veya forceRefresh true ise loading state'i göster
-    if (page == 1 || state.query != query) {
+    if (targetPage == 1 || state.query != query) {
       emit(state.copyWith(
         status: WebSearchStatus.loading,
         query: query,
-        currentPage: page,
+        currentPage: targetPage,
         hasReachedMax: false,
         results: [],
       ));
     } else {
       emit(state.copyWith(
         status: WebSearchStatus.loading,
-        currentPage: page,
+        currentPage: targetPage,
       ));
     }
 
     final result = await webSearchUseCase.execute(
       query,
-      page: page,
+      page: targetPage,
       count: 20,
     );
 
     result.map(
       success: (results) {
         // Sonuçları cache'e kaydet
-        _addToCache(query, page, results);
+        addToCache(query, targetPage, results);
+        // Mevcut sayfayı sakla
+        _queryCurrentPage[query] = targetPage;
         
-        if (results.isEmpty && page == 1) {
+        if (results.isEmpty && targetPage == 1) {
           emit(state.copyWith(
             status: WebSearchStatus.empty,
             results: [],
             hasReachedMax: true,
-            currentPage: page,
+            currentPage: targetPage,
           ));
         } else {
-          final hasReachedMax = page >= maxPages ||
+          final hasReachedMax = targetPage >= maxPages ||
               results.isEmpty ||
               results.length < 10;
 
           emit(state.copyWith(
             status: WebSearchStatus.success,
             results: results,
-            currentPage: page,
+            currentPage: targetPage,
             hasReachedMax: hasReachedMax,
             query: query,
           ));
@@ -82,32 +89,21 @@ class WebSearchCubit extends Cubit<WebSearchState> {
         emit(state.copyWith(
           status: WebSearchStatus.failure,
           errorMessage: error,
-          currentPage: page,
+          currentPage: targetPage,
         ));
       },
     );
   }
 
-  bool _isCached(String query, int page) {
-    return _queryCache.containsKey(query) && _queryCache[query]!.containsKey(page);
-  }
-
-  void _emitFromCache(String query, int page) {
-    final cachedResults = _queryCache[query]![page]!;
+  @override
+  void _emitCachedResults(String query, int page, List<WebSearchResult> results) {
     emit(state.copyWith(
       status: WebSearchStatus.success,
-      results: cachedResults,
+      results: results,
       currentPage: page,
       query: query,
-      hasReachedMax: page >= maxPages || cachedResults.isEmpty || cachedResults.length < 10,
+      hasReachedMax: page >= maxPages || results.isEmpty || results.length < 10,
     ));
-  }
-
-  void _addToCache(String query, int page, List<WebSearchResult> results) {
-    if (!_queryCache.containsKey(query)) {
-      _queryCache[query] = {};
-    }
-    _queryCache[query]![page] = results;
   }
 
   Future<void> loadPage(int page) async {
@@ -117,7 +113,8 @@ class WebSearchCubit extends Cubit<WebSearchState> {
   }
 
   void clearResults() {
-    _queryCache.clear();
+    clearCache();
+    _queryCurrentPage.clear();
     emit(const WebSearchState());
   }
 

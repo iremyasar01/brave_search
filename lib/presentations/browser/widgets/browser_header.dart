@@ -148,7 +148,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
         context.read<ImageSearchCubit>().searchImages(query, forceRefresh: forceRefresh);
         break;
       case 'videos':
-        context.read<VideoSearchCubit>().searchVideos(query, forceRefresh: forceRefresh);
+        context.read<VideoSearchCubit>().searchVideo(query, forceRefresh: forceRefresh);
         break;
       case 'news':
         context.read<NewsSearchCubit>().searchNews(query, forceRefresh: forceRefresh);

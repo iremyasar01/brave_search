@@ -1,132 +1,134 @@
+import 'package:brave_search/common/interfaces/base_search_cubit.dart';
+import 'package:brave_search/core/cache/cache_manager.dart';
 import 'package:brave_search/domain/entities/news_search_result.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/material.dart';
+
 import 'package:injectable/injectable.dart';
 import '../../../domain/usecases/news_search_use_case.dart';
 import 'news_search_state.dart';
 
+
 @injectable
-class NewsSearchCubit extends Cubit<NewsSearchState> {
+class NewsSearchCubit extends BaseSearchCubit<NewsSearchResult, NewsSearchState> {
   final NewsSearchUseCase newsSearchUseCase;
-  final Map<String, Map<int, List<NewsSearchResult>>> _queryCache = {};
+  final Map<String, int> _queryCurrentPage = {};
   static const int maxPages = 10;
 
-  NewsSearchCubit(this.newsSearchUseCase) : super(const NewsSearchState());
+  NewsSearchCubit(
+    this.newsSearchUseCase,
+    @Named('newsCacheManager') CacheManager<NewsSearchResult> cacheManager,
+  ) : super(cacheManager, const NewsSearchState());
 
-  Future<void> searchNews(
-    String query, {
-    String? country,
-    String safesearch = 'strict',
-    bool forceRefresh = false,
-  }) async {
-    if (query.trim().isEmpty) {
-      emit(state.copyWith(status: NewsSearchStatus.empty));
+
+  Future<void> searchNews(String query, {int? page, bool forceRefresh = false}) async {
+    if (query.trim().isEmpty) return;
+
+    // Sayfa belirtilmemişse, önceki sayfayı kullan veya 1 yap
+    final int targetPage = page ?? _queryCurrentPage[query] ?? 1;
+
+    // Sayfa sınırını kontrol et
+    if (targetPage < 1 || targetPage > maxPages) {
+      debugPrint('Sayfa sınırı aşıldı: $targetPage (Max: $maxPages)');
       return;
     }
 
-    // Aynı sorgu için cache'de veri varsa ve forceRefresh false ise cache'den getir
-    if (!forceRefresh && 
-        _isCached(query, 1) && 
-        state.status != NewsSearchStatus.loading) {
-      _emitFromCache(query, 1);
+    // Cache kontrolü - forceRefresh false ise cache'den getir
+    if (!forceRefresh && await checkAndEmitFromCache(query, targetPage)) {
       return;
     }
 
-    // Yeni arama yapılıyorsa cache'i temizle
-    if (state.query != query) {
-      _queryCache.remove(query);
+    // Yeni arama yapılıyorsa veya forceRefresh true ise loading state'i göster
+    if (targetPage == 1 || state.query != query) {
+      emit(state.copyWith(
+        status: NewsSearchStatus.loading,
+        query: query,
+        currentPage: targetPage,
+        hasReachedMax: false,
+        results: [],
+      ));
+    } else {
+      emit(state.copyWith(
+        status: NewsSearchStatus.loading,
+        currentPage: targetPage,
+      ));
     }
-
-    emit(state.copyWith(
-      status: NewsSearchStatus.loading,
-      query: query,
-      currentPage: 1,
-      hasReachedMax: false,
-      results: [],
-    ));
-
-    await _loadPage(1, country: country, safesearch: safesearch);
-  }
-
-  Future<void> loadPage(int page, {bool forceRefresh = false}) async {
-    if (state.query.isEmpty) return;
-    
-    // Sayfa sınırını kontrol et (1-10 arası)
-    if (page < 1 || page > maxPages) {
-      return;
-    }
-    
-    // Aynı sorgu ve sayfa için cache'de veri varsa ve forceRefresh false ise cache'den getir
-    if (!forceRefresh && 
-        _isCached(state.query, page) && 
-        state.status != NewsSearchStatus.loading) {
-      _emitFromCache(state.query, page);
-      return;
-    }
-    
-    if (state.status == NewsSearchStatus.loading) return;
-
-    await _loadPage(page);
-  }
-
-  Future<void> _loadPage(int page, {String? country, String? safesearch}) async {
-    emit(state.copyWith(status: NewsSearchStatus.loading));
 
     final result = await newsSearchUseCase.execute(
-      state.query,
-      page: page,
-      country: country,
-      safesearch: safesearch ?? 'strict',
+      query,
+      page: targetPage,
+      count: 20,
     );
 
     result.map(
-      success: (data) {
+      success: (results) {
         // Sonuçları cache'e kaydet
-        _addToCache(state.query, page, data);
+        addToCache(query, targetPage, results);
+        // Mevcut sayfayı sakla
+        _queryCurrentPage[query] = targetPage;
         
-        final hasReachedMax = page >= maxPages ||
-            data.isEmpty ||
-            data.length < 20;
+        if (results.isEmpty && targetPage == 1) {
+          emit(state.copyWith(
+            status: NewsSearchStatus.empty,
+            results: [],
+            hasReachedMax: true,
+            currentPage: targetPage,
+          ));
+        } else {
+          final hasReachedMax = targetPage >= maxPages ||
+              results.isEmpty ||
+              results.length < 10;
 
-        emit(state.copyWith(
-          status: NewsSearchStatus.success,
-          results: data,
-          currentPage: page,
-          hasReachedMax: hasReachedMax,
-        ));
+          emit(state.copyWith(
+            status: NewsSearchStatus.success,
+            results: results,
+            currentPage: targetPage,
+            hasReachedMax: hasReachedMax,
+            query: query,
+          ));
+        }
       },
       failure: (error) {
         emit(state.copyWith(
           status: NewsSearchStatus.failure,
           errorMessage: error,
+          currentPage: targetPage,
         ));
       },
     );
   }
-
-  bool _isCached(String query, int page) {
-    return _queryCache.containsKey(query) && _queryCache[query]!.containsKey(page);
-  }
-
-  void _emitFromCache(String query, int page) {
-    final cachedResults = _queryCache[query]![page]!;
+  @override
+  void _emitCachedResults(String query, int page, List<NewsSearchResult> results) {
     emit(state.copyWith(
       status: NewsSearchStatus.success,
-      results: cachedResults,
+      results: results,
       currentPage: page,
       query: query,
-      hasReachedMax: page >= maxPages || cachedResults.isEmpty || cachedResults.length < 20,
+      hasReachedMax: page >= maxPages || results.isEmpty || results.length < 20,
     ));
   }
-
-  void _addToCache(String query, int page, List<NewsSearchResult> results) {
-    if (!_queryCache.containsKey(query)) {
-      _queryCache[query] = {};
+   Future<void> loadPage(int page) async {
+    if (state.query.isNotEmpty && page >= 1 && page <= maxPages) {
+      await searchNews(state.query, page: page);
     }
-    _queryCache[query]![page] = results;
   }
 
   void clearResults() {
-    _queryCache.clear();
+    clearCache();
+    _queryCurrentPage.clear();
     emit(const NewsSearchState());
+  }
+
+  // Önceki sayfa
+  Future<void> previousPage() async {
+    if (state.currentPage > 1) {
+      await loadPage(state.currentPage - 1);
+    }
+  }
+
+  // Sonraki sayfa
+  Future<void> nextPage() async {
+    if (state.currentPage < maxPages && !state.hasReachedMax) {
+      await loadPage(state.currentPage + 1);
+    }
   }
 }

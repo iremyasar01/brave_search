@@ -64,7 +64,7 @@ class SearchFilters extends StatelessWidget {
           context.read<ImageSearchCubit>().searchImages(currentQuery, forceRefresh: false);
           break;
         case 'videos':
-          context.read<VideoSearchCubit>().searchVideos(currentQuery, forceRefresh: false);
+          context.read<VideoSearchCubit>().searchVideo(currentQuery, forceRefresh: false);
           break;
         case 'news':
           context.read<NewsSearchCubit>().searchNews(currentQuery, forceRefresh: false);

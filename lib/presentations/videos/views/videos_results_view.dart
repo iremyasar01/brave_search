@@ -51,7 +51,7 @@ class VideosResultsView extends StatelessWidget {
       case VideoSearchStatus.failure:
         return GenericSearchErrorWidget(
           errorMessage: state.errorMessage,
-          onRetry: () => context.read<VideoSearchCubit>().searchVideos(state.query),
+          onRetry: () => context.read<VideoSearchCubit>().searchVideo(state.query),
         );
       case VideoSearchStatus.success:
         return state.results.isEmpty

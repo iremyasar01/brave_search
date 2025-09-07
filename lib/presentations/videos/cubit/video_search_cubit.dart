@@ -1,132 +1,133 @@
+import 'package:brave_search/common/interfaces/base_search_cubit.dart';
+import 'package:brave_search/core/cache/cache_manager.dart';
 import 'package:brave_search/domain/entities/video_search_result.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import '../../../domain/usecases/video_search_use_case.dart';
 import 'video_search_state.dart';
 
 @injectable
-class VideoSearchCubit extends Cubit<VideoSearchState> {
+class VideoSearchCubit extends BaseSearchCubit<VideoSearchResult, VideoSearchState> {
   final VideoSearchUseCase videoSearchUseCase;
-  final Map<String, Map<int, List<VideoSearchResult>>> _queryCache = {};
+  final Map<String, int> _queryCurrentPage = {};
   static const int maxPages = 10;
 
-  VideoSearchCubit(this.videoSearchUseCase) : super(const VideoSearchState());
+  VideoSearchCubit(
+    this.videoSearchUseCase,
+    @Named('videoCacheManager') CacheManager<VideoSearchResult> cacheManager,
+  ) : super(cacheManager, const VideoSearchState());
 
-  Future<void> searchVideos(
-    String query, {
-    String? country,
-    String safesearch = 'strict',
-    bool forceRefresh = false,
-  }) async {
-    if (query.trim().isEmpty) {
-      emit(state.copyWith(status: VideoSearchStatus.empty));
+  Future<void> searchVideo(String query, {int? page, bool forceRefresh = false}) async {
+    if (query.trim().isEmpty) return;
+
+    // Sayfa belirtilmemişse, önceki sayfayı kullan veya 1 yap
+    final int targetPage = page ?? _queryCurrentPage[query] ?? 1;
+
+    // Sayfa sınırını kontrol et
+    if (targetPage < 1 || targetPage > maxPages) {
+      debugPrint('Sayfa sınırı aşıldı: $targetPage (Max: $maxPages)');
       return;
     }
 
-    // Aynı sorgu için cache'de veri varsa ve forceRefresh false ise cache'den getir
-    if (!forceRefresh && 
-        _isCached(query, 1) && 
-        state.status != VideoSearchStatus.loading) {
-      _emitFromCache(query, 1);
+    // Cache kontrolü - forceRefresh false ise cache'den getir
+    if (!forceRefresh && await checkAndEmitFromCache(query, targetPage)) {
       return;
     }
 
-    // Yeni arama yapılıyorsa cache'i temizle
-    if (state.query != query) {
-      _queryCache.remove(query);
+    // Yeni arama yapılıyorsa veya forceRefresh true ise loading state'i göster
+    if (targetPage == 1 || state.query != query) {
+      emit(state.copyWith(
+        status: VideoSearchStatus.loading,
+        query: query,
+        currentPage: targetPage,
+        hasReachedMax: false,
+        results: [],
+      ));
+    } else {
+      emit(state.copyWith(
+        status: VideoSearchStatus.loading,
+        currentPage: targetPage,
+      ));
     }
-
-    emit(state.copyWith(
-      status: VideoSearchStatus.loading,
-      query: query,
-      currentPage: 1,
-      hasReachedMax: false,
-      results: [],
-    ));
-
-    await _loadPage(1, country: country, safesearch: safesearch);
-  }
-
-  Future<void> loadPage(int page, {bool forceRefresh = false}) async {
-    if (state.query.isEmpty) return;
-    
-    // Sayfa sınırını kontrol et (1-10 arası)
-    if (page < 1 || page > maxPages) {
-      return;
-    }
-    
-    // Aynı sorgu ve sayfa için cache'de veri varsa ve forceRefresh false ise cache'den getir
-    if (!forceRefresh && 
-        _isCached(state.query, page) && 
-        state.status != VideoSearchStatus.loading) {
-      _emitFromCache(state.query, page);
-      return;
-    }
-    
-    if (state.status == VideoSearchStatus.loading) return;
-
-    await _loadPage(page);
-  }
-
-  Future<void> _loadPage(int page, {String? country, String? safesearch}) async {
-    emit(state.copyWith(status: VideoSearchStatus.loading));
 
     final result = await videoSearchUseCase.execute(
-      state.query,
-      page: page,
-      country: country,
-      safesearch: safesearch ?? 'strict',
+      query,
+      page: targetPage,
+      count: 20,
     );
 
     result.map(
-      success: (data) {
+      success: (results) {
         // Sonuçları cache'e kaydet
-        _addToCache(state.query, page, data);
+        addToCache(query, targetPage, results);
+        // Mevcut sayfayı sakla
+        _queryCurrentPage[query] = targetPage;
         
-        final hasReachedMax = page >= maxPages ||
-            data.isEmpty ||
-            data.length < 20;
+        if (results.isEmpty && targetPage == 1) {
+          emit(state.copyWith(
+            status: VideoSearchStatus.empty,
+            results: [],
+            hasReachedMax: true,
+            currentPage: targetPage,
+          ));
+        } else {
+          final hasReachedMax = targetPage >= maxPages ||
+              results.isEmpty ||
+              results.length < 10;
 
-        emit(state.copyWith(
-          status: VideoSearchStatus.success,
-          results: data,
-          currentPage: page,
-          hasReachedMax: hasReachedMax,
-        ));
+          emit(state.copyWith(
+            status: VideoSearchStatus.success,
+            results: results,
+            currentPage: targetPage,
+            hasReachedMax: hasReachedMax,
+            query: query,
+          ));
+        }
       },
       failure: (error) {
         emit(state.copyWith(
           status: VideoSearchStatus.failure,
           errorMessage: error,
+          currentPage: targetPage,
         ));
       },
     );
   }
 
-  bool _isCached(String query, int page) {
-    return _queryCache.containsKey(query) && _queryCache[query]!.containsKey(page);
-  }
-
-  void _emitFromCache(String query, int page) {
-    final cachedResults = _queryCache[query]![page]!;
+  @override
+  void _emitCachedResults(String query, int page, List<VideoSearchResult> results) {
     emit(state.copyWith(
       status: VideoSearchStatus.success,
-      results: cachedResults,
+      results: results,
       currentPage: page,
       query: query,
-      hasReachedMax: page >= maxPages || cachedResults.isEmpty || cachedResults.length < 20,
+      hasReachedMax: page >= maxPages || results.isEmpty || results.length < 10,
     ));
   }
 
-  void _addToCache(String query, int page, List<VideoSearchResult> results) {
-    if (!_queryCache.containsKey(query)) {
-      _queryCache[query] = {};
+  Future<void> loadPage(int page) async {
+    if (state.query.isNotEmpty && page >= 1 && page <= maxPages) {
+      await searchVideo(state.query, page: page);
     }
-    _queryCache[query]![page] = results;
   }
 
   void clearResults() {
-    _queryCache.clear();
+    clearCache();
+    _queryCurrentPage.clear();
     emit(const VideoSearchState());
+  }
+
+  // Önceki sayfa
+  Future<void> previousPage() async {
+    if (state.currentPage > 1) {
+      await loadPage(state.currentPage - 1);
+    }
+  }
+
+  // Sonraki sayfa
+  Future<void> nextPage() async {
+    if (state.currentPage < maxPages && !state.hasReachedMax) {
+      await loadPage(state.currentPage + 1);
+    }
   }
 }

@@ -29,6 +29,10 @@ import '../../data/repositories/local_repository_impl.dart' as _i326;
 import '../../data/repositories/news_search_repository_impl.dart' as _i294;
 import '../../data/repositories/video_search_repository_impl.dart' as _i208;
 import '../../data/repositories/web_search_repository_impl.dart' as _i860;
+import '../../domain/entities/image_search_result.dart' as _i555;
+import '../../domain/entities/news_search_result.dart' as _i245;
+import '../../domain/entities/video_search_result.dart' as _i540;
+import '../../domain/entities/web_search_result.dart' as _i155;
 import '../../domain/repositories/image_search_repository.dart' as _i71;
 import '../../domain/repositories/local_repository.dart' as _i144;
 import '../../domain/repositories/news_search_repository.dart' as _i838;
@@ -51,8 +55,10 @@ import '../../presentations/images/cubit/image_search_cubit.dart' as _i43;
 import '../../presentations/news/cubit/news_search_cubit.dart' as _i551;
 import '../../presentations/videos/cubit/video_search_cubit.dart' as _i605;
 import '../../presentations/web/cubit/web_search_cubit.dart' as _i372;
+import '../cache/cache_manager.dart' as _i326;
 import '../network/cubit/network_cubit.dart' as _i684;
 import '../network/network_info.dart' as _i932;
+import 'cache_module.dart' as _i363;
 import 'network_module.dart' as _i567;
 import 'register_module.dart' as _i291;
 
@@ -69,6 +75,7 @@ _i174.GetIt $initGetIt(
   );
   final registerModule = _$RegisterModule();
   final networkModule = _$NetworkModule();
+  final cacheModule = _$CacheModule();
   gh.singleton<_i361.Dio>(() => registerModule.dio);
   gh.lazySingleton<_i895.Connectivity>(() => networkModule.connectivity);
   gh.lazySingleton<_i161.InternetConnection>(
@@ -80,6 +87,22 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i851.LocalDataSource>(() => _i851.LocalDataSourceImpl());
   gh.lazySingleton<_i144.LocalRepository>(
       () => _i326.LocalRepositoryImpl(gh<_i851.LocalDataSource>()));
+  gh.lazySingleton<_i326.CacheManager<_i155.WebSearchResult>>(
+    () => cacheModule.webCacheManager,
+    instanceName: 'webCacheManager',
+  );
+  gh.lazySingleton<_i326.CacheManager<_i540.VideoSearchResult>>(
+    () => cacheModule.videoCacheManager,
+    instanceName: 'videoCacheManager',
+  );
+  gh.lazySingleton<_i326.CacheManager<_i245.NewsSearchResult>>(
+    () => cacheModule.newsCacheManager,
+    instanceName: 'newsCacheManager',
+  );
+  gh.lazySingleton<_i326.CacheManager<_i555.ImageSearchResult>>(
+    () => cacheModule.imageCacheManager,
+    instanceName: 'imageCacheManager',
+  );
   gh.lazySingleton<_i805.VideoSearchRemoteDataSource>(
       () => _i805.VideoSearchRemoteDataSourceImpl(gh<_i361.Dio>()));
   gh.lazySingleton<_i709.ImageSearchRemoteDataSource>(
@@ -120,23 +143,34 @@ _i174.GetIt $initGetIt(
       _i803.ImageSearchRepositoryImpl(gh<_i709.ImageSearchRemoteDataSource>()));
   gh.lazySingleton<_i838.NewsSearchRepository>(() =>
       _i294.NewsSearchRepositoryImpl(gh<_i895.NewsSearchRemoteDataSource>()));
+  gh.factory<_i372.WebSearchCubit>(() => _i372.WebSearchCubit(
+        gh<_i109.WebSearchUseCase>(),
+        gh<_i326.CacheManager<_i155.WebSearchResult>>(
+            instanceName: 'webCacheManager'),
+      ));
   gh.factory<_i936.NewsSearchUseCase>(
       () => _i936.NewsSearchUseCase(gh<_i838.NewsSearchRepository>()));
-  gh.factory<_i372.WebSearchCubit>(
-      () => _i372.WebSearchCubit(gh<_i109.WebSearchUseCase>()));
   gh.factory<_i967.ImageSearchUseCase>(
       () => _i967.ImageSearchUseCase(gh<_i71.ImageSearchRepository>()));
   gh.factory<_i43.ImageSearchCubit>(
       () => _i43.ImageSearchCubit(gh<_i967.ImageSearchUseCase>()));
+  gh.factory<_i551.NewsSearchCubit>(() => _i551.NewsSearchCubit(
+        gh<_i936.NewsSearchUseCase>(),
+        gh<_i326.CacheManager<_i245.NewsSearchResult>>(
+            instanceName: 'newsCacheManager'),
+      ));
   gh.factory<_i733.VideoSearchUseCase>(
       () => _i733.VideoSearchUseCase(gh<_i949.VideoSearchRepository>()));
-  gh.factory<_i551.NewsSearchCubit>(
-      () => _i551.NewsSearchCubit(gh<_i936.NewsSearchUseCase>()));
-  gh.factory<_i605.VideoSearchCubit>(
-      () => _i605.VideoSearchCubit(gh<_i733.VideoSearchUseCase>()));
+  gh.factory<_i605.VideoSearchCubit>(() => _i605.VideoSearchCubit(
+        gh<_i733.VideoSearchUseCase>(),
+        gh<_i326.CacheManager<_i540.VideoSearchResult>>(
+            instanceName: 'videoCacheManager'),
+      ));
   return getIt;
 }
 
 class _$RegisterModule extends _i291.RegisterModule {}
 
 class _$NetworkModule extends _i567.NetworkModule {}
+
+class _$CacheModule extends _i363.CacheModule {}
