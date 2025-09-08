@@ -95,7 +95,7 @@ class VideoSearchCubit extends BaseSearchCubit<VideoSearchResult, VideoSearchSta
   }
 
   @override
-  void _emitCachedResults(String query, int page, List<VideoSearchResult> results) {
+  void emitCachedResults(String query, int page, List<VideoSearchResult> results) {
     emit(state.copyWith(
       status: VideoSearchStatus.success,
       results: results,

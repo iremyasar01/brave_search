@@ -97,7 +97,7 @@ class NewsSearchCubit extends BaseSearchCubit<NewsSearchResult, NewsSearchState>
     );
   }
   @override
-  void _emitCachedResults(String query, int page, List<NewsSearchResult> results) {
+  void emitCachedResults(String query, int page, List<NewsSearchResult> results) {
     emit(state.copyWith(
       status: NewsSearchStatus.success,
       results: results,

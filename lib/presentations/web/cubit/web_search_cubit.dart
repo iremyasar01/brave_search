@@ -1,7 +1,6 @@
 import 'package:brave_search/common/interfaces/base_search_cubit.dart';
 import 'package:brave_search/domain/entities/web_search_result.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:brave_search/core/cache/cache_manager.dart';
 import 'package:brave_search/domain/usecases/web_search_use_case.dart';
@@ -96,7 +95,7 @@ class WebSearchCubit extends BaseSearchCubit<WebSearchResult, WebSearchState> {
   }
 
   @override
-  void _emitCachedResults(String query, int page, List<WebSearchResult> results) {
+  void emitCachedResults(String query, int page, List<WebSearchResult> results) {
     emit(state.copyWith(
       status: WebSearchStatus.success,
       results: results,

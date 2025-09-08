@@ -11,7 +11,7 @@ abstract class BaseSearchCubit<T, S> extends Cubit<S> {
     if (await cacheManager.exists(query, page)) {
       final cachedResults = await cacheManager.get(query, page);
       if (cachedResults != null) {
-        _emitCachedResults(query, page, cachedResults);
+        emitCachedResults(query, page, cachedResults);
         return true;
       }
     }
@@ -27,5 +27,5 @@ abstract class BaseSearchCubit<T, S> extends Cubit<S> {
   }
   
   // Her cubit kendi emit metodunu implemente etmeli
-  void _emitCachedResults(String query, int page, List<T> results);
+  void emitCachedResults(String query, int page, List<T> results);
 }
