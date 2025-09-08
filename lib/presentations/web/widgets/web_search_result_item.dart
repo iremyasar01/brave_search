@@ -6,7 +6,7 @@ import 'package:brave_search/presentations/web/widgets/web_search_top_row_widget
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:brave_search/core/extensions/widget_extensions.dart';
-
+import 'package:flutter/services.dart';
 
 class WebSearchResultItem extends StatelessWidget {
   final WebSearchResult result;
@@ -33,7 +33,7 @@ class WebSearchResultItem extends StatelessWidget {
           // Title
           GestureDetector(
             onTap: () => _openInAppWebView(context, result),
-            onLongPress: () => _showContextMenu(context, result),
+            onLongPress: () => _showLongPressMenu(context, result),
             child: Text(
               result.title,
               style: TextStyle(
@@ -48,7 +48,7 @@ class WebSearchResultItem extends StatelessWidget {
           // Description
           GestureDetector(
             onTap: () => _openInAppWebView(context, result),
-            onLongPress: () => _showContextMenu(context, result),
+            onLongPress: () => _showLongPressMenu(context, result),
             child: Text(
               result.description,
               style: TextStyle(
@@ -74,35 +74,34 @@ class WebSearchResultItem extends StatelessWidget {
     );
   }
 
-  void _showContextMenu(BuildContext context, WebSearchResult result) {
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-    
-    showMenu(
+  void _showLongPressMenu(BuildContext context, WebSearchResult result) {
+    showModalBottomSheet(
       context: context,
-      position: RelativeRect.fromRect(
-        Rect.fromPoints(
-          Offset(overlay.size.width / 2, overlay.size.height / 2),
-          Offset(overlay.size.width / 2, overlay.size.height / 2),
-        ),
-        Offset.zero & overlay.size,
-      ),
-      items: [
-        PopupMenuItem(
-          value: 'browser',
-          child: Row(
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
             children: [
-              const Icon(Icons.open_in_browser, size: 20),
-              const SizedBox(width: 8),
-              Text('Browser\'da aç'),
+              ListTile(
+                leading: const Icon(Icons.open_in_browser),
+                title: const Text('Browser\'da aç'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _launchUrlExternal(result.url);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.content_copy),
+                title: const Text('Linki kopyala'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _copyToClipboard(context, result.url);
+                },
+              ),
             ],
           ),
-        ),
-      ],
-    ).then((value) {
-      if (value == 'browser') {
-        _launchUrlExternal(result.url);
-      }
-    });
+        );
+      },
+    );
   }
 
   Future<void> _launchUrlExternal(String url) async {
@@ -123,6 +122,15 @@ class WebSearchResultItem extends StatelessWidget {
           title: result.title,
         ),
       ),
+    );
+  }
+
+  void _copyToClipboard(BuildContext context, String text) {
+    // Clipboard'a kopyalama işlemi
+    // Gerekli import: import 'package:flutter/services.dart';
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Link kopyalandı')),
     );
   }
 }

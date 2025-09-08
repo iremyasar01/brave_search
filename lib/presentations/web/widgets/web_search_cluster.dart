@@ -4,7 +4,7 @@ import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:brave_search/domain/entities/web_search_result.dart';
 import 'package:brave_search/core/extensions/widget_extensions.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'package:flutter/services.dart';
 
 class WebSearchCluster extends StatelessWidget {
   final List<WebCluster> cluster;
@@ -31,7 +31,7 @@ class WebSearchCluster extends StatelessWidget {
         ...cluster.take(3).map((clusterItem) => 
           GestureDetector(
             onTap: () => _openInAppWebView(context, clusterItem),
-            onLongPress: () => _showContextMenu(context, clusterItem),
+            onLongPress: () => _showLongPressMenu(context, clusterItem),
             child: Row(
               children: [
                 Icon(
@@ -59,35 +59,34 @@ class WebSearchCluster extends StatelessWidget {
     );
   }
 
-  void _showContextMenu(BuildContext context, WebCluster clusterItem) {
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-    
-    showMenu(
+  void _showLongPressMenu(BuildContext context, WebCluster clusterItem) {
+    showModalBottomSheet(
       context: context,
-      position: RelativeRect.fromRect(
-        Rect.fromPoints(
-          Offset(overlay.size.width / 2, overlay.size.height / 2),
-          Offset(overlay.size.width / 2, overlay.size.height / 2),
-        ),
-        Offset.zero & overlay.size,
-      ),
-      items:const [
-        PopupMenuItem(
-          value: 'browser',
-          child: Row(
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
             children: [
-               Icon(Icons.open_in_browser, size: 20),
-               SizedBox(width: 8),
-              Text('Browser\'da aç'),
+              ListTile(
+                leading: const Icon(Icons.open_in_browser),
+                title: const Text('Browser\'da aç'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _launchUrlExternal(clusterItem.url);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.content_copy),
+                title: const Text('Linki kopyala'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _copyToClipboard(context, clusterItem.url);
+                },
+              ),
             ],
           ),
-        ),
-      ],
-    ).then((value) {
-      if (value == 'browser') {
-        _launchUrlExternal(clusterItem.url);
-      }
-    });
+        );
+      },
+    );
   }
 
   Future<void> _launchUrlExternal(String url) async {
@@ -106,6 +105,15 @@ class WebSearchCluster extends StatelessWidget {
           title: clusterItem.title,
         ),
       ),
+    );
+  }
+
+  void _copyToClipboard(BuildContext context, String text) {
+    // Clipboard'a kopyalama işlemi
+    // Gerekli import: import 'package:flutter/services.dart';
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Link kopyalandı')),
     );
   }
 }
