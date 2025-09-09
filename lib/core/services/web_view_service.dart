@@ -1,4 +1,4 @@
-import 'package:brave_search/presentations/web/widgets/in_app_web_view_screen.dart';
+import 'package:brave_search/presentations/webview/views/in_app_web_view_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +13,7 @@ class WebViewService {
     );
   }
 
+  // Diğer metodlar aynı kalabilir...
   static void showLinkContextMenu(BuildContext context, {required String url, required String title}) {
     showModalBottomSheet(
       context: context,

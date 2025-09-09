@@ -2,6 +2,7 @@ class AssetConstants {
   // Animasyonlar
   static const String animationsPath = 'assets/animations';
   static const String constAnimation = '$animationsPath/Web Search..json';
+  static const String searchAnim = '$animationsPath/SearchingW.json';
   
   // Görseller
   static const String imagesPath = 'assets/images';

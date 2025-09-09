@@ -64,3 +64,4 @@ flutter:
     - assets/images/brave_color_darkbackground.png
     - assets/images/brave_color_lightbackground.png
     - assets/animations/Web Search..json
+    - assets/animations/SearchingW.json

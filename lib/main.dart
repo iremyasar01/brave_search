@@ -1,3 +1,4 @@
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/data/datasources/local/local_data_source.dart';
 import 'package:brave_search/domain/entities/search_history_item.dart';
 import 'package:brave_search/domain/entities/tab_data.dart';
@@ -46,14 +47,14 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => ThemeCubit()),
         BlocProvider(create: (context) => getIt<BrowserCubit>()),
         BlocProvider(create: (context) => getIt<WebSearchCubit>()),
-        BlocProvider(create: (context) => getIt<HistoryCubit>()), // Yeni eklenen
+        BlocProvider(create: (context) => getIt<HistoryCubit>()), 
       ],
       child: BlocBuilder<ThemeCubit, AppThemeMode>(
         builder: (context, themeMode) {
           final themeCubit = context.read<ThemeCubit>();
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            title: 'Brave Search Browser',
+            title: AppConstant.braveSearchBrowser,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeCubit.themeMode,

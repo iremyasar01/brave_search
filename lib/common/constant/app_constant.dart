@@ -4,6 +4,7 @@ class AppConstant {
   static const braveSearchBrowser= 'Brave Search Browser';
   static const slogan = 'Gizliliğinizi koruyarak arama yapın';
   static const hintText = 'Ara veya adres gir...';
+  static const loadingText = "yükleniyor...";
 }
 
 class ImageSearchStrings {

@@ -1,4 +1,4 @@
-import 'package:brave_search/presentations/web/widgets/in_app_web_view_screen.dart';
+import 'package:brave_search/presentations/webview/views/in_app_web_view_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:brave_search/domain/entities/web_search_result.dart';
