@@ -16,7 +16,6 @@ class ImageSearchContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Başlık
         if (result.title.isNotEmpty)
           Text(
             result.title,
