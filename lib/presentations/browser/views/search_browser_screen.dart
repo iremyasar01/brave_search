@@ -16,7 +16,6 @@ import '../widgets/search_results_view.dart';
 import '../../web/cubit/web_search_cubit.dart';
 import '../../images/cubit/image_search_cubit.dart';
 
-// Ana tarayıcı ekranı
 class SearchBrowserScreen extends StatefulWidget {
   const SearchBrowserScreen({super.key});
 
@@ -35,7 +34,6 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
   void initState() {
     super.initState();
     
-    // Dependency Injection ile cubit'leri al
     _browserCubit = GetIt.instance<BrowserCubit>();
     _webSearchCubit = GetIt.instance<WebSearchCubit>();
     _imageSearchCubit = GetIt.instance<ImageSearchCubit>();
@@ -43,11 +41,59 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
     _newsSearchCubit = GetIt.instance<NewsSearchCubit>();
   }
 
-  // Sekme değiştirme işlemi
-  void _onTabTapped(int index) => _browserCubit.switchTab(index);
+  void _onTabTapped(int index) {
+    // ÇÖZÜM 1: Otomatik arama ile sekme değiştir
+    _browserCubit.switchTab(index);
+    
+    // ÇÖZÜM 2: Cache temizleme ile sekme değiştir (daha performanslı)
+    // _browserCubit.switchTabWithCacheClear(index);
+    
+    // ÇÖZÜM 3: Her sekmeye özel cache ile sekme değiştir (en performanslı)
+    // _browserCubit.switchTabWithTabSpecificCache(index);
+  }
   
-  // Yeni sekme ekleme işlemi
   void _addNewTab() => _browserCubit.addTab();
+
+  // Sekme değiştirildiğinde arama işlemlerini yönet
+  void _handleTabSwitchSearch(BrowserState browserState) {
+    if (!browserState.shouldRefreshSearch) return;
+    
+    final currentQuery = _browserCubit.activeTabQuery;
+    if (currentQuery.isEmpty) return;
+
+    // Cache temizleme gerekiyorsa önce temizle
+    if (browserState.shouldClearCache) {
+      _clearAllSearchResults();
+    }
+
+    // Arama türüne göre ilgili arama işlemini yap
+    switch (browserState.searchFilter) {
+      case 'all':
+      case 'web':
+        _webSearchCubit.searchWeb(currentQuery, forceRefresh: browserState.shouldClearCache);
+        break;
+      case 'images':
+        _imageSearchCubit.searchImages(currentQuery, forceRefresh: browserState.shouldClearCache);
+        break;
+      case 'videos':
+        _videoSearchCubit.searchVideo(currentQuery, forceRefresh: browserState.shouldClearCache);
+        break;
+      case 'news':
+        _newsSearchCubit.searchNews(currentQuery, forceRefresh: browserState.shouldClearCache);
+        break;
+    }
+
+    // Flag'leri sıfırla
+    _browserCubit.resetSearchRefreshFlag();
+  }
+
+  // Tüm arama sonuçlarını temizle
+  void _clearAllSearchResults() {
+    _webSearchCubit.clearResults();
+    _imageSearchCubit.clearResults();
+    _videoSearchCubit.clearResults();
+    _newsSearchCubit.clearResults();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,23 +110,25 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              const NetworkStatusBanner(), // Ağ durumu bildirimi
-              const BrowserHeader(), // Arama başlığı
+              const NetworkStatusBanner(),
+              const BrowserHeader(),
               Expanded(
                 child: BlocBuilder<NetworkCubit, NetworkState>(
                   builder: (context, networkState) {
-                    // İnternet bağlantısı kontrolü
                     if (networkState is NetworkDisconnected) {
                       return const NoInternetScreen();
                     }
                     
-                    return BlocBuilder<BrowserCubit, BrowserState>(
+                    return BlocConsumer<BrowserCubit, BrowserState>(
+                      listener: (context, browserState) {
+                        // Sekme değiştirildiğinde arama işlemlerini yönet
+                        _handleTabSwitchSearch(browserState);
+                      },
                       builder: (context, browserState) {
-                        // Sekme yoksa boş durum göster
                         if (browserState.tabs.isEmpty) {
                           return const EmptyBrowserState();
                         }
-                        return const SearchResultsView(); // Arama sonuçlarını göster
+                        return const SearchResultsView();
                       },
                     );
                   },

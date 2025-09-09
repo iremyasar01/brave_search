@@ -38,7 +38,6 @@ class BrowserCubit extends Cubit<BrowserState> {
       final savedTabs = await _getTabData();
       
       if (savedTabs.isNotEmpty) {
-        // Kayıtlı sekmeleri state'e yükle
         final tabIds = savedTabs.keys.toList();
         final tabQueries = Map<String, String>.fromIterables(
           savedTabs.keys,
@@ -54,7 +53,7 @@ class BrowserCubit extends Cubit<BrowserState> {
           savedTabs.keys,
           savedTabs.values.map((tab) => tab.newsResults),
         );
-        
+
         final hasSearched = Map<String, bool>.fromIterables(
           savedTabs.keys,
           savedTabs.values.map((tab) => tab.query.isNotEmpty),
@@ -103,49 +102,86 @@ class BrowserCubit extends Cubit<BrowserState> {
       searchType: 'web',
     ));
   }
-// BrowserCubit'e aşağıdaki değişiklikleri yapın:
 
-void addTab() {
-  final newTabId = 'tab_${DateTime.now().millisecondsSinceEpoch}';
-  final updatedTabs = List.of(state.tabs)..add(newTabId);
-  final updatedQueries = Map.of(state.tabQueries);
-  final updatedHasSearched = Map.of(state.hasSearched);
-  final updatedSearchTypes = Map.of(state.searchTypes);
-  
-  updatedQueries[newTabId] = '';
-  updatedHasSearched[newTabId] = false;
-  updatedSearchTypes[newTabId] = 'web'; // Yeni sekmeler web'den başlasın
-  
-  emit(state.copyWith(
-    tabs: updatedTabs,
-    activeTabIndex: updatedTabs.length - 1,
-    tabQueries: updatedQueries,
-    hasSearched: updatedHasSearched,
-    searchTypes: updatedSearchTypes,
-    searchFilter: 'web', // Yeni sekmede filtre web olsun
-  ));
-  
-  _saveTabData(TabData(
-    tabId: newTabId,
-    query: '',
-    webResults: [],
-    newsResults: [],
-    lastUpdated: DateTime.now(),
-    searchType: 'web', // Yeni sekmeler web'den başlasın
-  ));
-}
-
-void switchTab(int index) {
-  if (index >= 0 && index < state.tabs.length) {
-    final tabId = state.tabs[index];
-    final tabSearchType = state.searchTypes[tabId] ?? 'web';
+  // Yeni sekme ekle
+  void addTab() {
+    final newTabId = 'tab_${DateTime.now().millisecondsSinceEpoch}';
+    final updatedTabs = List.of(state.tabs)..add(newTabId);
+    final updatedQueries = Map.of(state.tabQueries);
+    final updatedHasSearched = Map.of(state.hasSearched);
+    final updatedSearchTypes = Map.of(state.searchTypes);
+    
+    updatedQueries[newTabId] = '';
+    updatedHasSearched[newTabId] = false;
+    updatedSearchTypes[newTabId] = 'web';
     
     emit(state.copyWith(
-      activeTabIndex: index,
-      searchFilter: tabSearchType, // Sekme değiştirildiğinde o sekmenin arama türüne geç
+      tabs: updatedTabs,
+      activeTabIndex: updatedTabs.length - 1,
+      tabQueries: updatedQueries,
+      hasSearched: updatedHasSearched,
+      searchTypes: updatedSearchTypes,
+      searchFilter: 'web',
+      // Yeni sekme oluştururken search cubit'leri temizle
+      shouldRefreshSearch: true,
+    ));
+    
+    _saveTabData(TabData(
+      tabId: newTabId,
+      query: '',
+      webResults: [],
+      newsResults: [],
+      lastUpdated: DateTime.now(),
+      searchType: 'web',
     ));
   }
-}
+
+  // ÇÖZÜM 1: Otomatik Arama (Senin Önerdiğin)
+  void switchTab(int index) {
+    if (index >= 0 && index < state.tabs.length) {
+      final tabId = state.tabs[index];
+      final tabSearchType = state.searchTypes[tabId] ?? 'web';
+      final tabQuery = state.tabQueries[tabId] ?? '';
+      
+      emit(state.copyWith(
+        activeTabIndex: index,
+        searchFilter: tabSearchType,
+        // Sekme değiştirildiğinde arama yapılması gerektiğini işaretle
+        shouldRefreshSearch: tabQuery.isNotEmpty,
+      ));
+    }
+  }
+
+  // ÇÖZÜM 2: Manuel Cache Temizleme ile Sekme Değiştirme
+  void switchTabWithCacheClear(int index) {
+    if (index >= 0 && index < state.tabs.length) {
+      final tabId = state.tabs[index];
+      final tabSearchType = state.searchTypes[tabId] ?? 'web';
+      
+      emit(state.copyWith(
+        activeTabIndex: index,
+        searchFilter: tabSearchType,
+        // Cache'i temizle ve yeniden arama yapılmasını işaretle
+        shouldRefreshSearch: true,
+        shouldClearCache: true,
+      ));
+    }
+  }
+
+  // ÇÖZÜM 3: Her Sekmeye Özel Cache ile Sekme Değiştirme
+  void switchTabWithTabSpecificCache(int index) {
+    if (index >= 0 && index < state.tabs.length) {
+      final tabId = state.tabs[index];
+      final tabSearchType = state.searchTypes[tabId] ?? 'web';
+      
+      emit(state.copyWith(
+        activeTabIndex: index,
+        searchFilter: tabSearchType,
+        // Aktif sekme değiştiğini belirt ama cache'i koruma
+        tabSwitched: true,
+      ));
+    }
+  }
 
   // Sekme kapat
   void closeTab(int index) {
@@ -283,6 +319,16 @@ void switchTab(int index) {
     ));
   }
 
+  // Arama filtresini ayarla
+  void setSearchFilter(String newFilter) {
+    emit(state.copyWith(searchFilter: newFilter));
+  }
+
+  // Search refresh flag'ini sıfırla
+  void resetSearchRefreshFlag() {
+    emit(state.copyWith(shouldRefreshSearch: false, shouldClearCache: false, tabSwitched: false));
+  }
+
   // Aktif sekme ID'sini getir
   String? get activeTabId {
     if (state.tabs.isNotEmpty && state.activeTabIndex < state.tabs.length) {
@@ -325,13 +371,6 @@ void switchTab(int index) {
       return state.searchTypes[tabId] ?? 'web';
     }
     return 'web';
-  }
-  
- 
-  
-  // Arama filtresini ayarla
-  void setSearchFilter(String newFilter) {
-    emit(state.copyWith(searchFilter: newFilter));
   }
   
   // Aktif sekmede arama yapılıp yapılmadığını kontrol et
