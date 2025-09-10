@@ -12,11 +12,13 @@ import '../widgets/empty_browser_state.dart';
 class SearchResultsView extends StatelessWidget {
   final ScrollController? scrollController;
   final ValueNotifier<bool>? headerVisibilityNotifier;
+  final ValueNotifier<bool>? paginationVisibilityNotifier;
 
   const SearchResultsView({
     super.key,
     this.scrollController,
     this.headerVisibilityNotifier,
+    this.paginationVisibilityNotifier,
   });
 
   @override
@@ -62,13 +64,17 @@ class SearchResultsView extends StatelessWidget {
   Widget _buildResultsContent(BuildContext context, BrowserState browserState) {
     // Scroll controller'ı her result view'a geçirin
     if (browserState.searchFilter == 'images') {
-      return ImagesResultsView(scrollController: scrollController);
+      return ImagesResultsView(scrollController: scrollController,
+          paginationVisibilityNotifier: paginationVisibilityNotifier, );
     } else if (browserState.searchFilter == 'videos') {
-      return VideosResultsView(scrollController: scrollController);
+      return VideosResultsView(scrollController: scrollController,
+          paginationVisibilityNotifier: paginationVisibilityNotifier, );
     } else if (browserState.searchFilter == 'news') {
-      return NewsResultsView(scrollController: scrollController);
+      return NewsResultsView(scrollController: scrollController,
+          paginationVisibilityNotifier: paginationVisibilityNotifier, );
     } else {
-      return WebResultsView(scrollController: scrollController);
+      return WebResultsView(scrollController: scrollController,
+          paginationVisibilityNotifier: paginationVisibilityNotifier, );
     }
   }
 }

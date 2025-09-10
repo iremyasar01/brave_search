@@ -13,8 +13,13 @@ import '../widgets/video_search_result_item.dart';
 
 class VideosResultsView extends StatelessWidget {
   final ScrollController? scrollController;
+  final ValueNotifier<bool>? paginationVisibilityNotifier;
 
-  const VideosResultsView({super.key, this.scrollController});
+  const VideosResultsView({
+    super.key,
+    this.scrollController,
+    this.paginationVisibilityNotifier,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,18 +32,30 @@ class VideosResultsView extends StatelessWidget {
             ),
             // Sayfa navigasyonu - sadece success durumunda göster
             if (state.status == VideoSearchStatus.success)
-              GenericPaginationControls(
-                currentPage: state.currentPage,
-                hasReachedMax: state.hasReachedMax,
-                onPageChanged: (page) => context.read<VideoSearchCubit>().loadPage(page),
-                maxPages: 10, // Video arama için maksimum 10 sayfa
+             ValueListenableBuilder<bool>(
+                valueListenable: paginationVisibilityNotifier ?? ValueNotifier(false),
+                builder: (context, isVisible, child) {
+                  return AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: isVisible ? 1.0 : 0.0,
+                    child: IgnorePointer(
+                      ignoring: !isVisible,
+                      child: GenericPaginationControls(
+                        currentPage: state.currentPage,
+                        hasReachedMax: state.hasReachedMax,
+                        onPageChanged: (page) =>
+                            context.read<VideoSearchCubit>().loadPage(page),
+                        maxPages: 10,
+                      ),
+                    ),
+                  );
+                },
               ),
           ],
         );
       },
     );
   }
-
   Widget _buildContent(BuildContext context, VideoSearchState state) {
     switch (state.status) {
       case VideoSearchStatus.initial:

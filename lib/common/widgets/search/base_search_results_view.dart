@@ -15,7 +15,7 @@ class BaseSearchResultsView<TState extends BaseSearchState<TResult>, TResult, TC
   final Widget Function(TResult item, int index) itemBuilder;
   final Function(TCubit cubit, String query) onRetry;
   final Function(TCubit cubit, int page) onPageChanged;
-  final ScrollController? scrollController; // Bu parametreyi ekleyin
+  final ScrollController? scrollController; 
 
   const BaseSearchResultsView({
     super.key,
@@ -25,7 +25,7 @@ class BaseSearchResultsView<TState extends BaseSearchState<TResult>, TResult, TC
     required this.itemBuilder,
     required this.onRetry,
     required this.onPageChanged,
-    this.scrollController, // Bu parametreyi ekleyin
+    this.scrollController, 
   });
 
   @override
@@ -70,7 +70,7 @@ class BaseSearchResultsView<TState extends BaseSearchState<TResult>, TResult, TC
             : GenericSearchResultsList<TResult>(
                 results: state.results,
                 itemBuilder: itemBuilder,
-                scrollController: scrollController, // Bu satırı ekleyin
+                scrollController: scrollController, 
               );
     }
   }

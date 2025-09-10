@@ -14,7 +14,8 @@ import '../cubit/news_search_state.dart';
 
 class NewsResultsView extends StatelessWidget {
   final ScrollController? scrollController;
-  const NewsResultsView({super.key, this.scrollController});
+  final ValueNotifier<bool>? paginationVisibilityNotifier;
+  const NewsResultsView({super.key, this.scrollController, this.paginationVisibilityNotifier});
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +28,24 @@ class NewsResultsView extends StatelessWidget {
             ),
             // Sayfa navigasyonu - sadece success durumunda göster
             if (state.status == NewsSearchStatus.success)
-              GenericPaginationControls(
-                currentPage: state.currentPage,
-                hasReachedMax: state.hasReachedMax,
-                onPageChanged: (page) =>
-                    context.read<NewsSearchCubit>().loadPage(page),
-                maxPages: 10, // Video arama için maksimum 10 sayfa
+         ValueListenableBuilder<bool>(
+                valueListenable: paginationVisibilityNotifier ?? ValueNotifier(false),
+                builder: (context, isVisible, child) {
+                  return AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: isVisible ? 1.0 : 0.0,
+                    child: IgnorePointer(
+                      ignoring: !isVisible,
+                      child: GenericPaginationControls(
+                        currentPage: state.currentPage,
+                        hasReachedMax: state.hasReachedMax,
+                        onPageChanged: (page) =>
+                            context.read<NewsSearchCubit>().loadPage(page),
+                        maxPages: 10,
+                      ),
+                    ),
+                  );
+                },
               ),
           ],
         );

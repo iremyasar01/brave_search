@@ -123,6 +123,7 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen>
               ValueListenableBuilder<bool>(
                 valueListenable: headerVisibilityNotifier,
                 builder: (context, isHeaderVisible, child) {
+
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
@@ -148,12 +149,14 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen>
                       },
                       builder: (context, browserState) {
                         if (browserState.tabs.isEmpty) {
+                          headerVisibilityNotifier.value = true;
                           return const EmptyBrowserState();
                         }
                         // SearchResultsView'a scroll controller ve visibility notifier'ları geçirin
                         return SearchResultsView(
                           scrollController: _scrollController,
                           headerVisibilityNotifier: headerVisibilityNotifier,
+                          paginationVisibilityNotifier: paginationVisibilityNotifier, 
                         );
                       },
                     );

@@ -12,8 +12,9 @@ import '../cubit/image_search_state.dart';
 
 class ImagesResultsView extends StatelessWidget {
   final ScrollController? scrollController;
+  final ValueNotifier<bool>? paginationVisibilityNotifier;
 
-  const ImagesResultsView({super.key, this.scrollController});
+  const ImagesResultsView({super.key, this.scrollController, this.paginationVisibilityNotifier});
 
   @override
    Widget build(BuildContext context) {
@@ -26,13 +27,28 @@ class ImagesResultsView extends StatelessWidget {
             ),
             // Sayfa navigasyonu - en alta taşındı
             if (state.status == ImageSearchStatus.success)
-              ImageSearchPaginationControls(state: state),
+              ValueListenableBuilder<bool>(
+                valueListenable: paginationVisibilityNotifier ?? ValueNotifier(false),
+                builder: (context, isVisible, child) {
+                  return AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: isVisible ? 1.0 : 0.0,
+                    child: IgnorePointer(
+                      ignoring: !isVisible,
+                      child: ImageSearchPaginationControls(
+                        state: state,
+                      ),
+                    ),
+                  );
+                },
+              ),
+           
           ],
         );
       },
     );
   }
-
+ //  ImageSearchPaginationControls(state: state),
   Widget _buildContent(BuildContext context, ImageSearchState state) {
     switch (state.status) {
       case ImageSearchStatus.initial:

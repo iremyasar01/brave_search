@@ -13,10 +13,12 @@ import '../cubit/web_search_state.dart';
 
 class WebResultsView extends StatelessWidget {
   final ScrollController? scrollController; 
+  final ValueNotifier<bool>? paginationVisibilityNotifier;
 
   const WebResultsView({
     super.key,
     this.scrollController, 
+    this.paginationVisibilityNotifier,
   });
 
   @override
@@ -30,12 +32,25 @@ class WebResultsView extends StatelessWidget {
             ),
             // Sayfa navigasyonu - sadece success durumunda göster
             if (state.status == WebSearchStatus.success)
-              GenericPaginationControls(
-                currentPage: state.currentPage,
-                hasReachedMax: state.hasReachedMax,
-                onPageChanged: (page) =>
-                    context.read<WebSearchCubit>().loadPage(page),
-                maxPages: 10,
+              // Pagination visibility 
+              ValueListenableBuilder<bool>(
+                valueListenable: paginationVisibilityNotifier ?? ValueNotifier(false),
+                builder: (context, isVisible, child) {
+                  return AnimatedOpacity(
+                    duration: const Duration(milliseconds: 300),
+                    opacity: isVisible ? 1.0 : 0.0,
+                    child: IgnorePointer(
+                      ignoring: !isVisible,
+                      child: GenericPaginationControls(
+                        currentPage: state.currentPage,
+                        hasReachedMax: state.hasReachedMax,
+                        onPageChanged: (page) =>
+                            context.read<WebSearchCubit>().loadPage(page),
+                        maxPages: 10,
+                      ),
+                    ),
+                  );
+                },
               ),
           ],
         );
@@ -73,4 +88,5 @@ class WebResultsView extends StatelessWidget {
                 scrollController: scrollController,
             );
     }
-}}
+  }
+}
