@@ -1,4 +1,4 @@
-// history_view.dart
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/presentations/history/cubit/history_cubit.dart';
 import 'package:brave_search/presentations/history/cubit/history_state.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +38,7 @@ class HistoryView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Arama Geçmişi',
+                      HistorySearchStrings.searchHistory,
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -67,7 +67,7 @@ class HistoryView extends StatelessWidget {
                       //side: BorderSide(color: colors.error),
                       minimumSize: const Size(double.infinity, 48),
                     ),
-                    child: const Text('Tüm Geçmişi Temizle'),
+                    child: const Text(HistorySearchStrings.deleteAllHistory),
                   ),
                 ),
             ],
@@ -95,7 +95,7 @@ class HistoryView extends StatelessWidget {
                     size: 64,
                   ).paddingBottom(16),
                   Text(
-                    'Henüz arama geçmişi yok',
+                    HistorySearchStrings.noHistory,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: colors.textHint,
                     ),
@@ -110,7 +110,7 @@ class HistoryView extends StatelessWidget {
                 final item = history[index];
                 return ListTile(
                   leading: Icon(
-                    item.searchType == 'web' 
+                    item.searchType == WebSearchStrings.web 
                       ? Icons.public 
                       : Icons.article,
                     color: colors.iconSecondary,
@@ -161,7 +161,7 @@ class HistoryView extends StatelessWidget {
             ),
             TextButton(
               onPressed: () => context.read<HistoryCubit>().loadHistory(),
-              child: const Text('Tekrar Dene'),
+              child: const Text(AppConstant.tryAgain),
             ),
           ],
         ),

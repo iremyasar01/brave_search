@@ -1,3 +1,4 @@
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/common/widgets/bottomnavbar/tab_grid_item.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
@@ -21,7 +22,7 @@ class TabsGrid extends StatelessWidget {
         ? Expanded(
             child: Center(
               child: Text(
-                'Hiç sekme yok',
+                TabStrings.noneTab,
                 style: TextStyle(color: colors.textHint),
               ),
             ),

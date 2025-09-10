@@ -1,4 +1,3 @@
-// history_state.dart
 import 'package:brave_search/domain/entities/search_history_item.dart';
 
 abstract class HistoryState {

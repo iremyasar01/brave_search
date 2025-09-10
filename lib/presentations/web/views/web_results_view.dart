@@ -5,16 +5,11 @@ import 'package:brave_search/common/widgets/search/search_error_widget.dart';
 import 'package:brave_search/common/widgets/search/search_results_list.dart';
 import 'package:brave_search/core/widgets/empty/empty_state.dart';
 import 'package:brave_search/core/widgets/loading/loading_indicator.dart';
-
 import 'package:brave_search/presentations/web/widgets/web_search_result_item.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../cubit/web_search_cubit.dart';
 import '../cubit/web_search_state.dart';
-
-
 
 class WebResultsView extends StatelessWidget {
   const WebResultsView({super.key});
@@ -33,7 +28,8 @@ class WebResultsView extends StatelessWidget {
               GenericPaginationControls(
                 currentPage: state.currentPage,
                 hasReachedMax: state.hasReachedMax,
-                onPageChanged: (page) => context.read<WebSearchCubit>().loadPage(page),
+                onPageChanged: (page) =>
+                    context.read<WebSearchCubit>().loadPage(page),
                 maxPages: 10, // Video arama için maksimum 10 sayfa
               ),
           ],
@@ -45,7 +41,8 @@ class WebResultsView extends StatelessWidget {
   Widget _buildContent(BuildContext context, WebSearchState state) {
     switch (state.status) {
       case WebSearchStatus.initial:
-        return const SearchInitialWidget(message: NewsSearchStrings.newsInitialMessage);
+        return const SearchInitialWidget(
+            message: NewsSearchStrings.newsInitialMessage);
       case WebSearchStatus.loading:
         return const AppLoadingIndicator();
       case WebSearchStatus.empty:
@@ -61,12 +58,13 @@ class WebResultsView extends StatelessWidget {
       case WebSearchStatus.success:
         return state.results.isEmpty
             ? const AppEmptyState(
-                message: NewsSearchStrings.newsNoResultsMessage, 
+                message: NewsSearchStrings.newsNoResultsMessage,
                 icon: Icons.web_asset_off_outlined,
               )
             : GenericSearchResultsList(
                 results: state.results,
-                itemBuilder: (result, index) => WebSearchResultItem(result: result),
+                itemBuilder: (result, index) =>
+                    WebSearchResultItem(result: result),
               );
     }
   }

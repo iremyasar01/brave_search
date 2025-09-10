@@ -1,3 +1,4 @@
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/presentations/webview/views/in_app_web_view_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
@@ -76,7 +77,7 @@ class WebSearchCluster extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.content_copy),
-                title: const Text('Linki kopyala'),
+                title: const Text(AppConstant.copyLink),
                 onTap: () {
                   Navigator.pop(context);
                   _copyToClipboard(context, clusterItem.url);
@@ -109,11 +110,9 @@ class WebSearchCluster extends StatelessWidget {
   }
 
   void _copyToClipboard(BuildContext context, String text) {
-    // Clipboard'a kopyalama işlemi
-    // Gerekli import: import 'package:flutter/services.dart';
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Link kopyalandı')),
+      const SnackBar(content: Text(AppConstant.succesCopy)),
     );
   }
 }

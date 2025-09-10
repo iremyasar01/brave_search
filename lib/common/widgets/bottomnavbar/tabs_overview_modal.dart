@@ -1,3 +1,4 @@
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/common/widgets/bottomnavbar/modal_header.dart';
 import 'package:brave_search/common/widgets/bottomnavbar/tabs_grid.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_cubit.dart';
@@ -38,7 +39,6 @@ class TabsOverviewModal extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // Handle bar
               Container(
                 width: 40,
                 height: 4,
@@ -65,7 +65,7 @@ class TabsOverviewModal extends StatelessWidget {
                   // Modal'ı kapatma - state değişikliği otomatik yansıyacak
                 },
                 icon: const Icon(Icons.add),
-                label: const Text('Yeni Sekme'),
+                label: const Text(TabStrings.newTab),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
                   foregroundColor: Colors.white,

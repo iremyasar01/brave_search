@@ -1,3 +1,4 @@
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:brave_search/domain/entities/web_search_result.dart';
 import 'package:brave_search/core/extensions/widget_extensions.dart';
@@ -31,7 +32,7 @@ class WebSearchIndicators extends StatelessWidget {
         if (!result.familyFriendly) ...[
           const SizedBox(width: 8),
           Text(
-            'NOT SAFE',
+            AppConstant.notSafe,
             style: TextStyle(
               color: theme.colorScheme.error,
               fontSize: 10,

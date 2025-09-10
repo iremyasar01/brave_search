@@ -1,4 +1,6 @@
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:flutter/material.dart';
+
 class ModalHeader extends StatelessWidget {
   final int tabCount;
 
@@ -12,7 +14,7 @@ class ModalHeader extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          '$tabCount Gizli Sekme',
+          '$tabCount ${TabStrings.tabText}',
           style: TextStyle(
             color: theme.textTheme.bodyLarge?.color,
             fontSize: 18,
