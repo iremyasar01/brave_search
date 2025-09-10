@@ -34,11 +34,12 @@ dependencies:
   # connectivity
   internet_connection_checker_plus: ^2.7.2
   connectivity_plus: ^6.1.5
+  # local storage
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  hive_generator: ^2.0.1
+
   webview_flutter: ^4.10.0
-  visibility_detector: ^0.4.0+2
+ 
   
 
 dev_dependencies:
@@ -51,6 +52,7 @@ dev_dependencies:
   # code generation
   build_runner: ^2.4.13
   injectable_generator: ^2.6.2
+  hive_generator: ^2.0.1
 
 
 
