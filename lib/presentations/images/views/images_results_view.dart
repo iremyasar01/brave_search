@@ -13,11 +13,17 @@ import '../cubit/image_search_state.dart';
 class ImagesResultsView extends StatelessWidget {
   final ScrollController? scrollController;
   final ValueNotifier<bool>? paginationVisibilityNotifier;
+  final ValueNotifier<bool>? headerVisibilityNotifier;
 
-  const ImagesResultsView({super.key, this.scrollController, this.paginationVisibilityNotifier});
+  const ImagesResultsView({
+    super.key, 
+    this.scrollController, 
+    this.paginationVisibilityNotifier,
+    this.headerVisibilityNotifier,
+  });
 
   @override
-   Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     return BlocBuilder<ImageSearchCubit, ImageSearchState>(
       builder: (context, state) {
         return Column(
@@ -25,46 +31,54 @@ class ImagesResultsView extends StatelessWidget {
             Expanded(
               child: _buildContent(context, state),
             ),
-            // Sayfa navigasyonu - en alta taşındı
-            if (state.status == ImageSearchStatus.success)
+            // Sayfa navigasyonu - scroll durumuna göre görünür/gizli
+            if (state.status == ImageSearchStatus.success && state.totalPages > 1)
               ValueListenableBuilder<bool>(
-                valueListenable: paginationVisibilityNotifier ?? ValueNotifier(false),
+                valueListenable: paginationVisibilityNotifier ?? ValueNotifier(true),
                 builder: (context, isVisible, child) {
-                  return AnimatedOpacity(
+                  return AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    opacity: isVisible ? 1.0 : 0.0,
-                    child: IgnorePointer(
-                      ignoring: !isVisible,
-                      child: ImageSearchPaginationControls(
-                        state: state,
-                      ),
+                    curve: Curves.easeInOut,
+                    height: isVisible ? null : 0,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 300),
+                      opacity: isVisible ? 1.0 : 0.0,
+                      child: isVisible 
+                        ? ImageSearchPaginationControls(state: state)
+                        : const SizedBox.shrink(),
                     ),
                   );
                 },
               ),
-           
           ],
         );
       },
     );
   }
- //  ImageSearchPaginationControls(state: state),
+
   Widget _buildContent(BuildContext context, ImageSearchState state) {
     switch (state.status) {
       case ImageSearchStatus.initial:
-        return const SearchInitialWidget(message: ImageSearchStrings.imageInitialMessage,);
+        return const SearchInitialWidget(
+          message: ImageSearchStrings.imageInitialMessage,
+        );
       case ImageSearchStatus.loading:
         return const AppLoadingIndicator();
       case ImageSearchStatus.empty:
-        return const AppEmptyState( message: ImageSearchStrings.imageEmptyMessage,
-      icon: Icons.image_not_supported);
+        return const AppEmptyState(
+          message: ImageSearchStrings.imageEmptyMessage,
+          icon: Icons.image_not_supported,
+        );
       case ImageSearchStatus.failure:
         return ImageSearchErrorWidget(
           errorMessage: state.errorMessage,
           query: state.query,
         );
       case ImageSearchStatus.success:
-        return ImageSearchResultsGrid(results: state.results );
+        return ImageSearchResultsGrid(
+          results: state.results,
+          scrollController: scrollController,
+        );
     }
   }
 }
