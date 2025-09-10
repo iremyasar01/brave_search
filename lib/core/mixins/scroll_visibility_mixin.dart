@@ -7,7 +7,18 @@ mixin ScrollVisibilityMixin {
   ValueNotifier<bool> get headerVisibilityNotifier => _headerVisibilityNotifier;
   ValueNotifier<bool> get paginationVisibilityNotifier => _paginationVisibilityNotifier;
   
-  void updateVisibilityBasedOnScroll(double scrollPosition, double maxScroll) {
+  void updateVisibilityBasedOnScroll(double scrollPosition, double maxScroll, {bool isEmptyState = false}) {
+    // Empty state'te header'ı hiçbir zaman gizleme
+    if (isEmptyState) {
+      if (_headerVisibilityNotifier.value != true) {
+        _headerVisibilityNotifier.value = true;
+      }
+      if (_paginationVisibilityNotifier.value != false) {
+        _paginationVisibilityNotifier.value = false;
+      }
+      return;
+    }
+    
     const double headerThreshold = 100.0;
     const double paginationThreshold = 200.0;
     

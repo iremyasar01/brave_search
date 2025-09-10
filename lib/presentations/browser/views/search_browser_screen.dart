@@ -15,6 +15,7 @@ import 'package:brave_search/presentations/web/cubit/web_search_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+
 class SearchBrowserScreen extends StatefulWidget {
   const SearchBrowserScreen({super.key});
 
@@ -30,6 +31,7 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen>
   late VideoSearchCubit _videoSearchCubit;
   late NewsSearchCubit _newsSearchCubit;
   late ScrollController _scrollController;
+  bool _isEmptyState = false;
 
   @override
   void initState() {
@@ -50,7 +52,7 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen>
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
-    disposeVisibilityNotifiers(); // Mixin'den gelen dispose
+    disposeVisibilityNotifiers();
     super.dispose();
   }
 
@@ -58,7 +60,9 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen>
   void _onScroll() {
     final scrollPosition = _scrollController.position.pixels;
     final maxScroll = _scrollController.position.maxScrollExtent;
-    updateVisibilityBasedOnScroll(scrollPosition, maxScroll);
+    
+    // Empty state durumunu da parametre olarak geç
+    updateVisibilityBasedOnScroll(scrollPosition, maxScroll, isEmptyState: _isEmptyState);
   }
 
   void _onTabTapped(int index) {
@@ -116,54 +120,80 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen>
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
-          child: Column(
-            children: [
-              const NetworkStatusBanner(),
-              // Header'ı ValueListenableBuilder ile sarmalayın
-              ValueListenableBuilder<bool>(
-                valueListenable: headerVisibilityNotifier,
-                builder: (context, isHeaderVisible, child) {
-
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    height: isHeaderVisible ? null : 0,
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 300),
-                      opacity: isHeaderVisible ? 1.0 : 0.0,
-                      child: isHeaderVisible ? const BrowserHeader() : const SizedBox.shrink(),
-                    ),
+          child: BlocBuilder<NetworkCubit, NetworkState>(
+            builder: (context, networkState) {
+              if (networkState is NetworkDisconnected) {
+                return const NoInternetScreen();
+              }
+              
+              return BlocConsumer<BrowserCubit, BrowserState>(
+                listener: (context, browserState) {
+                  _handleTabSwitchSearch(browserState);
+                  
+                  // Browser state değiştiğinde empty state durumunu güncelle
+                  final newEmptyState = browserState.tabs.isEmpty || 
+                      (browserState.tabs.isNotEmpty && _browserCubit.activeTabQuery.isEmpty);
+                  
+                  if (_isEmptyState != newEmptyState) {
+                    setState(() {
+                      _isEmptyState = newEmptyState;
+                    });
+                    
+                    // Empty state durumunda header'ı her zaman göster
+                    if (_isEmptyState) {
+                      updateHeaderVisibility(true);
+                      updatePaginationVisibility(false);
+                    }
+                  }
+                },
+                builder: (context, browserState) {
+                  // Empty state durumunu daha doğru belirle
+                  final currentEmptyState = browserState.tabs.isEmpty || 
+                      (browserState.tabs.isNotEmpty && _browserCubit.activeTabQuery.isEmpty);
+                  
+                  if (_isEmptyState != currentEmptyState) {
+                    _isEmptyState = currentEmptyState;
+                    
+                    // Empty state'te header'ı her zaman göster
+                    if (_isEmptyState) {
+                      updateHeaderVisibility(true);
+                      updatePaginationVisibility(false);
+                    }
+                  }
+                  
+                  return Column(
+                    children: [
+                      const NetworkStatusBanner(),
+                      // Header'ı ValueListenableBuilder ile sarmalayın
+                      ValueListenableBuilder<bool>(
+                        valueListenable: headerVisibilityNotifier,
+                        builder: (context, isHeaderVisible, child) {
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            height: isHeaderVisible ? null : 0,
+                            child: AnimatedOpacity(
+                              duration: const Duration(milliseconds: 300),
+                              opacity: isHeaderVisible ? 1.0 : 0.0,
+                              child: isHeaderVisible ? const BrowserHeader() : const SizedBox.shrink(),
+                            ),
+                          );
+                        },
+                      ),
+                      Expanded(
+                        child: _isEmptyState
+                            ? const EmptyBrowserState()
+                            : SearchResultsView(
+                                scrollController: _scrollController,
+                                headerVisibilityNotifier: headerVisibilityNotifier,
+                                paginationVisibilityNotifier: paginationVisibilityNotifier,
+                              ),
+                      ),
+                    ],
                   );
                 },
-              ),
-              Expanded(
-                child: BlocBuilder<NetworkCubit, NetworkState>(
-                  builder: (context, networkState) {
-                    if (networkState is NetworkDisconnected) {
-                      return const NoInternetScreen();
-                    }
-                    
-                    return BlocConsumer<BrowserCubit, BrowserState>(
-                      listener: (context, browserState) {
-                        _handleTabSwitchSearch(browserState);
-                      },
-                      builder: (context, browserState) {
-                        if (browserState.tabs.isEmpty) {
-                          headerVisibilityNotifier.value = true;
-                          return const EmptyBrowserState();
-                        }
-                        // SearchResultsView'a scroll controller ve visibility notifier'ları geçirin
-                        return SearchResultsView(
-                          scrollController: _scrollController,
-                          headerVisibilityNotifier: headerVisibilityNotifier,
-                          paginationVisibilityNotifier: paginationVisibilityNotifier, 
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
+              );
+            },
           ),
         ),
         bottomNavigationBar: BlocBuilder<BrowserCubit, BrowserState>(
