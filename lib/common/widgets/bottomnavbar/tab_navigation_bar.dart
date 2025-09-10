@@ -12,12 +12,14 @@ class TabNavigationBar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onTabTapped;
   final VoidCallback onAddTab;
+ final Function(String)? onSearchFromHistory;
 
   const TabNavigationBar({
     super.key,
     required this.selectedIndex,
     required this.onTabTapped,
     required this.onAddTab,
+    this.onSearchFromHistory,
   });
 
   @override
@@ -67,12 +69,16 @@ class TabNavigationBar extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (BuildContext context) => BrowserMenuSheet(browserState: browserState),
+      builder: (BuildContext context) => BrowserMenuSheet(browserState: browserState,
+    onSearchFromHistory: onSearchFromHistory,
+  
+      ),
     );
   }
 
   void _showTabsOverview(BuildContext context, BrowserState browserState) {
     showModalBottomSheet(
+      useSafeArea: true,
       context: context,
       backgroundColor: Theme.of(context).colorScheme.surface,
       isScrollControlled: true,

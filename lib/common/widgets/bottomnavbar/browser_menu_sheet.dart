@@ -10,9 +10,11 @@ import 'package:brave_search/core/extensions/widget_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 class BrowserMenuSheet extends StatelessWidget {
   final BrowserState browserState;
+ final Function(String)? onSearchFromHistory; 
 
   const BrowserMenuSheet({super.key, 
     required this.browserState,
+    this.onSearchFromHistory,
   });
 
   @override
@@ -92,7 +94,7 @@ class BrowserMenuSheet extends StatelessWidget {
       builder: (BuildContext context) {
         return BlocProvider.value(
           value: context.read<HistoryCubit>()..loadHistory(),
-          child: const HistoryView(),
+          child: HistoryView(onSearchFromHistory: onSearchFromHistory),
         );
       },
     );

@@ -40,6 +40,7 @@ import '../../domain/repositories/video_search_repository.dart' as _i949;
 import '../../domain/repositories/web_search_repository.dart' as _i79;
 import '../../domain/usecases/clean_old_history.dart' as _i348;
 import '../../domain/usecases/clear_search_history.dart' as _i70;
+import '../../domain/usecases/delete_search_history_item.dart' as _i107;
 import '../../domain/usecases/delete_tab_data.dart' as _i385;
 import '../../domain/usecases/get_search_history.dart' as _i888;
 import '../../domain/usecases/get_tab_data.dart' as _i528;
@@ -125,15 +126,13 @@ _i174.GetIt $initGetIt(
       () => _i528.GetTabData(gh<_i144.LocalRepository>()));
   gh.factory<_i348.CleanOldHistory>(
       () => _i348.CleanOldHistory(gh<_i144.LocalRepository>()));
+  gh.factory<_i107.DeleteSearchHistoryItem>(
+      () => _i107.DeleteSearchHistoryItem(gh<_i144.LocalRepository>()));
   gh.factory<_i594.BrowserCubit>(() => _i594.BrowserCubit(
         gh<_i998.SaveTabData>(),
         gh<_i528.GetTabData>(),
         gh<_i385.DeleteTabData>(),
         gh<_i83.SaveSearchHistory>(),
-      ));
-  gh.factory<_i559.HistoryCubit>(() => _i559.HistoryCubit(
-        gh<_i888.GetSearchHistory>(),
-        gh<_i70.ClearSearchHistory>(),
       ));
   gh.lazySingleton<_i949.VideoSearchRepository>(() =>
       _i208.VideoSearchRepositoryImpl(gh<_i805.VideoSearchRemoteDataSource>()));
@@ -158,6 +157,12 @@ _i174.GetIt $initGetIt(
         gh<_i936.NewsSearchUseCase>(),
         gh<_i326.CacheManager<_i245.NewsSearchResult>>(
             instanceName: 'newsCacheManager'),
+      ));
+  gh.factory<_i559.HistoryCubit>(() => _i559.HistoryCubit(
+        gh<_i888.GetSearchHistory>(),
+        gh<_i70.ClearSearchHistory>(),
+        gh<_i348.CleanOldHistory>(),
+        gh<_i107.DeleteSearchHistoryItem>(),
       ));
   gh.factory<_i733.VideoSearchUseCase>(
       () => _i733.VideoSearchUseCase(gh<_i949.VideoSearchRepository>()));

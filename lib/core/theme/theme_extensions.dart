@@ -10,6 +10,7 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
   final Color accent;
   final Color bottomNavBackground;
   final Color bottomNavBorder;
+  final Color? error;
 
   const AppColorsExtension({
     required this.searchBarBackground,
@@ -20,6 +21,7 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     required this.accent,
     required this.bottomNavBackground,
     required this.bottomNavBorder,
+    this.error,
   });
 
   static const AppColorsExtension light = AppColorsExtension(

@@ -6,8 +6,29 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:brave_search/core/extensions/widget_extensions.dart';
 
-class HistoryView extends StatelessWidget {
-  const HistoryView({super.key});
+class HistoryView extends StatefulWidget {
+  // Arama sonucunu geri döndürmek için callback fonksiyonu
+  final Function(String)? onSearchFromHistory;
+
+  const HistoryView({super.key, this.onSearchFromHistory});
+
+  @override
+  State<HistoryView> createState() => _HistoryViewState();
+}
+
+class _HistoryViewState extends State<HistoryView> {
+  @override
+  void initState() {
+    super.initState();
+    // Sayfa açıldığında önce eski kayıtları temizle, sonra geçmişi yükle
+    _initializeHistory();
+  }
+
+  Future<void> _initializeHistory() async {
+    final historyCubit = context.read<HistoryCubit>();
+    await historyCubit.cleanOldHistory();
+    await historyCubit.loadHistory();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,21 +71,22 @@ class HistoryView extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // History list
               Expanded(
                 child: _buildContent(context, state, theme, colors),
               ),
-              
+
               // Clear all button
               if (state is HistoryLoaded && state.history.isNotEmpty)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: OutlinedButton(
-                    onPressed: () => context.read<HistoryCubit>().clearHistory(),
+                    onPressed: () => _showClearAllDialog(context),
                     style: OutlinedButton.styleFrom(
-                      //foregroundColor: colors.error,
-                      //side: BorderSide(color: colors.error),
+                      foregroundColor: colors.error,
+                      side: BorderSide(color: colors.error ?? Colors.red),
                       minimumSize: const Size(double.infinity, 48),
                     ),
                     child: const Text(HistorySearchStrings.deleteAllHistory),
@@ -77,7 +99,8 @@ class HistoryView extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, HistoryState state, ThemeData theme, AppColorsExtension colors) {
+  Widget _buildContent(BuildContext context, HistoryState state,
+      ThemeData theme, AppColorsExtension colors) {
     if (state is HistoryLoading) {
       return Center(
         child: CircularProgressIndicator(color: theme.primaryColor),
@@ -108,37 +131,45 @@ class HistoryView extends StatelessWidget {
               itemCount: history.length,
               itemBuilder: (context, index) {
                 final item = history[index];
-                return ListTile(
-                  leading: Icon(
-                    item.searchType == WebSearchStrings.web 
-                      ? Icons.public 
-                      : Icons.article,
-                    color: colors.iconSecondary,
-                  ),
-                  title: Text(
-                    item.query,
-                    style: theme.textTheme.bodyLarge,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Text(
-                    '${item.timestamp.day}/${item.timestamp.month}/${item.timestamp.year} ${item.timestamp.hour}:${item.timestamp.minute.toString().padLeft(2, '0')}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.textHint,
-                    ),
-                  ),
-                  trailing: IconButton(
-                    icon: Icon(
-                      Icons.delete,
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: ListTile(
+                    leading: Icon(
+                      item.searchType == WebSearchStrings.web
+                          ? Icons.public
+                          : Icons.article,
                       color: colors.iconSecondary,
-                      size: 20,
                     ),
-                    onPressed: () => context.read<HistoryCubit>().removeHistoryItem(index, history),
+                    title: Text(
+                      item.query,
+                      style: theme.textTheme.bodyLarge,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(
+                      _formatDateTime(item.timestamp),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colors.textHint,
+                      ),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(
+                        Icons.delete,
+                        color: colors.iconSecondary,
+                        size: 20,
+                      ),
+                      onPressed: () =>
+                          _showDeleteDialog(context, index, item.query),
+                    ),
+                    // HistoryView içinde:
+                    onTap: () {
+                      if (widget.onSearchFromHistory != null) {
+                        widget.onSearchFromHistory!(
+                            item.query); // Tıklanan query'yi gönder
+                      }
+                      Navigator.pop(context); // Sadece sayfayı kapat
+                    },
                   ),
-                  onTap: () {
-                    // Bu aramayı yeniden yüklemek için gerekli işlemler
-                    Navigator.pop(context, item.query);
-                  },
                 );
               },
             );
@@ -149,17 +180,18 @@ class HistoryView extends StatelessWidget {
           children: [
             const Icon(
               Icons.error_outline,
-              //color: colors.error,
+              //color: colors.error ?? Colors.red,
               size: 64,
             ).paddingBottom(16),
             Text(
               state.message,
               style: theme.textTheme.bodyLarge?.copyWith(
-                //color: colors.error,
+                color: colors.error ?? Colors.red,
               ),
               textAlign: TextAlign.center,
             ),
-            TextButton(
+            const SizedBox(height: 16),
+            ElevatedButton(
               onPressed: () => context.read<HistoryCubit>().loadHistory(),
               child: const Text(AppConstant.tryAgain),
             ),
@@ -167,7 +199,94 @@ class HistoryView extends StatelessWidget {
         ),
       );
     } else {
-      return Container(); // Varsayılan durum
+      return Container();
     }
+  }
+
+  // Tarih formatla
+  String _formatDateTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final itemDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
+
+    String timeStr =
+        '${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
+
+    if (itemDate == today) {
+      return 'Bugün $timeStr';
+    } else if (itemDate == yesterday) {
+      return 'Dün $timeStr';
+    } else {
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year} $timeStr';
+    }
+  }
+
+  // Tek öğe silme onay dialogu
+  void _showDeleteDialog(BuildContext context, int index, String query) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Geçmişten Sil'),
+          content: Text(
+              '"$query" aramasını geçmişten silmek istediğinizden emin misiniz?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('İptal'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                context.read<HistoryCubit>().removeHistoryItem(index);
+              },
+              child: Text(
+                'Sil',
+                style: TextStyle(
+                    color: Theme.of(context)
+                            .extension<AppColorsExtension>()
+                            ?.error ??
+                        Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Tüm geçmişi silme onay dialogu
+  void _showClearAllDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Tüm Geçmişi Sil'),
+          content: const Text(
+              'Tüm arama geçmişini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('İptal'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                context.read<HistoryCubit>().clearHistory();
+              },
+              child: Text(
+                'Tümünü Sil',
+                style: TextStyle(
+                    color: Theme.of(context)
+                            .extension<AppColorsExtension>()
+                            ?.error ??
+                        Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

@@ -82,7 +82,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
                             hintStyle: TextStyle(color: colors.textHint),
                             border: InputBorder.none,
                           ),
-                          onSubmitted: (query) => _performSearch(context, query, browserState.searchFilter),
+                          onSubmitted: (query) => performSearch(context, query, browserState.searchFilter),
                           onChanged: (query) {
                             if (browserState.tabs.isNotEmpty) {
                               final currentTabId = browserState.tabs[browserState.activeTabIndex];
@@ -103,7 +103,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
                           color: colors.iconSecondary, 
                           size: 20,
                         ),
-                        onPressed: () => _performSearch(context, _searchController.text, browserState.searchFilter, forceRefresh: true),
+                        onPressed: () => performSearch(context, _searchController.text, browserState.searchFilter, forceRefresh: true),
                       ),
                     ],
                   ),
@@ -116,7 +116,7 @@ class _BrowserHeaderState extends State<BrowserHeader> {
     );
   }
 
-  void _performSearch(BuildContext context, String query, String currentFilter, {bool forceRefresh = false}) {
+  void performSearch(BuildContext context, String query, String currentFilter, {bool forceRefresh = false}) {
     if (query.trim().isEmpty) return;
 
     final browserCubit = context.read<BrowserCubit>();

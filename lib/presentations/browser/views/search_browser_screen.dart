@@ -99,6 +99,34 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen>
 
     _browserCubit.resetSearchRefreshFlag();
   }
+    void _handleSearchFromHistory(String query) {
+    // Aktif tab'ın sorgusunu güncelle
+    if (_browserCubit.state.tabs.isNotEmpty) {
+      final currentTabId = _browserCubit.state.tabs[_browserCubit.state.activeTabIndex];
+      _browserCubit.updateTabQuery(currentTabId, query);
+    }
+    
+    // Mevcut filtreye göre arama yap
+    final currentFilter = _browserCubit.state.searchFilter;
+    
+    switch (currentFilter) {
+      case 'all':
+      case 'web':
+        _webSearchCubit.searchWeb(query);
+        break;
+      case 'images':
+        _imageSearchCubit.searchImages(query);
+        break;
+      case 'videos':
+        _videoSearchCubit.searchVideo(query);
+        break;
+      case 'news':
+        _newsSearchCubit.searchNews(query);
+        break;
+      default:
+        _webSearchCubit.searchWeb(query);
+    }
+  }
 
   void _clearAllSearchResults() {
     _webSearchCubit.clearResults();
@@ -202,6 +230,8 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen>
               selectedIndex: browserState.activeTabIndex,
               onTabTapped: _onTabTapped,
               onAddTab: _addNewTab,
+              onSearchFromHistory: _handleSearchFromHistory,
+              
             );
           },
         ),
