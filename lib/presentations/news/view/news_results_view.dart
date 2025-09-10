@@ -13,7 +13,8 @@ import '../cubit/news_search_cubit.dart';
 import '../cubit/news_search_state.dart';
 
 class NewsResultsView extends StatelessWidget {
-  const NewsResultsView({super.key});
+  final ScrollController? scrollController;
+  const NewsResultsView({super.key, this.scrollController});
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +68,7 @@ class NewsResultsView extends StatelessWidget {
                 results: state.results,
                 itemBuilder: (result, index) =>
                     NewsSearchResultItem(result: result),
+                scrollController: scrollController,
               );
     }
   }

@@ -1,6 +1,6 @@
 class AppConstant {
   static const constErrorMessage = 'Bir hata oluştu';
-  static const tryAgain = 'tekrar dene';
+  static const tryAgain = 'Tekrar dene';
   static const braveSearchBrowser= 'Brave Search Browser';
   static const slogan = 'Gizliliğinizi koruyarak arama yapın';
   static const hintText = 'Ara veya adres gir...';
@@ -12,14 +12,14 @@ class AppConstant {
   static const home = 'Ana Sayfa';
 }
 class TabStrings{
- static const tabText = "sekme";
-  static const newTab = "yeni sekme";
+ static const tabText = "Sekme";
+  static const newTab = "Yeni sekme";
   static const noneTab = "Hiç sekme yok";
 
 }
 
 class HistorySearchStrings{
-  static const history = "geçmiş";
+  static const history = "Geçmiş";
   static const searchHistory = "Arama geçmişi";
   static const deleteAllHistory = "Tüm geçmişi temizle";
   static const noHistory = 'Henüz arama geçmişi yok';

@@ -12,7 +12,12 @@ import '../cubit/web_search_cubit.dart';
 import '../cubit/web_search_state.dart';
 
 class WebResultsView extends StatelessWidget {
-  const WebResultsView({super.key});
+  final ScrollController? scrollController; 
+
+  const WebResultsView({
+    super.key,
+    this.scrollController, 
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +35,7 @@ class WebResultsView extends StatelessWidget {
                 hasReachedMax: state.hasReachedMax,
                 onPageChanged: (page) =>
                     context.read<WebSearchCubit>().loadPage(page),
-                maxPages: 10, // Video arama için maksimum 10 sayfa
+                maxPages: 10,
               ),
           ],
         );
@@ -65,7 +70,7 @@ class WebResultsView extends StatelessWidget {
                 results: state.results,
                 itemBuilder: (result, index) =>
                     WebSearchResultItem(result: result),
-              );
+                scrollController: scrollController,
+            );
     }
-  }
-}
+}}

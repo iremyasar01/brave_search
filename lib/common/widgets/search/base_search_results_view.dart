@@ -8,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../interfaces/base_search_state.dart';
 import '../../widgets/initial/search_initial_state.dart';
 
-
 class BaseSearchResultsView<TState extends BaseSearchState<TResult>, TResult, TCubit extends StateStreamable<TState>> extends StatelessWidget {
   final String initialMessage;
   final String emptyMessage;
@@ -16,6 +15,7 @@ class BaseSearchResultsView<TState extends BaseSearchState<TResult>, TResult, TC
   final Widget Function(TResult item, int index) itemBuilder;
   final Function(TCubit cubit, String query) onRetry;
   final Function(TCubit cubit, int page) onPageChanged;
+  final ScrollController? scrollController; // Bu parametreyi ekleyin
 
   const BaseSearchResultsView({
     super.key,
@@ -25,6 +25,7 @@ class BaseSearchResultsView<TState extends BaseSearchState<TResult>, TResult, TC
     required this.itemBuilder,
     required this.onRetry,
     required this.onPageChanged,
+    this.scrollController, // Bu parametreyi ekleyin
   });
 
   @override
@@ -58,20 +59,21 @@ class BaseSearchResultsView<TState extends BaseSearchState<TResult>, TResult, TC
         return const AppLoadingIndicator();
       case SearchStatus.empty:
         return AppEmptyState(message: emptyMessage, icon: emptyIcon);
-      
       case SearchStatus.failure:
         return GenericSearchErrorWidget(
           errorMessage: state.errorMessage,
           onRetry: () => onRetry(context.read<TCubit>(), state.query),
         );
-        
       case SearchStatus.success:
         return state.results.isEmpty
             ? AppEmptyState(message: emptyMessage, icon: emptyIcon)
             : GenericSearchResultsList<TResult>(
                 results: state.results,
                 itemBuilder: itemBuilder,
+                scrollController: scrollController, // Bu satırı ekleyin
               );
     }
   }
 }
+
+

@@ -11,7 +11,9 @@ import '../cubit/image_search_cubit.dart';
 import '../cubit/image_search_state.dart';
 
 class ImagesResultsView extends StatelessWidget {
-  const ImagesResultsView({super.key});
+  final ScrollController? scrollController;
+
+  const ImagesResultsView({super.key, this.scrollController});
 
   @override
    Widget build(BuildContext context) {
@@ -46,7 +48,7 @@ class ImagesResultsView extends StatelessWidget {
           query: state.query,
         );
       case ImageSearchStatus.success:
-        return ImageSearchResultsGrid(results: state.results);
+        return ImageSearchResultsGrid(results: state.results );
     }
   }
 }

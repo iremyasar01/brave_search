@@ -12,7 +12,9 @@ import '../cubit/video_search_state.dart';
 import '../widgets/video_search_result_item.dart';
 
 class VideosResultsView extends StatelessWidget {
-  const VideosResultsView({super.key});
+  final ScrollController? scrollController;
+
+  const VideosResultsView({super.key, this.scrollController});
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +64,7 @@ class VideosResultsView extends StatelessWidget {
             : GenericSearchResultsList(
                 results: state.results,
                 itemBuilder: (result, index) => VideoSearchResultItem(result: result),
+                scrollController: scrollController,
               );
     }
   }

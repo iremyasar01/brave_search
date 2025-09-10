@@ -1,5 +1,6 @@
 import 'package:brave_search/presentations/browser/cubit/browser_cubit.dart';
 import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
+import 'package:brave_search/presentations/browser/widgets/my_filter_chip.dart';
 import 'package:brave_search/presentations/news/cubit/news_search_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,22 +21,22 @@ class SearchFilters extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              _FilterChip(
+              MyFilterChip(
                 label: 'Tümü',
                 isSelected: state.searchFilter == 'all',
                 onTap: () => _onFilterChanged(context, 'all', state),
               ),
-              _FilterChip(
+              MyFilterChip(
                 label: 'Görseller',
                 isSelected: state.searchFilter == 'images',
                 onTap: () => _onFilterChanged(context, 'images', state),
               ),
-              _FilterChip(
+              MyFilterChip(
                 label: 'Videolar',
                 isSelected: state.searchFilter == 'videos',
                 onTap: () => _onFilterChanged(context, 'videos', state),
               ),
-              _FilterChip(
+              MyFilterChip(
                 label: 'Haberler',
                 isSelected: state.searchFilter == 'news',
                 onTap: () => _onFilterChanged(context, 'news', state),
@@ -71,43 +72,5 @@ class SearchFilters extends StatelessWidget {
           break;
       }
     }
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _FilterChip({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: isSelected ? theme.primaryColor : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? theme.primaryColor : theme.dividerColor,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : theme.textTheme.bodyMedium?.color,
-            fontSize: 14,
-          ),
-        ).symmetricPadding(horizontal: 16),
-      ).onlyPadding(right: 12),
-    );
   }
 }
