@@ -1,3 +1,4 @@
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:flutter/material.dart';
 
 class AddTabButtonLarge extends StatelessWidget {
@@ -22,7 +23,7 @@ class AddTabButtonLarge extends StatelessWidget {
         }
       },
       icon: const Icon(Icons.add),
-      label: const Text('Yeni Sekme'),
+      label: const Text(TabStrings.newTab),
       style: ElevatedButton.styleFrom(
         backgroundColor: theme.primaryColor,
         foregroundColor: Colors.white,

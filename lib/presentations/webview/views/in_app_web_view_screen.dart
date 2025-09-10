@@ -20,19 +20,18 @@ class InAppWebViewScreen extends StatefulWidget {
 
 class _InAppWebViewScreenState extends State<InAppWebViewScreen>
     with SingleTickerProviderStateMixin, AnimationMixin {
-  
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    
+
     _controller = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _fadeAnimation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOut,
@@ -72,7 +71,8 @@ class _InAppWebViewScreenState extends State<InAppWebViewScreen>
           builder: (context, state) {
             return Stack(
               children: [
-                WebViewWidget(controller: context.read<WebViewCubit>().controller),
+                WebViewWidget(
+                    controller: context.read<WebViewCubit>().controller),
                 if (state.isLoading)
                   buildFadeLottieAnimation(
                     assetPath: AssetConstants.searchAnim,
@@ -92,14 +92,18 @@ class _InAppWebViewScreenState extends State<InAppWebViewScreen>
               child: Row(
                 children: [
                   IconButton(
-                    onPressed: state.canGoBack ? () => context.read<WebViewCubit>().goBack() : null,
+                    onPressed: state.canGoBack
+                        ? () => context.read<WebViewCubit>().goBack()
+                        : null,
                     icon: Icon(
                       Icons.arrow_back_ios,
                       color: state.canGoBack ? null : Colors.grey,
                     ),
                   ),
                   IconButton(
-                    onPressed: state.canGoForward ? () => context.read<WebViewCubit>().goForward() : null,
+                    onPressed: state.canGoForward
+                        ? () => context.read<WebViewCubit>().goForward()
+                        : null,
                     icon: Icon(
                       Icons.arrow_forward_ios,
                       color: state.canGoForward ? null : Colors.grey,

@@ -1,3 +1,4 @@
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:brave_search/core/extensions/widget_extensions.dart';
@@ -27,7 +28,7 @@ class TabItemHeader extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              query.isEmpty ? 'Ana Sayfa' : query,
+              query.isEmpty ? AppConstant.home : query,
               style: TextStyle(
                 color: theme.textTheme.bodyLarge?.color,
                 fontSize: 12,

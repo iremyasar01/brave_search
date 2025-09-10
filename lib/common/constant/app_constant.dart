@@ -8,6 +8,8 @@ class AppConstant {
   static const copyLink = 'Linki kopyala';
   static const succesCopy = 'Link kopyalandı';
   static const notSafe = 'GÜVENLİ DEĞİL';
+  static const menuTitle =  'Tarayıcı Menüsü';
+  static const home = 'Ana Sayfa';
 }
 class TabStrings{
  static const tabText = "sekme";
@@ -17,9 +19,11 @@ class TabStrings{
 }
 
 class HistorySearchStrings{
+  static const history = "geçmiş";
   static const searchHistory = "Arama geçmişi";
   static const deleteAllHistory = "Tüm geçmişi temizle";
   static const noHistory = 'Henüz arama geçmişi yok';
+  static const historyInitalMessage = 'Arama geçmişini görüntüle';
 }
 
 class ImageSearchStrings {

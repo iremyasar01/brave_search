@@ -136,7 +136,7 @@ class BrowserCubit extends Cubit<BrowserState> {
     ));
   }
 
-  // ÇÖZÜM 1: Otomatik Arama (Senin Önerdiğin)
+
   void switchTab(int index) {
     if (index >= 0 && index < state.tabs.length) {
       final tabId = state.tabs[index];
@@ -148,37 +148,6 @@ class BrowserCubit extends Cubit<BrowserState> {
         searchFilter: tabSearchType,
         // Sekme değiştirildiğinde arama yapılması gerektiğini işaretle
         shouldRefreshSearch: tabQuery.isNotEmpty,
-      ));
-    }
-  }
-
-  // ÇÖZÜM 2: Manuel Cache Temizleme ile Sekme Değiştirme
-  void switchTabWithCacheClear(int index) {
-    if (index >= 0 && index < state.tabs.length) {
-      final tabId = state.tabs[index];
-      final tabSearchType = state.searchTypes[tabId] ?? 'web';
-      
-      emit(state.copyWith(
-        activeTabIndex: index,
-        searchFilter: tabSearchType,
-        // Cache'i temizle ve yeniden arama yapılmasını işaretle
-        shouldRefreshSearch: true,
-        shouldClearCache: true,
-      ));
-    }
-  }
-
-  // ÇÖZÜM 3: Her Sekmeye Özel Cache ile Sekme Değiştirme
-  void switchTabWithTabSpecificCache(int index) {
-    if (index >= 0 && index < state.tabs.length) {
-      final tabId = state.tabs[index];
-      final tabSearchType = state.searchTypes[tabId] ?? 'web';
-      
-      emit(state.copyWith(
-        activeTabIndex: index,
-        searchFilter: tabSearchType,
-        // Aktif sekme değiştiğini belirt ama cache'i koruma
-        tabSwitched: true,
       ));
     }
   }

@@ -1,3 +1,4 @@
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/common/widgets/bottomnavbar/menu_item.dart';
 import 'package:brave_search/core/theme/theme_cubit.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
@@ -41,7 +42,7 @@ class BrowserMenuSheet extends StatelessWidget {
           
           // Menu title
           Text(
-            'Tarayıcı Menüsü',
+           AppConstant.menuTitle,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -68,8 +69,8 @@ class BrowserMenuSheet extends StatelessWidget {
           MenuItem(
             context: context,
             icon: Icons.history,
-            title: 'Geçmiş',
-            subtitle: 'Arama geçmişini görüntüle',
+            title: HistorySearchStrings.history,
+            subtitle: HistorySearchStrings.historyInitalMessage,
             onTap: () {
               Navigator.pop(context);
               _showHistory(context);
