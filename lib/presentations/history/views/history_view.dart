@@ -1,3 +1,4 @@
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/presentations/history/widgets/clear_history_button.dart';
 import 'package:brave_search/presentations/history/widgets/history_error.dart';
 import 'package:brave_search/presentations/history/widgets/history_header.dart';
@@ -82,13 +83,13 @@ class _HistoryViewState extends State<HistoryView> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Tüm Geçmişi Sil'),
+          title: const Text(HistorySearchStrings.deleteAllHistory),
           content: const Text(
-              'Tüm arama geçmişini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'),
+              HistorySearchStrings.deleteAllHistoryAlert),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('İptal'),
+              child: const Text(AppConstant.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -96,7 +97,7 @@ class _HistoryViewState extends State<HistoryView> {
                 context.read<HistoryCubit>().clearHistory();
               },
               child: Text(
-                'Tümünü Sil',
+                HistorySearchStrings.deleteAllHistory,
                 style: TextStyle(
                   color: Theme.of(context)
                           .extension<AppColorsExtension>()

@@ -10,6 +10,7 @@ class AppConstant {
   static const notSafe = 'GÜVENLİ DEĞİL';
   static const menuTitle =  'Tarayıcı Menüsü';
   static const home = 'Ana Sayfa';
+  static const cancel = "iptal";
 }
 class TabStrings{
  static const tabText = "Sekme";
@@ -24,6 +25,7 @@ class HistorySearchStrings{
   static const deleteAllHistory = "Tüm geçmişi temizle";
   static const noHistory = 'Henüz arama geçmişi yok';
   static const historyInitalMessage = 'Arama geçmişini görüntüle';
+  static const deleteAllHistoryAlert = 'Tüm arama geçmişini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.';
 }
 
 class ImageSearchStrings {
