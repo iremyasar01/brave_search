@@ -1,14 +1,17 @@
-import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/presentations/images/cubit/image_search_cubit.dart';
 import 'package:brave_search/presentations/news/cubit/news_search_cubit.dart';
 import 'package:brave_search/presentations/videos/cubit/video_search_cubit.dart';
+import 'package:brave_search/presentations/web/cubit/web_search_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:brave_search/core/extensions/widget_extensions.dart';
 import '../cubit/browser_cubit.dart';
 import '../cubit/browser_state.dart';
-import '../../web/cubit/web_search_cubit.dart';
+
+part 'search_bar_widget.dart';
+part 'search_actions.dart';
 
 class BrowserHeader extends StatefulWidget {
   const BrowserHeader({super.key});
@@ -39,7 +42,6 @@ class _BrowserHeaderState extends State<BrowserHeader> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = theme.extension<AppColorsExtension>()!;
     
     return Container(
       color: theme.appBarTheme.backgroundColor,
@@ -56,57 +58,23 @@ class _BrowserHeaderState extends State<BrowserHeader> {
                   _searchController.text = currentQuery;
                 }
 
-                return Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: colors.searchBarBackground,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Icon(
-                          Icons.search, 
-                          color: colors.iconSecondary, 
-                          size: 20,
-                        ),
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: _searchController,
-                          focusNode: _searchFocus,
-                          style: theme.textTheme.bodyLarge,
-                          decoration: InputDecoration(
-                            hintText: AppConstant.hintText,
-                            hintStyle: TextStyle(color: colors.textHint),
-                            border: InputBorder.none,
-                          ),
-                          onSubmitted: (query) => performSearch(context, query, browserState.searchFilter),
-                          onChanged: (query) {
-                            if (browserState.tabs.isNotEmpty) {
-                              final currentTabId = browserState.tabs[browserState.activeTabIndex];
-                              context.read<BrowserCubit>().updateTabQuery(currentTabId, query);
-                              
-                              // Yazarken eski sonuçları temizle
-                              if (query.length < _lastSearchedQuery.length || 
-                                  !query.contains(_lastSearchedQuery)) {
-                                _clearSearchResults(context, browserState.searchFilter);
-                              }
-                            }
-                          },
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.refresh, 
-                          color: colors.iconSecondary, 
-                          size: 20,
-                        ),
-                        onPressed: () => performSearch(context, _searchController.text, browserState.searchFilter, forceRefresh: true),
-                      ),
-                    ],
-                  ),
+                return SearchBarWidget(
+                  searchController: _searchController,
+                  searchFocus: _searchFocus,
+                  onSubmitted: (query) => performSearch(context, query, browserState.searchFilter),
+                  onQueryChanged: (query) {
+                    if (browserState.tabs.isNotEmpty) {
+                      final currentTabId = browserState.tabs[browserState.activeTabIndex];
+                      browserCubit.updateTabQuery(currentTabId, query);
+                      
+                      // Yazarken eski sonuçları temizle
+                      if (query.length < _lastSearchedQuery.length || 
+                          !query.contains(_lastSearchedQuery)) {
+                        _clearSearchResults(context, browserState.searchFilter);
+                      }
+                    }
+                  },
+                  onRefresh: () => performSearch(context, _searchController.text, browserState.searchFilter, forceRefresh: true),
                 );
               },
             ),
@@ -138,46 +106,19 @@ class _BrowserHeaderState extends State<BrowserHeader> {
       _lastSearchedQuery = query;
     }
 
-    // Filtre türüne göre ilgili cubit'i tetikle
-    switch (currentFilter) {
-      case 'all':
-      case 'web':
-        context.read<WebSearchCubit>().searchWeb(query, forceRefresh: forceRefresh);
-        break;
-      case 'images':
-        context.read<ImageSearchCubit>().searchImages(query, forceRefresh: forceRefresh);
-        break;
-      case 'videos':
-        context.read<VideoSearchCubit>().searchVideo(query, forceRefresh: forceRefresh);
-        break;
-      case 'news':
-        context.read<NewsSearchCubit>().searchNews(query, forceRefresh: forceRefresh);
-        break;
-      default:
-        context.read<WebSearchCubit>().searchWeb(query, forceRefresh: forceRefresh);
-    }
+    // arama yap
+    SearchActions.performSearch(
+      context: context,
+      query: query,
+      currentFilter: currentFilter,
+      forceRefresh: forceRefresh,
+    );
 
     _searchFocus.unfocus();
   }
 
   void _clearSearchResults(BuildContext context, String currentFilter) {
-    // Filtre türüne göre ilgili cubit'in sonuçlarını temizle
-    switch (currentFilter) {
-      case 'all':
-      case 'web':
-        context.read<WebSearchCubit>().clearResults();
-        break;
-      case 'images':
-        context.read<ImageSearchCubit>().clearResults();
-        break;
-      case 'videos':
-        context.read<VideoSearchCubit>().clearResults();
-        break;
-      case 'news':
-        context.read<NewsSearchCubit>().clearResults();
-        break;
-      default:
-        context.read<WebSearchCubit>().clearResults();
-    }
+    // sonuçları temizle
+    SearchActions.clearSearchResults(context, currentFilter);
   }
 }

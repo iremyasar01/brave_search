@@ -29,7 +29,7 @@ class HistorySearchStrings{
 }
 
 class ImageSearchStrings {
-  static const  image = 'image';
+  static const  image = 'images';
   static const imageInitialMessage =
       'Görsel aramak için üstteki çubuğu kullanın';
   static const imageEmptyMessage = 'Görsel bulunamadı';
@@ -42,7 +42,7 @@ class WebSearchStrings {
 }
 
 class VideoSearchStrings {
-  static const video = "video";
+  static const video = "videos";
   static const String videoInitialMessage =
       'Video aramak için üstteki çubuğu kullanın';
   static const String videoEmptyMessage = 'Video bulunamadı';
@@ -53,4 +53,10 @@ class NewsSearchStrings {
   static const String newsInitialMessage = 'Haber aramak için üstteki çubuğu kullanın';
   static const String newsEmptyMessage = 'Haber bulunamadı';
   static const String newsNoResultsMessage = 'Hiç haber bulunamadı';
+}
+class NetworkStrings {
+  static const offlineMessage = 'Lütfen internet bağlantınızı kontrol edin\nve tekrar deneyin.';
+static const noInternet = 'İnternet Bağlantısı Yok';
+static const checkingConnection = 'Bağlantı kontrol ediliyor...';
+
 }

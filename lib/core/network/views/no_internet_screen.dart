@@ -1,3 +1,4 @@
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,47 +12,49 @@ class NoInternetScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColorsExtension>()!;
     
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.wifi_off, size: 80, color: colors.iconSecondary),
-          const SizedBox(height: 24),
-          Text(
-            'İnternet Bağlantısı Yok',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: colors.textHint,
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.wifi_off, size: 80, color: colors.iconSecondary),
+            const SizedBox(height: 24),
+            Text(
+              NetworkStrings.noInternet,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: colors.textHint,
+              ),
+            ).paddingBottom(12),
+            Text(
+              NetworkStrings.offlineMessage,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: colors.textHint,
+                height: 1.5,
+              ),
+            ).paddingBottom(32),
+            ElevatedButton.icon(
+              onPressed: () {
+                context.read<NetworkCubit>().checkConnection();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(NetworkStrings.checkingConnection),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text(AppConstant.tryAgain),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
             ),
-          ).paddingBottom(12),
-          Text(
-            'Lütfen internet bağlantınızı kontrol edin\nve tekrar deneyin.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              color: colors.textHint,
-              height: 1.5,
-            ),
-          ).paddingBottom(32),
-          ElevatedButton.icon(
-            onPressed: () {
-              context.read<NetworkCubit>().checkConnection();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Bağlantı kontrol ediliyor...'),
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
-            icon: const Icon(Icons.refresh),
-            label: const Text('Tekrar Dene'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-          ),
-        ],
-      ).allPadding(24),
+          ],
+        ).allPadding(24),
+      ),
     );
   }
 }
