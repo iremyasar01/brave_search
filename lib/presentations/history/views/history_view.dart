@@ -11,7 +11,7 @@ import 'package:brave_search/presentations/history/cubit/history_state.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
 
 class HistoryView extends StatefulWidget {
-  final Function(String)? onSearchFromHistory;
+  final Function(String, String)? onSearchFromHistory; // Updated to include search type
 
   const HistoryView({super.key, this.onSearchFromHistory});
 

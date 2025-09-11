@@ -17,43 +17,68 @@ class BrowserBottomNav extends StatelessWidget {
     return BlocBuilder<BrowserCubit, BrowserState>(
       builder: (context, browserState) {
         final browserCubit = context.read<BrowserCubit>();
-        
+
         return TabNavigationBar(
           selectedIndex: browserState.activeTabIndex,
           onTabTapped: (index) => browserCubit.switchTab(index),
           onAddTab: () => browserCubit.addTab(),
-          onSearchFromHistory: (query) => _handleSearchFromHistory(context, query),
+          // Fixed: Now using the correct signature (String query, String searchType)
+          onSearchFromHistory: (query, searchType) => _onSearchFromHistory(context, query, searchType),
         );
       },
     );
   }
 
-  void _handleSearchFromHistory(BuildContext context, String query) {
+  void _onSearchFromHistory(BuildContext context, String query, String searchType) {
     final browserCubit = context.read<BrowserCubit>();
+    final currentTabId = browserCubit.activeTabId;
     
-    if (browserCubit.state.tabs.isNotEmpty) {
-      final currentTabId = browserCubit.state.tabs[browserCubit.state.activeTabIndex];
-      browserCubit.updateTabQuery(currentTabId, query);
-    }
-    
-    final currentFilter = browserCubit.state.searchFilter;
-    
-    switch (currentFilter) {
-      case 'all':
-      case 'web':
-        GetIt.instance<WebSearchCubit>().searchWeb(query);
-        break;
-      case 'images':
-        GetIt.instance<ImageSearchCubit>().searchImages(query);
-        break;
-      case 'videos':
-        GetIt.instance<VideoSearchCubit>().searchVideo(query);
-        break;
-      case 'news':
-        GetIt.instance<NewsSearchCubit>().searchNews(query);
-        break;
-      default:
-        GetIt.instance<WebSearchCubit>().searchWeb(query);
+    if (currentTabId != null) {
+      try {
+        // Clear all search results first
+        GetIt.instance<WebSearchCubit>().clearResults();
+        GetIt.instance<ImageSearchCubit>().clearResults();
+        GetIt.instance<VideoSearchCubit>().clearResults();
+        GetIt.instance<NewsSearchCubit>().clearResults();
+        
+        // Update tab query
+        browserCubit.updateTabQuery(currentTabId, query);
+        
+        // Update search type for the tab
+        browserCubit.setSearchType(currentTabId, searchType);
+        
+        // Update search filter
+        browserCubit.setSearchFilter(searchType);
+        
+        // Add to search history
+        browserCubit.addToSearchHistory(currentTabId, query, searchType);
+        
+        // Perform search based on type
+        switch (searchType) {
+          case 'web':
+            GetIt.instance<WebSearchCubit>().searchWeb(query, forceRefresh: true);
+            break;
+          case 'images':
+            GetIt.instance<ImageSearchCubit>().searchImages(query, forceRefresh: true);
+            break;
+          case 'videos':
+            GetIt.instance<VideoSearchCubit>().searchVideo(query, forceRefresh: true);
+            break;
+          case 'news':
+            GetIt.instance<NewsSearchCubit>().searchNews(query, forceRefresh: true);
+            break;
+          default:
+            // Fallback to web search
+            GetIt.instance<WebSearchCubit>().searchWeb(query, forceRefresh: true);
+        }
+      } catch (e) {
+        debugPrint('Error performing search from history: $e');
+        // Fallback: at least update the query
+        if (browserCubit.state.tabs.isNotEmpty) {
+          final fallbackTabId = browserCubit.state.tabs[browserCubit.state.activeTabIndex];
+          browserCubit.updateTabQuery(fallbackTabId, query);
+        }
+      }
     }
   }
 }

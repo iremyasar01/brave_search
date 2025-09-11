@@ -8,11 +8,13 @@ import 'package:brave_search/presentations/history/views/history_view.dart';
 import 'package:flutter/material.dart';
 import 'package:brave_search/core/extensions/widget_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 class BrowserMenuSheet extends StatelessWidget {
   final BrowserState browserState;
- final Function(String)? onSearchFromHistory; 
+  final Function(String, String)? onSearchFromHistory; // Updated signature
 
-  const BrowserMenuSheet({super.key, 
+  const BrowserMenuSheet({
+    super.key, 
     required this.browserState,
     this.onSearchFromHistory,
   });
@@ -83,7 +85,8 @@ class BrowserMenuSheet extends StatelessWidget {
       ),
     );
   }
-   void _showHistory(BuildContext context) {
+
+  void _showHistory(BuildContext context) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Theme.of(context).colorScheme.surface,

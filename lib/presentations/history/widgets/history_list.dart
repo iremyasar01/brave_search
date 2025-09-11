@@ -8,7 +8,7 @@ import 'package:brave_search/presentations/history/cubit/history_cubit.dart';
 
 class HistoryList extends StatelessWidget {
   final List<SearchHistoryItem> history;
-  final Function(String)? onSearchFromHistory;
+  final Function(String, String)? onSearchFromHistory; // Updated to include search type
 
   const HistoryList({
     super.key,
@@ -28,12 +28,10 @@ class HistoryList extends StatelessWidget {
               return HistoryListItem(
                 item: item,
                 onTap: () {
-                  if (onSearchFromHistory != null) {
-                    onSearchFromHistory!(item.query);
-                  }
-                  Navigator.pop(context);
+                  // This onTap is now handled inside HistoryListItem
                 },
                 onDelete: () => _showDeleteDialog(context, index, item.query),
+                onSearchFromHistory: onSearchFromHistory, // Pass the callback
               );
             },
           );

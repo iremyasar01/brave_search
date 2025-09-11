@@ -8,11 +8,12 @@ import 'package:brave_search/presentations/browser/cubit/browser_state.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 class TabNavigationBar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onTabTapped;
   final VoidCallback onAddTab;
- final Function(String)? onSearchFromHistory;
+  final Function(String, String)? onSearchFromHistory; // Updated signature
 
   const TabNavigationBar({
     super.key,
@@ -39,19 +40,17 @@ class TabNavigationBar extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-                  // Tab Counter
+              // Tab Counter
               TabCounter(
                 tabCount: browserState.tabs.length,
                 onTap: () => _showTabsOverview(context, browserState),
               ),
-              
 
               // Center - Navigation Buttons
               NavigationButtons(
                 onAddTab: onAddTab,
               ),
-            
-              
+
               // Right - Menu
               MenuButton(
                 onPressed: () => _showMenu(context, browserState),
@@ -70,9 +69,9 @@ class TabNavigationBar extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (BuildContext context) => BrowserMenuSheet(browserState: browserState,
-    onSearchFromHistory: onSearchFromHistory,
-  
+      builder: (BuildContext context) => BrowserMenuSheet(
+        browserState: browserState,
+        onSearchFromHistory: onSearchFromHistory,
       ),
     );
   }

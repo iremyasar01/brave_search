@@ -1,24 +1,20 @@
-import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:brave_search/domain/entities/search_history_item.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:brave_search/presentations/browser/cubit/browser_cubit.dart';
-import 'package:brave_search/presentations/web/cubit/web_search_cubit.dart';
-import 'package:brave_search/presentations/images/cubit/image_search_cubit.dart';
-import 'package:brave_search/presentations/videos/cubit/video_search_cubit.dart';
-import 'package:brave_search/presentations/news/cubit/news_search_cubit.dart';
+
 
 class HistoryListItem extends StatelessWidget {
   final SearchHistoryItem item;
   final VoidCallback onTap;
   final VoidCallback onDelete;
+  final Function(String, String)? onSearchFromHistory; 
 
   const HistoryListItem({
     super.key,
     required this.item,
     required this.onTap,
     required this.onDelete,
+    this.onSearchFromHistory,
   });
 
   @override
@@ -30,9 +26,15 @@ class HistoryListItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: Icon(
-          item.searchType == WebSearchStrings.web
+          item.searchType == 'web'
               ? Icons.public
-              : Icons.article,
+              : item.searchType == 'images'
+                  ? Icons.image
+                  : item.searchType == 'videos'
+                      ? Icons.video_library
+                      : item.searchType == 'news'
+                          ? Icons.article
+                          : Icons.search,
           color: colors.iconSecondary,
         ),
         title: Text(
@@ -56,58 +58,16 @@ class HistoryListItem extends StatelessWidget {
           onPressed: onDelete,
         ),
         onTap: () {
-          // Önce tüm modalleri kapat
+          // Close all modals
           Navigator.of(context).popUntil((route) => route.isFirst);
           
-          final browserCubit = context.read<BrowserCubit>();
-          final currentTabId = browserCubit.activeTabId;
-          
-          if (currentTabId != null) {
-            // Önce tüm sonuçları temizle
-            _clearAllSearchResults(context);
-            
-            // Sekme sorgusunu güncelle
-            browserCubit.updateTabQuery(currentTabId, item.query);
-            
-            // Arama türünü güncelle
-            browserCubit.setSearchType(currentTabId, item.searchType);
-            
-            // Arama filtresini güncelle
-            browserCubit.setSearchFilter(item.searchType);
-            
-            // Arama geçmişine ekle
-            browserCubit.addToSearchHistory(currentTabId, item.query, item.searchType);
-            
-            // Arama yap
-            _performSearch(context, item.query, item.searchType);
+          // Call the callback function to perform search in the main context
+          if (onSearchFromHistory != null) {
+            onSearchFromHistory!(item.query, item.searchType);
           }
         },
       ),
     );
-  }
-
-  void _performSearch(BuildContext context, String query, String searchType) {
-    switch (searchType) {
-      case 'web':
-        context.read<WebSearchCubit>().searchWeb(query, forceRefresh: true);
-        break;
-      case 'images':
-        context.read<ImageSearchCubit>().searchImages(query, forceRefresh: true);
-        break;
-      case 'videos':
-        context.read<VideoSearchCubit>().searchVideo(query, forceRefresh: true);
-        break;
-      case 'news':
-        context.read<NewsSearchCubit>().searchNews(query, forceRefresh: true);
-        break;
-    }
-  }
-
-  void _clearAllSearchResults(BuildContext context) {
-    context.read<WebSearchCubit>().clearResults();
-    context.read<ImageSearchCubit>().clearResults();
-    context.read<VideoSearchCubit>().clearResults();
-    context.read<NewsSearchCubit>().clearResults();
   }
 
   String _formatDateTime(DateTime dateTime) {
