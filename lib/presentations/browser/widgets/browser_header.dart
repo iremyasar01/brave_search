@@ -43,46 +43,64 @@ class _BrowserHeaderState extends State<BrowserHeader> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return Container(
-      color: theme.appBarTheme.backgroundColor,
-      child: Row(
-        children: [
-          Expanded(
-            child: BlocBuilder<BrowserCubit, BrowserState>(
-              builder: (context, browserState) {
-                final browserCubit = context.read<BrowserCubit>();
-                final currentQuery = browserCubit.activeTabQuery;
+    return BlocListener<BrowserCubit, BrowserState>(
+      listener: (context, browserState) {
+        // Sekme değiştiğinde ve sorgu varsa arama yap
+        if (browserState.tabSwitched) {
+          final browserCubit = context.read<BrowserCubit>();
+          final currentQuery = browserCubit.activeTabQuery;
+          
+          if (currentQuery.isNotEmpty) {
+            // Önce tüm sonuçları temizle
+            _clearAllSearchResults(context);
+            
+            // Arama yap
+            performSearch(context, currentQuery, browserState.searchFilter, forceRefresh: true);
+          }
+        }
+      },
+      child: Container(
+        color: theme.appBarTheme.backgroundColor,
+        child: Row(
+          children: [
+            Expanded(
+              child: BlocBuilder<BrowserCubit, BrowserState>(
+                builder: (context, browserState) {
+                  final browserCubit = context.read<BrowserCubit>();
+                  final currentQuery = browserCubit.activeTabQuery;
 
-                // Kontrolcüyü güncel sorgu ile senkronize et
-                if (_searchController.text != currentQuery) {
-                  _searchController.text = currentQuery;
-                }
+                  // Kontrolcüyü güncel sorgu ile senkronize et
+                  if (_searchController.text != currentQuery) {
+                    _searchController.text = currentQuery;
+                  }
 
-                return SearchBarWidget(
-                  searchController: _searchController,
-                  searchFocus: _searchFocus,
-                  onSubmitted: (query) => performSearch(context, query, browserState.searchFilter),
-                  onQueryChanged: (query) {
-                    if (browserState.tabs.isNotEmpty) {
-                      final currentTabId = browserState.tabs[browserState.activeTabIndex];
-                      browserCubit.updateTabQuery(currentTabId, query);
-                         // Her karakter değişiminde sonuçları temizle
-                     _clearSearchResults(context, browserState.searchFilter);
-                      
-                      // Yazarken eski sonuçları temizle
-                      if (query.length < _lastSearchedQuery.length || 
-                          !query.contains(_lastSearchedQuery)) {
+                  return SearchBarWidget(
+                    searchController: _searchController,
+                    searchFocus: _searchFocus,
+                    onSubmitted: (query) => performSearch(context, query, browserState.searchFilter),
+                    onQueryChanged: (query) {
+                      if (browserState.tabs.isNotEmpty) {
+                        final currentTabId = browserState.tabs[browserState.activeTabIndex];
+                        browserCubit.updateTabQuery(currentTabId, query);
+                        
+                        // Her karakter değişiminde sonuçları temizle
                         _clearSearchResults(context, browserState.searchFilter);
+                        
+                        // Yazarken eski sonuçları temizle
+                        if (query.length < _lastSearchedQuery.length || 
+                            !query.contains(_lastSearchedQuery)) {
+                          _clearSearchResults(context, browserState.searchFilter);
+                        }
                       }
-                    }
-                  },
-                  onRefresh: () => performSearch(context, _searchController.text, browserState.searchFilter, forceRefresh: true),
-                );
-              },
+                    },
+                    onRefresh: () => performSearch(context, _searchController.text, browserState.searchFilter, forceRefresh: true),
+                  );
+                },
+              ),
             ),
-          ),
-        ],
-      ).allPadding(16),
+          ],
+        ).allPadding(16),
+      ),
     );
   }
 
@@ -122,5 +140,13 @@ class _BrowserHeaderState extends State<BrowserHeader> {
   void _clearSearchResults(BuildContext context, String currentFilter) {
     // sonuçları temizle
     SearchActions.clearSearchResults(context, currentFilter);
+  }
+
+  void _clearAllSearchResults(BuildContext context) {
+    // tüm sonuçları temizle
+    context.read<WebSearchCubit>().clearResults();
+    context.read<ImageSearchCubit>().clearResults();
+    context.read<VideoSearchCubit>().clearResults();
+    context.read<NewsSearchCubit>().clearResults();
   }
 }

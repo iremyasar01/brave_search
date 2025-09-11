@@ -75,40 +75,40 @@ class BrowserBody extends StatelessWidget {
     );
   }
 
-  void _handleTabSwitchSearch(BuildContext context, BrowserState browserState) {
-    if (!browserState.shouldRefreshSearch) return;
+void _handleTabSwitchSearch(BuildContext context, BrowserState browserState) {
+  if (!browserState.shouldRefreshSearch && !browserState.tabSwitched) return;
 
-    final browserCubit = context.read<BrowserCubit>();
-    final currentQuery = browserCubit.activeTabQuery;
-    if (currentQuery.isEmpty) return;
-
-    if (browserState.shouldClearCache) {
-      _clearAllSearchResults(context);
-    }
-
+  final browserCubit = context.read<BrowserCubit>();
+  final currentQuery = browserCubit.activeTabQuery;
+  
+  // Sekme değiştiğinde ve sorgu varsa arama yap
+  if (currentQuery.isNotEmpty) {
+    // Önce tüm sonuçları temizle (cache'deki eski sonuçları göstermemek için)
+    _clearAllSearchResults(context);
+    
     switch (browserState.searchFilter) {
       case 'all':
       case 'web':
         GetIt.instance<WebSearchCubit>()
-            .searchWeb(currentQuery, forceRefresh: browserState.shouldClearCache);
+            .searchWeb(currentQuery, forceRefresh: true);
         break;
       case 'images':
         GetIt.instance<ImageSearchCubit>()
-            .searchImages(currentQuery, forceRefresh: browserState.shouldClearCache);
+            .searchImages(currentQuery, forceRefresh: true);
         break;
       case 'videos':
         GetIt.instance<VideoSearchCubit>()
-            .searchVideo(currentQuery, forceRefresh: browserState.shouldClearCache);
+            .searchVideo(currentQuery, forceRefresh: true);
         break;
       case 'news':
         GetIt.instance<NewsSearchCubit>()
-            .searchNews(currentQuery, forceRefresh: browserState.shouldClearCache);
+            .searchNews(currentQuery, forceRefresh: true);
         break;
     }
-
-    browserCubit.resetSearchRefreshFlag();
   }
 
+  browserCubit.resetSearchRefreshFlag();
+}
   void _clearAllSearchResults(BuildContext context) {
     GetIt.instance<WebSearchCubit>().clearResults();
     GetIt.instance<ImageSearchCubit>().clearResults();

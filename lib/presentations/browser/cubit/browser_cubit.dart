@@ -148,6 +148,7 @@ class BrowserCubit extends Cubit<BrowserState> {
         searchFilter: tabSearchType,
         // Sekme değiştirildiğinde arama yapılması gerektiğini işaretle
         shouldRefreshSearch: tabQuery.isNotEmpty,
+        tabSwitched: true,
       ));
     }
   }
