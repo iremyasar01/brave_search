@@ -1,16 +1,15 @@
-import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
+
 class NavigationButtons extends StatelessWidget {
   final VoidCallback onAddTab;
 
-  const NavigationButtons({super.key, 
+  const NavigationButtons({
+    super.key,
     required this.onAddTab,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColorsExtension>()!;
-
     return Row(
       children: [
         /*
