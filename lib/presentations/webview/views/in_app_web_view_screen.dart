@@ -1,12 +1,12 @@
-import 'package:brave_search/common/constant/app_constant.dart';
-import 'package:brave_search/common/constant/asset_constants.dart';
-import 'package:brave_search/core/mixins/animation_mixin.dart';
-import 'package:brave_search/core/services/web_view_service.dart';
-import 'package:brave_search/presentations/webview/cubit/web_view_cubit.dart';
+import 'package:brave_search/presentations/webview/widgets/web_view_app_bar.dart';
+import 'package:brave_search/presentations/webview/widgets/web_view_body.dart';
+import 'package:brave_search/presentations/webview/widgets/web_view_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:brave_search/core/extensions/widget_extensions.dart';
+import 'package:brave_search/core/mixins/animation_mixin.dart';
+import 'package:brave_search/presentations/webview/cubit/web_view_cubit.dart';
+
+
 
 class InAppWebViewScreen extends StatefulWidget {
   final String url;
@@ -26,7 +26,10 @@ class _InAppWebViewScreenState extends State<InAppWebViewScreen>
   @override
   void initState() {
     super.initState();
+    _initializeAnimations();
+  }
 
+  void _initializeAnimations() {
     _controller = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -49,76 +52,15 @@ class _InAppWebViewScreenState extends State<InAppWebViewScreen>
     return BlocProvider(
       create: (context) => WebViewCubit(widget.url),
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.open_in_browser),
-              onPressed: () => WebViewService.launchUrlExternal(widget.url),
-            ),
-          ],
+        appBar: WebViewAppBar(
+          title: widget.title,
+          url: widget.url,
         ),
-        body: BlocConsumer<WebViewCubit, WebViewState>(
-          listener: (context, state) {
-            // Animasyonu state değişikliklerine göre kontrol et
-            if (state.isLoading) {
-              _controller.repeat(reverse: true);
-            } else {
-              _controller.stop();
-              _controller.reset();
-            }
-          },
-          builder: (context, state) {
-            return Stack(
-              children: [
-                WebViewWidget(
-                    controller: context.read<WebViewCubit>().controller),
-                if (state.isLoading)
-                  buildFadeLottieAnimation(
-                    assetPath: AssetConstants.searchAnim,
-                    controller: _controller,
-                    fadeAnimation: _fadeAnimation,
-                    text: AppConstant.loadingText,
-                    width: 100,
-                    height: 100,
-                  ).center(),
-              ],
-            );
-          },
+        body: WebViewBody(
+          controller: _controller,
+          fadeAnimation: _fadeAnimation,
         ),
-        bottomNavigationBar: BlocBuilder<WebViewCubit, WebViewState>(
-          builder: (context, state) {
-            return BottomAppBar(
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: state.canGoBack
-                        ? () => context.read<WebViewCubit>().goBack()
-                        : null,
-                    icon: Icon(
-                      Icons.arrow_back_ios,
-                      color: state.canGoBack ? null : Colors.grey,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: state.canGoForward
-                        ? () => context.read<WebViewCubit>().goForward()
-                        : null,
-                    icon: Icon(
-                      Icons.arrow_forward_ios,
-                      color: state.canGoForward ? null : Colors.grey,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => context.read<WebViewCubit>().reload(),
-                    icon: const Icon(Icons.refresh),
-                  ),
-                  const Spacer(),
-                ],
-              ),
-            );
-          },
-        ),
+        bottomNavigationBar: const WebViewBottomBar(),
       ),
     );
   }
