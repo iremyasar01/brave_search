@@ -6,8 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:brave_search/core/mixins/animation_mixin.dart';
 import 'package:brave_search/presentations/webview/cubit/web_view_cubit.dart';
 
-
-
 class InAppWebViewScreen extends StatefulWidget {
   final String url;
   final String title;

@@ -26,13 +26,12 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen>
   late VideoSearchCubit _videoSearchCubit;
   late NewsSearchCubit _newsSearchCubit;
 
-
   @override
   void initState() {
     super.initState();
 
     _browserCubit = GetIt.instance<BrowserCubit>();
-      _webSearchCubit = GetIt.instance<WebSearchCubit>();
+    _webSearchCubit = GetIt.instance<WebSearchCubit>();
     _imageSearchCubit = GetIt.instance<ImageSearchCubit>();
     _videoSearchCubit = GetIt.instance<VideoSearchCubit>();
     _newsSearchCubit = GetIt.instance<NewsSearchCubit>();
@@ -61,8 +60,7 @@ class _SearchBrowserScreenState extends State<SearchBrowserScreen>
       providers: [
         BlocProvider.value(value: _browserCubit),
         BlocProvider.value(value: GetIt.instance<NetworkCubit>()),
-
-      BlocProvider.value(value: _webSearchCubit),
+        BlocProvider.value(value: _webSearchCubit),
         BlocProvider.value(value: _imageSearchCubit),
         BlocProvider.value(value: _videoSearchCubit),
         BlocProvider.value(value: _newsSearchCubit),

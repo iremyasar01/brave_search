@@ -1,3 +1,4 @@
+import 'package:brave_search/common/constant/app_constant.dart';
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:brave_search/domain/entities/search_history_item.dart';
 import 'package:brave_search/presentations/history/widgets/history_empty.dart';
@@ -28,7 +29,9 @@ class HistoryList extends StatelessWidget {
               return HistoryListItem(
                 item: item,
                 onTap: () {
-                  // This onTap is now handled inside HistoryListItem
+                  if (onSearchFromHistory != null) {
+                    onSearchFromHistory!(item.query, item.searchType);
+                  }
                 },
                 onDelete: () => _showDeleteDialog(context, index, item.query),
                 onSearchFromHistory: onSearchFromHistory, // Pass the callback
@@ -42,13 +45,13 @@ class HistoryList extends StatelessWidget {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Geçmişten Sil'),
+          title: const Text(HistorySearchStrings.historyDelete),
           content: Text(
               '"$query" aramasını geçmişten silmek istediğinizden emin misiniz?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('İptal'),
+              child: const Text(AppConstant.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -56,7 +59,7 @@ class HistoryList extends StatelessWidget {
                 context.read<HistoryCubit>().removeHistoryItem(index);
               },
               child: Text(
-                'Sil',
+                AppConstant.delete,
                 style: TextStyle(
                   color: Theme.of(context)
                           .extension<AppColorsExtension>()

@@ -38,7 +38,7 @@ class VideosResultsView extends StatelessWidget {
                   return AnimatedOpacity(
                     duration: const Duration(milliseconds: 300),
                     opacity: isVisible ? 1.0 : 0.0,
-                    child: IgnorePointer(
+                    child: IgnorePointer(//İFLE KAPAT ŞU AN SADECE OPACİTİYİ DEĞİŞTİRİYOR
                       ignoring: !isVisible,
                       child: GenericPaginationControls(
                         currentPage: state.currentPage,

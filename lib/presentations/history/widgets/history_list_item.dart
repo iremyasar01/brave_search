@@ -1,13 +1,15 @@
 import 'package:brave_search/core/theme/theme_extensions.dart';
 import 'package:brave_search/domain/entities/search_history_item.dart';
+import 'package:brave_search/presentations/browser/cubit/browser_cubit.dart';
+import 'package:brave_search/presentations/browser/widgets/browser_header.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HistoryListItem extends StatelessWidget {
   final SearchHistoryItem item;
   final VoidCallback onTap;
   final VoidCallback onDelete;
-  final Function(String, String)? onSearchFromHistory; 
+  final Function(String, String)? onSearchFromHistory;
 
   const HistoryListItem({
     super.key,
@@ -58,12 +60,22 @@ class HistoryListItem extends StatelessWidget {
           onPressed: onDelete,
         ),
         onTap: () {
-          // Close all modals
           Navigator.of(context).popUntil((route) => route.isFirst);
-          
-          // Call the callback function to perform search in the main context
+
           if (onSearchFromHistory != null) {
             onSearchFromHistory!(item.query, item.searchType);
+          }
+
+          final browserCubit = context.read<BrowserCubit>();
+          final currentTabId = browserCubit.activeTabId;
+          if (currentTabId != null) {
+            browserCubit.updateTabQuery(currentTabId, item.query);
+            SearchActions.performSearch(
+              context: context,
+              query: item.query,
+              currentFilter: item.searchType,
+              forceRefresh: true,
+            );
           }
         },
       ),
