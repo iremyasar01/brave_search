@@ -37,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen>
     // Animasyonu hemen başlat
     _controller.forward();
 
-    // Ağ kontrolünü arka planda başlat (beklemeden)
+    // Ağ kontrolünü arka planda başlat 
     context.read<NetworkCubit>().checkConnection();
     
     _initializeApp();
@@ -45,12 +45,12 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _initializeApp() async {
     try {
-      // Sadece minimum gösterim süresi (2 saniye) bekle
+      // Sadece minimum gösterim süresini bekle
       await Future.delayed(const Duration(seconds: 3));
       
     
       // Navigasyon için kısa bir bekleme
-      await Future.delayed(const Duration(milliseconds: 300));
+      await Future.delayed(const Duration(milliseconds: 100));
       
       if (mounted) {
         Navigator.of(context).pushReplacement(

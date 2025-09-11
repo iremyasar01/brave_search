@@ -31,26 +31,26 @@ class HistorySearchStrings{
 class ImageSearchStrings {
   static const  image = 'images';
   static const imageInitialMessage =
-      'Görsel aramak için üstteki çubuğu kullanın';
+      'Arama yapmak için üstteki çubuğu kullanın';
   static const imageEmptyMessage = 'Görsel bulunamadı';
 }
 
 class WebSearchStrings {
   static const web = 'web';
-  static const webInitialMessage = 'Web aramak için üstteki çubuğu kullanın';
+  static const webInitialMessage = 'Arama yapmak için üstteki çubuğu kullanın';
   static const webEmptyMessage = 'Web arama sonucu bulunamadı';
 }
 
 class VideoSearchStrings {
   static const video = "videos";
   static const String videoInitialMessage =
-      'Video aramak için üstteki çubuğu kullanın';
+      'Arama yapmak için üstteki çubuğu kullanın';
   static const String videoEmptyMessage = 'Video bulunamadı';
   static const String videoNoResultsMessage = 'Hiç sonuç bulunamadı';
 }
 class NewsSearchStrings {
   static const news = 'news';
-  static const String newsInitialMessage = 'Haber aramak için üstteki çubuğu kullanın';
+  static const String newsInitialMessage = ' Arama yapmak için üstteki çubuğu kullanın';
   static const String newsEmptyMessage = 'Haber bulunamadı';
   static const String newsNoResultsMessage = 'Hiç haber bulunamadı';
 }

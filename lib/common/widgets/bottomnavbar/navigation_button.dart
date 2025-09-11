@@ -13,6 +13,7 @@ class NavigationButtons extends StatelessWidget {
 
     return Row(
       children: [
+        /*
         // Back button
         IconButton(
           onPressed: () {
@@ -38,7 +39,7 @@ class NavigationButtons extends StatelessWidget {
         ),
         
         const SizedBox(width:32),
-        
+        */
         // Main + button
         Container(
           width: 50,

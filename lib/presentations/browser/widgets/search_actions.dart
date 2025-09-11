@@ -8,6 +8,8 @@ class SearchActions {
     bool forceRefresh = false,
   }) {
     if (query.trim().isEmpty) return;
+  
+
 
     // Filtre türüne göre ilgili cubit'i tetikle
     switch (currentFilter) {

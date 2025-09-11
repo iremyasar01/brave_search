@@ -39,17 +39,18 @@ class TabNavigationBar extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-            
-              // Center - Navigation Buttons
-              NavigationButtons(
-                onAddTab: onAddTab,
-              ),
-                // Tab Counter
+                  // Tab Counter
               TabCounter(
                 tabCount: browserState.tabs.length,
                 onTap: () => _showTabsOverview(context, browserState),
               ),
               
+
+              // Center - Navigation Buttons
+              NavigationButtons(
+                onAddTab: onAddTab,
+              ),
+            
               
               // Right - Menu
               MenuButton(

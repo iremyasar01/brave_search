@@ -66,6 +66,8 @@ class _BrowserHeaderState extends State<BrowserHeader> {
                     if (browserState.tabs.isNotEmpty) {
                       final currentTabId = browserState.tabs[browserState.activeTabIndex];
                       browserCubit.updateTabQuery(currentTabId, query);
+                         // Her karakter değişiminde sonuçları temizle
+                     _clearSearchResults(context, browserState.searchFilter);
                       
                       // Yazarken eski sonuçları temizle
                       if (query.length < _lastSearchedQuery.length || 

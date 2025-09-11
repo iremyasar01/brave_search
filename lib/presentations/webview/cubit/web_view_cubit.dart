@@ -22,7 +22,7 @@ class WebViewCubit extends Cubit<WebViewState> {
             final canGoBack = await controller.canGoBack();
             final canGoForward = await controller.canGoForward();
             emit(state.copyWith(
-              isLoading: false,  // Bu satırı ekledik
+              isLoading: false, 
               canGoBack: canGoBack,
               canGoForward: canGoForward,
             ));
