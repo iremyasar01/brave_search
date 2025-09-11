@@ -14,7 +14,7 @@ class SearchHistoryItem {
   final String tabId;
   
   @HiveField(3)
-  final String searchType; // 'web' veya 'news'
+  final String searchType; 
   
   SearchHistoryItem({
     required this.query,

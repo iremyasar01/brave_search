@@ -27,7 +27,7 @@ class HistoryCubit extends Cubit<HistoryState> {
       emit(const HistoryLoading());
       final history = await _getSearchHistory();
       
-      // Tarihe göre sırala (yeniden eskiye)
+      // Tarihe göre sıralaması için
       history.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       
       emit(HistoryLoaded(history));
@@ -69,20 +69,15 @@ class HistoryCubit extends Cubit<HistoryState> {
 
       final itemToDelete = currentHistory[index];
 
-      // Optimistic update: Remove the item from the list and update the state
       final updatedHistory = List<SearchHistoryItem>.from(currentHistory);
       updatedHistory.removeAt(index);
       emit(HistoryLoaded(updatedHistory));
 
-      // Use the use case to delete the specific item
+
       await _deleteSearchHistoryItem(itemToDelete);
 
-      // We don't need to reload the entire history because we already updated the UI optimistically
-      // However, if you want to ensure consistency, you can reload:
-      // await loadHistory();
     } catch (e) {
       emit(HistoryError('Öğe silinirken hata oluştu: $e'));
-      // In case of error, reload the history to revert the optimistic update
       await loadHistory();
     }
   }

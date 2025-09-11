@@ -22,7 +22,7 @@ class TabData {
   final DateTime lastUpdated;
   
   @HiveField(5)
-  final String searchType; // 'web' veya 'news'
+  final String searchType; 
   
   TabData({
     required this.tabId,
