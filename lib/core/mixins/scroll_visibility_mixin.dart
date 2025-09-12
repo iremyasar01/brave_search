@@ -27,12 +27,12 @@ mixin ScrollVisibilityMixin {
       _headerVisibilityNotifier.value = shouldShowHeader;
     }
     
+   // Sadece pagination visibility'yi güncelle
     final bool shouldShowPagination = (maxScroll - scrollPosition) < paginationThreshold;
     if (_paginationVisibilityNotifier.value != shouldShowPagination) {
       _paginationVisibilityNotifier.value = shouldShowPagination;
     }
   }
-  
   void updateHeaderVisibility(bool isVisible) {
     if (_headerVisibilityNotifier.value != isVisible) {
       _headerVisibilityNotifier.value = isVisible;

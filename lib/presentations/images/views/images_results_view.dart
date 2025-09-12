@@ -16,8 +16,8 @@ class ImagesResultsView extends StatelessWidget {
   final ValueNotifier<bool>? headerVisibilityNotifier;
 
   const ImagesResultsView({
-    super.key, 
-    this.scrollController, 
+    super.key,
+    this.scrollController,
     this.paginationVisibilityNotifier,
     this.headerVisibilityNotifier,
   });
@@ -32,21 +32,15 @@ class ImagesResultsView extends StatelessWidget {
               child: _buildContent(context, state),
             ),
             // Sayfa navigasyonu - scroll durumuna göre görünür/gizli
-            if (state.status == ImageSearchStatus.success && state.totalPages > 1)
+            if (state.status == ImageSearchStatus.success &&
+                state.totalPages > 1)
               ValueListenableBuilder<bool>(
-                valueListenable: paginationVisibilityNotifier ?? ValueNotifier(true),
+                valueListenable:
+                    paginationVisibilityNotifier ?? ValueNotifier(true),
                 builder: (context, isVisible, child) {
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    height: isVisible ? null : 0,
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 300),
-                      opacity: isVisible ? 1.0 : 0.0,
-                      child: isVisible 
-                        ? ImageSearchPaginationControls(state: state)
-                        : const SizedBox.shrink(),
-                    ),
+                  return Visibility(
+                    visible: isVisible,
+                    child: ImageSearchPaginationControls(state: state),
                   );
                 },
               ),
