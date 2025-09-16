@@ -9,7 +9,6 @@ class EmptyBrowserState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appColors = Theme.of(context).extension<AppColorsExtension>();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Center(
       child: Column(
@@ -17,14 +16,11 @@ class EmptyBrowserState extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Image.asset(
-            isDark
-                ? AssetConstants.braveColorDark
-                : AssetConstants.braveColorLight,
-            width: 120,
-            height: 120,
+            AssetConstants.havenLogo,
+            width: 200,
+            height: 200,
             fit: BoxFit.contain,
           ),
-          const SizedBox(height: 24),
           Text(
             AppConstant.braveSearchBrowser,
             style: TextStyle(

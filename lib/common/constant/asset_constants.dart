@@ -9,6 +9,7 @@ class AssetConstants {
   static const String braveColorDark = '$imagesPath/brave_color_darkbackground.png';
   static const String braveColorLight = '$imagesPath/brave_color_lightbackground.png';
   static const String braveLogo = '$imagesPath/brave_logo.png';
+  static const String havenLogo = '$imagesPath/haven.png';
   
   // İkonlar
   static const String iconsPath = 'assets/icons';
