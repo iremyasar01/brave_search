@@ -3,7 +3,9 @@
 Modern Flutter ile geliştirilmiş, Clean Architecture ve Cubit tabanlı state management kullanan bir mobil tarayıcı uygulaması. Web, görsel, video ve haber aramalarını destekler. Ayrıca geçmiş yönetimi, offline cache ve dahili WebView entegrasyonu sunar.
 
 📱 Özellikler
+
 Arama Modülleri
+
 🌐 Web Arama – Sonsuz kaydırma (pagination) ile sonuç listesi
 
 🖼️ Görseller – Grid layout ile görsel arama
@@ -35,9 +37,10 @@ Kullanıcı Deneyimi
 ✅ Animasyonlu arama ekranları (Lottie)
 
 🎨 UI/UX
+
 Minimal, modern arayüz
 
-dark&Light Tema
+Dark&Light Tema
 
 Özel animasyon mixin'leri ile akıcı kullanıcı deneyimi
 
@@ -97,3 +100,16 @@ Responsive & modern UI/UX
 Ayrı pagination implementasyonu ile veri yükleme optimizasyonu
 
 AnimationMixin ve ScrollMixin ile geliştirilmiş kullanıcı deneyimi
+
+| Light Theme | Dark Theme |
+|-------------|------------|
+| <img width="300" alt="light" src="https://github.com/user-attachments/assets/41c06a73-99cd-4a1e-b19d-e4a7b85237c8" /> | <img width="300" alt="dark" src="https://github.com/user-attachments/assets/92f39771-27e4-4905-bb39-3e7954e0ffad" /> |
+| <img width="300" alt="light" src="https://github.com/user-attachments/assets/41c06a73-99cd-4a1e-b19d-e4a7b85237c8" /> | <img width="300" alt="dark" src="https://github.com/user-attachments/assets/92f39771-27e4-4905-bb39-3e7954e0ffad" /> |
+
+
+
+
+
+
+
+
