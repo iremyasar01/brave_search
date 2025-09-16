@@ -104,7 +104,7 @@ AnimationMixin ve ScrollMixin ile geliştirilmiş kullanıcı deneyimi
 | Light Theme | Dark Theme |
 |-------------|------------|
 | <img width="300" alt="light" src="https://github.com/user-attachments/assets/41c06a73-99cd-4a1e-b19d-e4a7b85237c8" /> | <img width="300" alt="dark" src="https://github.com/user-attachments/assets/92f39771-27e4-4905-bb39-3e7954e0ffad" /> |
-| <img width="300" alt="light" src="https://github.com/user-attachments/assets/41c06a73-99cd-4a1e-b19d-e4a7b85237c8" /> | <img width="300" alt="dark" src="https://github.com/user-attachments/assets/92f39771-27e4-4905-bb39-3e7954e0ffad" /> |
+| <![light](https://github.com/user-attachments/assets/eb38ee34-c8bc-441b-b31a-eb3faa2cf870) /> |  ![darkmode](https://github.com/user-attachments/assets/c6a99234-8d03-40e1-8b42-42c0fa8df624) /> |
 
 
 
