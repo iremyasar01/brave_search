@@ -17,13 +17,21 @@ Arama Modülleri
 🔍 WebView – Sonuçları uygulama içinde görüntüleme
 
 Kullanıcı Deneyimi
+
 ✅ Sonsuz kaydırma (pagination)
+
 ✅ Özel mixin'ler ile akıcı animasyonlar
+
 ✅ Scroll kontrolü için mixin implementasyonu
+
 ✅ Pull-to-refresh
+
 ✅ Cache üzerinden offline çalışma
+
 ✅ History üzerinden hızlı geri dönüş
+
 ✅ İnternet bağlantı kontrolü (online/offline state)
+
 ✅ Animasyonlu arama ekranları (Lottie)
 
 🎨 UI/UX
