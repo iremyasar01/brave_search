@@ -49,11 +49,51 @@ Lottie animasyonları ile zenginleştirilmiş arayüz
 
 Responsive tasarım (iOS ve Android uyumlu)
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+🌐 Teknik Implementasyon
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Network
+
+Dio ile HTTP istekleri
+
+flutter_dotenv ile API key yönetimi
+
+Hata yönetimi & retry mekanizmaları
+
+Pagination ile sayfalı veri yükleme
+
+Local Storage
+
+Hive & hive_flutter ile cache
+
+Arama geçmişi için Hive model + generator
+
+Offline-first deneyim
+
+🧪 Test
+
+Unit testler → UseCase & Repository
+
+Widget testleri → UI bileşenleri
+
+Integration testleri → Arama akışı
+
+Mixin testleri → Özel mixin implementasyonları
+
+🎯 Teknik Başarılar
+
+Cubit tabanlı Clean Architecture
+
+Hive cache + history yönetimi
+
+Offline-first yaklaşımı
+
+Dependency Injection (get_it & injectable)
+
+Responsive & modern UI/UX
+
+Özel mixin'ler ile kod modülerliği ve yeniden kullanımı
+
+Ayrı pagination implementasyonu ile veri yükleme optimizasyonu
+
+AnimationMixin ve ScrollMixin ile geliştirilmiş kullanıcı deneyimi
